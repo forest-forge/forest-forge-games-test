@@ -97,11 +97,44 @@
       else if (e.ch === "C") cart = { x: e.x - 2, y: e.y + TS - 8, w: 20, h: 8, vx: 0, vy: 0, ride: false, home: { x: e.x - 2, y: e.y + TS - 8 } };
       else items.push({ k: e.ch, x: e.x + 3, y: e.y + 3, w: 10, h: 10, tx: e.tx, ty: e.ty });
     });
+    var gi = items.filter(function (it) { return it.k === "G"; })[0]; boss = null;
+    if (gi) { var bx = gi.x - 110, by = Math.floor((gi.y + 20) / TS); while (by > 0 && !L.solid(Math.floor((bx + 13) / TS), by)) by++; while (L.solid(Math.floor((bx + 13) / TS), by - 1)) by--; boss = { x: bx, y: by * TS - 22, w: 26, h: 22, vx: 0, vy: 0, hp: 3 + (i >= 2 ? 1 : 0) + (i >= 3 ? 1 : 0), max: 0, t: 0, inv: 0, daze: 0, seen: false, alive: true, ground: false, face: -1, a0: 0, a1: gi.x - 4, name: BOSSES[i][0], col: BOSSES[i][1], col2: BOSSES[i][2] }; boss.max = boss.hp; }
+    irisT = 1;
     var s = cp || start, c = CH[active];
     hero = { x: s.x, y: s.y + TS - c.h, w: c.w, h: c.h, vx: 0, vy: 0, face: 1, ground: false, coyote: 0, buffer: 0, inv: 1, ph: 0, state: "run", pod: null, vine: null, blast: 0, dash: 0, dashCd: 0 };
     if (cp && cart && cp.x > cart.x) cart = null;
     trail = []; cam.x = hero.x - W / 3; cam.y = hero.y - H / 2; PF.follow(cam, L, hero, W, H, 1);
     ui.setCourse(st.name); hud();
+  }
+  var BOSSES = [["Gloria the Glasshouse Toad", "#2ad86a", "#ffe23a"], ["Sunset Sid", "#ff7a2a", "#ffd0f0"], ["Old Mossback", "#2a8ae8", "#a8ffea"], ["The Boiler Toad", "#c83ae8", "#ffb02a"]];
+  var boss = null, irisT = 0, bannerT = 0;
+  function stepBoss(dt) {
+    var b = boss, h = hero; if (!b || !b.alive) return;
+    if (!b.seen) { if (h.x > b.x - 150) { b.seen = true; b.a0 = Math.max(0, h.x - 30); bannerT = 2.2; S.hurt(); } else return; }
+    if (h.state !== "dead") { if (h.x < b.a0) { h.x = b.a0; h.vx = Math.max(0, h.vx); } if (h.x + h.w > b.a1) { h.x = b.a1 - h.w; h.vx = Math.min(0, h.vx); } }
+    b.t += dt; if (b.inv > 0) b.inv -= dt; var wasAir = !b.ground;
+    b.vy = Math.min(420, b.vy + 900 * dt); var r = PF.move(L, b, dt); b.ground = r.ground; if (r.wallL || r.wallR) b.vx = -b.vx;
+    if (b.x < b.a0) { b.x = b.a0; b.vx = Math.abs(b.vx); } if (b.x + b.w > b.a1) { b.x = b.a1 - b.w; b.vx = -Math.abs(b.vx); }
+    if (b.ground) { b.vx *= 0.8; if (wasAir) { b.daze = 1.0 - si * 0.08; parts.add(b.x + 13, b.y + b.h, 16, "#ffffff", 90); S.stomp(); if (h.ground && Math.abs((h.x + h.w / 2) - (b.x + 13)) < 26 && h.inv <= 0) hurt(); } }
+    if (b.daze > 0) b.daze -= dt; else if (b.ground && b.t > 1.5 - si * 0.12) { b.t = 0; b.face = h.x < b.x ? -1 : 1; var hdx = (h.x + h.w / 2) - (b.x + 13); b.vy = -340; b.vx = clamp((hdx - b.face * 36) / 0.75, -(80 + si * 10), 80 + si * 10); }
+    if (h.state === "pod" || h.state === "dead" || !PF.aabb(h, b)) return;
+    var stomp = h.vy > 20 && h.y + h.h - b.y < 14;
+    if (stomp && b.inv <= 0) { b.hp--; b.inv = 0.8; b.daze = 0; b.t = 0.6; h.vy = -340; S.stomp(); parts.add(b.x + 13, b.y, 20, b.col2, 120); score += 300; hud();
+      if (b.hp <= 0) { b.alive = false; score += 3000; hud(); parts.add(b.x + 13, b.y + 10, 40, "#ffffff", 160); parts.add(b.x + 13, b.y + 10, 30, b.col, 140); S.life(); } }
+    else if (!stomp) hurt();
+  }
+  function drawBoss(tt) {
+    var b = boss; if (!b || !b.alive) return; if (b.inv > 0 && Math.floor(tt * 14) % 2) return;
+    var x = Math.round(b.x - cam.x), y = Math.round(b.y - cam.y), sq = b.ground ? (b.daze > 0 ? 2 : 0) : -2, c1 = b.col, c2 = b.col2;
+    g.fillStyle = FXP.shade(c1, -0.25); g.beginPath(); g.ellipse(x + 13, y + 14 + sq / 2, 14 + sq, 9 - sq / 2, 0, 0, 7); g.fill();
+    g.fillStyle = c1; g.beginPath(); g.ellipse(x + 13, y + 12 + sq / 2, 13 + sq, 8 - sq / 2, 0, 0, 7); g.fill();
+    g.fillStyle = c2; g.beginPath(); g.ellipse(x + 13, y + 16, 8 + sq, 4, 0, 0, 7); g.fill();
+    for (var k = 0; k < 4; k++) R(x + 5 + k * 5, y + 9 + (k % 2), 2, 2, FXP.shade(c1, -0.35));
+    R(x + 4, y + 1 + sq, 7, 7, c1); R(x + 15, y + 1 + sq, 7, 7, c1); R(x + 5, y + 2 + sq, 5, 5, "#ffffff"); R(x + 16, y + 2 + sq, 5, 5, "#ffffff");
+    var ex = b.daze > 0 ? 0 : (hero.x < b.x ? -1 : 1); R(x + 7 + ex, y + 3 + sq, 2, 3, "#111"); R(x + 18 + ex, y + 3 + sq, 2, 3, "#111");
+    R(x + 6, y + 15, 14, 1, "#3a1a0a"); R(x + 4, y + 20, 5, 3, FXP.shade(c1, -0.2)); R(x + 17, y + 20, 5, 3, FXP.shade(c1, -0.2));
+    R(x + 9, y - 3 + sq, 8, 3, "#2ab84a"); R(x + 12, y - 6 + sq, 2, 3, "#2ab84a");
+    if (b.daze > 0) for (var st = 0; st < 3; st++) { var an = tt * 6 + st * 2.1; R(x + 13 + Math.cos(an) * 12, y - 8 + Math.sin(an) * 3, 2, 2, "#fff7b0"); }
   }
   function setActive(k) { var h = hero, c = CH[k], by = h.y + h.h; active = k; h.w = c.w; h.h = c.h; h.y = by - c.h; }
 
@@ -169,6 +202,7 @@
         else hurt();
       }
     });
+    stepBoss(dt);
     // items
     items.forEach(function (it) {
       if (it.got || !PF.aabb(h, it)) return;
@@ -176,7 +210,7 @@
       else if (it.k === "F") { it.got = 1; lives++; score += 500; S.life(); hud(); }
       else if (it.k === "H" && !buddy) { it.got = 1; buddy = true; S.swap(); parts.add(it.x, it.y, 14, "#ffe23a", 70); }
       else if (it.k === "K" && (!cp || cp.x < it.x)) { cp = { x: it.x - 3, y: it.ty * TS }; S.grab(); }
-      else if (it.k === "G" && !won) { won = 2; S.clear(); A.stopSong(); h.vx = 0; }
+      else if (it.k === "G" && !won && !(boss && boss.alive)) { won = 2; S.clear(); A.stopSong(); h.vx = 0; }
     });
     trail.push({ x: h.x, y: h.y + h.h, f: h.face, ph: h.ph, g: h.ground }); if (trail.length > 14) trail.shift();
     parts.step(dt); PF.follow(cam, L, h, W, H, dt);
@@ -185,13 +219,14 @@
   // ---------- render ----------
   function render(c, tt) {
     if (!W) sizeLo(); if (!L) load(0);
-    var th = L.theme; PF.drawBack(g, th, cam, W, H, tt);
+    var th = L.theme; th.noClouds = th === THEMES.cave || th === THEMES.vault; PF.drawBack(g, th, cam, W, H, tt);
     // glasshouse frame
     g.fillStyle = th.glass; for (var x = 0; x < W + 40; x += 40) { var gx = Math.round(x - (cam.x * 0.3) % 40); g.fillRect(gx, 0, 2, H); } for (var y = 20; y < H; y += 36) g.fillRect(0, Math.round(y - (cam.y * 0.3) % 36), W, 1);
     if (th === THEMES.palm || th === THEMES.sunset) for (var k = 0; k < 10; k++) { var px = ((k * 83 - cam.x * 0.6) % (W + 80) + W + 80) % (W + 80) - 40, py = H * 0.8 - cam.y * 0.2; R(px + 6, py - 50, 3, 60, th === THEMES.palm ? "#6a4a2a" : "#4a1a2a"); for (var l = 0; l < 5; l++) { R(px + 7 - 14 + l * 6, py - 54 + Math.abs(l - 2) * 3, 8, 3, th.near); } }
     PF.drawTiles(g, L, th, cam, W, H, tt);
     for (var ty = Math.floor(cam.y / TS); ty <= Math.ceil((cam.y + H) / TS); ty++) for (var tx = Math.floor(cam.x / TS); tx <= Math.ceil((cam.x + W) / TS); tx++) if (L.get(tx, ty) === "-") { var rx = tx * TS - cam.x, ry = ty * TS - cam.y; R(rx, ry, TS, 2, "#d8e0f0"); R(rx, ry + 5, TS, 2, "#a8b0c8"); R(rx + 2, ry + 2, 3, 6, "#8a5a3a"); R(rx + 10, ry + 2, 3, 6, "#8a5a3a"); R(rx + 6, ry + 7, 2, 9, "#5a6a8a"); }
     vines.forEach(function (v) { var on = hero.vine === v, th2 = on ? hero.th : Math.sin(v.sway) * 0.12, ex = v.x + Math.sin(th2) * v.len, ey = v.y + Math.cos(th2) * v.len; for (var i = 0; i <= 16; i++) { var t2 = i / 16; R(v.x + (ex - v.x) * t2 - cam.x - 1, v.y + (ey - v.y) * t2 - cam.y, 2, 4, i % 3 ? "#2ab84a" : "#1a8a3a"); if (i % 4 === 2) R(v.x + (ex - v.x) * t2 - cam.x + 1, v.y + (ey - v.y) * t2 - cam.y, 3, 2, "#5ae05a"); } R(v.x - cam.x - 4, v.y - cam.y - 2, 8, 4, "#1a6a2a"); });
+    var g0 = g; g = FXP.layer(W, H);
     items.forEach(function (it) { if (it.got) return; var x = Math.round(it.x - cam.x), y = Math.round(it.y - cam.y), b = Math.round(Math.sin(tt * 4 + it.x) * 1.5);
       if (it.k === "f") { R(x + 2, y + 2 + b, 6, 6, "#9a2ae0"); R(x + 3, y + 3 + b, 2, 2, "#e8a0ff"); R(x + 4, y + b, 2, 2, "#2ab84a"); }
       else if (it.k === "F") { R(x, y + b - 2, 10, 10, "#ff4aa0"); R(x + 2, y + b, 3, 3, "#ffd0f0"); R(x + 4, y + b - 4, 2, 3, "#2ab84a"); R(x - 1, y + b + 9, 12, 1, "rgba(255,255,255,0.5)"); }
@@ -207,7 +242,15 @@
     if (fled) drawChar(fled.k, fled.x - cam.x, fled.y + CH[fled.k].h - cam.y, -1, 0, false, tt, true);
     if (buddy && mode !== "title" && hero.state !== "pod" && hero.state !== "dead") { var o = trail[0] || { x: hero.x, y: hero.y + hero.h, f: 1, ph: 0, g: true }; var other = active === "otter" ? "squirrel" : "otter"; drawChar(other, o.x - (hero.state === "cart" ? 8 : o.f * 6) - cam.x, (hero.state === "cart" ? hero.y + hero.h : o.y) - cam.y, o.f, o.ph, !o.g, tt); }
     if (mode !== "title" && hero.state !== "pod" && (hero.inv <= 0 || Math.floor(tt * 14) % 2)) drawChar(active, hero.x - cam.x, hero.y + hero.h - cam.y, hero.face, hero.ph, !hero.ground && hero.state === "run", tt, false, hero.state === "vine", hero.dash > 0);
+    drawBoss(tt);
+    g = g0; FXP.flush(g, th === THEMES.cave || th === THEMES.vault ? "#020818" : "#102808");
     parts.draw(g, cam);
+    var cave = th === THEMES.cave || th === THEMES.vault;
+    FXP.ambient(g, W, H, cam, tt, cave ? "rise" : "drift", cave ? "rgba(120,220,255,0.8)" : "rgba(255,250,200,0.85)", 22);
+    if (cave) FXP.glow(g, hero.x + hero.w / 2 - cam.x, hero.y - cam.y, 60, "#8ad8ff", 0.22);
+    FXP.vignette(g, W, H, cave ? 0.6 : 0.35);
+    if (boss && boss.seen && boss.alive) { var bw = 90, bx2 = W / 2 - bw / 2; R(bx2 - 1, H - 13, bw + 2, 7, "#102808"); R(bx2, H - 12, bw * boss.hp / boss.max, 5, boss.col); R(bx2, H - 12, bw * boss.hp / boss.max, 1, "#ffffff"); if (bannerT > 0) FXP.banner(g, boss.name, W / 2, H * 0.36, 14, boss.col2); }
+    if (bannerT > 0) bannerT -= 1 / 60; if (irisT > 0) { FXP.iris(g, W, H, irisT, hero.x - cam.x, hero.y - cam.y); irisT -= 1 / 40; }
     if (mode !== "title") { R(3, 3, 40, 9, "rgba(0,0,0,0.4)"); g.fillStyle = "#fff"; g.font = "8px monospace"; g.fillText("x" + lives + (buddy ? " +1" : ""), 6, 10); }
     c.drawImage(lo, 0, 0, W * PX, H * PX);
   }
@@ -247,6 +290,6 @@
   var game = { toTitle: toTitle, onResize: sizeLo, update: function (dt) { if (mode === "play") update(dt); }, render: render,
     idle: function (dt) { if (mode === "title" && L) { cam.x += dt * 30; if (cam.x > L.pw - W) cam.x = 0; } }, onBack: function () { if (mode === "title") return "exit"; toTitle(); return "menu"; } };
   ui.onAdsRemoved = function () { if (mode === "title") toTitle(); };
-  game.qa = { play: play, state: function () { return { mode: mode, si: si, x: hero.x, y: hero.y, tx: Math.floor((hero.x + hero.w / 2) / TS), ty: Math.floor((hero.y + hero.h - 1) / TS), vx: hero.vx, vy: hero.vy, ground: hero.ground, st: hero.state, th: hero.th, om: hero.om, lives: lives, buddy: buddy, won: won, dead: dead, pw: L.pw }; }, L: function () { return L; }, foes: function () { return foes; }, vines: function () { return vines; }, pods: function () { return pods; }, lives: function (n) { lives = n; }, inv: function () { hero.inv = 1e9; } };
+  game.qa = { boss: function () { return boss && { x: boss.x, y: boss.y, hp: boss.hp, alive: boss.alive, seen: boss.seen, daze: boss.daze, ground: boss.ground }; }, toBoss: function () { if (boss) { hero.x = boss.x - 140; hero.y = boss.y - 30; hero.vy = 0; } }, play: play, state: function () { return { mode: mode, si: si, x: hero.x, y: hero.y, tx: Math.floor((hero.x + hero.w / 2) / TS), ty: Math.floor((hero.y + hero.h - 1) / TS), vx: hero.vx, vy: hero.vy, ground: hero.ground, st: hero.state, th: hero.th, om: hero.om, lives: lives, buddy: buddy, won: won, dead: dead, pw: L.pw }; }, L: function () { return L; }, foes: function () { return foes; }, vines: function () { return vines; }, pods: function () { return pods; }, lives: function (n) { lives = n; }, inv: function () { hero.inv = 1e9; } };
   ui.start(game);
 })();
