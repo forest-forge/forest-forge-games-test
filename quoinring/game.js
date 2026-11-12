@@ -9,7 +9,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#1e6a9a;--water:#1a5e8a;--amber:#fff4d8;--amber-hi:#ffe08a;--amber-soft:#ffe9c4;--amber-line:#e8a04a;--ember:#e85a2a;--btn:#185078;--lamp:#fff6e0;--glow-line:rgba(255,200,100,.4);--glow-fill:rgba(255,200,100,.1)}.ff-host{background:radial-gradient(ellipse at 50% 30%, #5eb8e0 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#1e6a9a,#123c5c);border-bottom-color:rgba(232,160,74,.4)}.ff{border-left-color:rgba(232,160,74,.3);border-right-color:rgba(232,160,74,.3)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(255,200,80,.45)}`);
+  })(`:root{--bg:#1e6a9a;--water:#1a5e8a;--amber:#fff4d8;--amber-hi:#ffe08a;--amber-soft:#ffe9c4;--amber-line:#e8a04a;--ember:#e85a2a;--btn:#185078;--lamp:#fff6e0;--glow-line:rgba(255,200,100,.4);--glow-fill:rgba(255,200,100,.1)}.ff-host{background:radial-gradient(ellipse at 50% 30%, #5eb8e0 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#1e6a9a,#123c5c);border-bottom-color:rgba(232,160,74,.4)}.ff{border-left-color:rgba(232,160,74,.3);border-right-color:rgba(232,160,74,.3)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(255,200,80,.45)}` + (window.FFX ? FFX.menuChrome() : ""));
 
   var R = 4, N6 = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
   var STONE = ["#e8c878", "#d45a32", "#2a9a88", "#c87a2a", "#6a8aac", "#f0e0c0"];
@@ -29,7 +29,7 @@
     }
   });
   var A = ui.audio, save = ui.save;
-  save.hi = save.hi || 0; save.bestRings = save.bestRings || 0; save.chal = save.chal || 0;
+  save.hi = save.hi || 0; save.bestRings = save.bestRings || 0; save.chal = save.chal || 0; save.yard = save.yard || 0;
 
   var S = {
     move: function () { if (A.sfxOk()) A.tone({ f: 420, f2: 380, dur: 0.04, type: "triangle", gain: 0.05 }); },
@@ -73,7 +73,21 @@
     [[0, 0], [1, -1], [0, -1]]
   ];
 
-  var mode = "title", challenge = false, board, cur, nxt, score, rings, combo, tick, interval, flash, over, won, bag, qaAuto = 0;
+  var mode = "title", challenge = false, yard = -1, board, cur, nxt, score, rings, combo, tick, interval, flash, over, won, bag, qaAuto = 0, idleT = 0, ringsThis = 0;
+  var YARDS = [
+    { name: "First cut", goal: 2, pre: [] },
+    { name: "Inner course", goal: 3, pre: [[3, 2]] },
+    { name: "Rim start", goal: 3, pre: [[4, 3]] },
+    { name: "Two courses", goal: 4, pre: [[2, 2], [4, 4]] },
+    { name: "Tight well", goal: 4, pre: [[2, 1], [3, 2]] },
+    { name: "Packed yard", goal: 5, pre: [[3, 1], [4, 2]] },
+    { name: "Cross grain", goal: 5, pre: [[1, 1], [3, 2], [4, 5]] },
+    { name: "Deep silo", goal: 6, pre: [[2, 0], [4, 3]] },
+    { name: "Split work", goal: 6, pre: [[1, 2], [2, 3], [4, 2]] },
+    { name: "Long haul", goal: 7, pre: [[3, 1], [4, 1]] },
+    { name: "Crowded rim", goal: 8, pre: [[2, 0], [3, 1], [4, 2]] },
+    { name: "Master yard", goal: 10, pre: [[1, 1], [2, 1], [3, 2], [4, 3]] }
+  ];
   function emptyBoard() {
     var b = {};
     for (var q = -R; q <= R; q++) for (var r = -R; r <= R; r++) if (inBoard(q, r)) b[hx(q, r)] = 0;
@@ -225,7 +239,6 @@
     nxt = roll();
     if (!placeOnRim(cur)) { cur = null; over = true; endRun(false); }
   }
-  var ringsThis = 0;
   // wrap resolve with accurate ring count
   var resolveInner = resolve;
   resolve = function () {
@@ -242,38 +255,66 @@
       }
       if (!cleared.length) break;
       chain++;
+      var cols = cleared.map(function (c) { return board[hx(c[0], c[1])]; });
       cleared.forEach(function (c) { board[hx(c[0], c[1])] = 0; });
       rings += ringCount; ringsThis += ringCount;
       score += Math.round(180 * ringCount * ringCount * chain);
       S.ring(chain);
-      flash = { cells: cleared.slice(), t: 0.3 };
+      flash = { cells: cleared.slice(), t: 0.45 };
+      if (window.FFX) {
+        var Lx = layoutHex();
+        cleared.forEach(function (cell, i) {
+          var p = pix(cell[0], cell[1], Lx);
+          var col = STONE[((cols[i] || 1) - 1) % STONE.length];
+          FFX.burst(p[0], p[1], "#fff3c0", 8, { spd: 110, r: 3, kind: "spark", g: 80 });
+          FFX.burst(p[0], p[1], col, 6, { spd: 70, r: 2.4, g: 160 });
+        });
+        FFX.kick(0.5 + ringCount * 0.15, "#fff4d0");
+      }
       collapse();
-      if (challenge && rings >= 10) { won = true; endRun(true); return; }
+      var goalR = challenge ? 10 : (yard >= 0 ? YARDS[yard].goal : 0);
+      if (goalR && rings >= goalR) { won = true; endRun(true); return; }
     }
     hud();
   };
 
   function hud() {
     ui.setStat("score", FF.n(score));
-    ui.setStat("rings", challenge ? rings + "/10" : String(rings));
+    var goalR = challenge ? 10 : (yard >= 0 ? YARDS[yard].goal : 0);
+    ui.setStat("rings", goalR ? rings + "/" + goalR : String(rings));
   }
   function endRun(win) {
     ui.stop();
     if (score > save.hi) save.hi = score;
     if (rings > save.bestRings) save.bestRings = rings;
     if (win && challenge) { if (!save.chal || score > save.chal) save.chal = score; }
+    if (win && yard >= 0) { save.yard = Math.max(save.yard || 0, yard + 1); }
     ui.persist();
     if (win) S.win(); else S.over();
     ui.runEnded();
-    ui.menu({
-      title: win ? "Ten rings set" : "The silo is full",
-      body: win ? "The keystone took the last ring. A tidy bit of work." : "No room left on the rim for another stone.",
+    var title = win ? (yard >= 0 ? YARDS[yard].name + " set" : "Ten rings set") : "The silo is full";
+    var body = win ? "The keystone took the last ring. A tidy bit of work." : "No room left on the rim for another stone.";
+    var btns = [];
+    if (win && yard >= 0 && yard + 1 < YARDS.length) {
+      btns.push({ label: "Next yard", act: function () { playYard(yard + 1); } });
+    }
+    btns.push({ label: win ? "Again" : "Try again", act: function () { if (yard >= 0) playYard(yard); else play(challenge); } });
+    btns.push({ label: "Menu", small: true, act: toTitle });
+    ui.menu({ title: title, body: body,
       stats: '<b class="ff-score-xl">' + FF.n(score) + "</b><span>" + rings + " rings · best " + save.bestRings + "</span><span>HIGH SCORE " + FF.n(save.hi) + "</span>",
-      buttons: [{ label: win ? "Again" : "Try again", act: function () { play(challenge); } }, { label: "Menu", small: true, act: toTitle }]
+      buttons: btns
+    });
+  }
+  function prefillYard(yd) {
+    (yd.pre || []).forEach(function (pr) {
+      var ring = pr[0], leave = pr[1], cells = [];
+      for (var q = -R; q <= R; q++) for (var r = -R; r <= R; r++) if (dist(q, r) === ring) cells.push([q, r]);
+      cells.forEach(function (p, i) { if (i >= leave) board[hx(p[0], p[1])] = 1 + (i % STONE.length); });
     });
   }
   function play(chal) {
-    challenge = !!chal;
+    challenge = !!chal; yard = -1;
+    if (window.FFX) FFX.reset();
     board = emptyBoard();
     bag = []; refillBag();
     score = 0; rings = 0; ringsThis = 0; combo = 0; tick = 0;
@@ -287,28 +328,53 @@
     ui.go();
     ui.showPads(true);
   }
+  function playYard(i) {
+    challenge = false; yard = i;
+    if (window.FFX) FFX.reset();
+    board = emptyBoard();
+    prefillYard(YARDS[i]);
+    bag = []; refillBag();
+    score = 0; rings = 0; ringsThis = 0; combo = 0; tick = 0;
+    interval = Math.max(0.48, 0.85 - i * 0.03);
+    flash = null; over = false; won = false; cur = null; nxt = roll();
+    spawn();
+    hud();
+    ui.setCourse((i + 1) + ". " + YARDS[i].name);
+    mode = "play";
+    A.playSong(SONG);
+    ui.go();
+    ui.showPads(true);
+  }
   function toTitle() {
     ui.stop(); mode = "title"; A.playSong(SONG);
-    if (!board) board = emptyBoard();
+    if (window.FFX) FFX.reset();
+    board = emptyBoard();
+    // a little dressed silo for the title backdrop
+    qaFillRing(3, 8); qaFillRing(4, 6);
     ui.showPads(false);
     ui.setCourse("The silo");
+    save.yard = save.yard || 0;
+    var yardBtns = [
+      { label: "Open silo", act: function () { play(false); } },
+      { label: "Ten rings", act: function () { play(true); } },
+      { label: save.yard ? "Yards · " + Math.min(save.yard + 1, YARDS.length) + "/" + YARDS.length : "Yards", act: function () { playYard(Math.min(save.yard || 0, YARDS.length - 1)); } }
+    ];
     ui.menu({
       title: "QUOINRING",
       body: "Two- and three-stone hexes settle toward the keystone. Fill a whole ring and the work drops in. No four-block pieces, and no straight well.",
       stats: "<span>HIGH SCORE " + (save.hi ? FF.n(save.hi) : "-") + "</span><span>BEST RINGS " + (save.bestRings || "-") + "</span>",
-      buttons: [
-        { label: "Open silo", act: function () { play(false); } },
-        { label: "Ten rings", act: function () { play(true); } }
-      ],
-      help: ["Left and right orbit the stone around the silo.", "Turn rotates it. Set drops it in to a rest.", "Swipe around or inward, or tap the stone to turn it."],
+      buttons: yardBtns,
+      help: ["Left and right orbit the stone around the silo.", "Turn rotates it. Set drops it in to a rest.", "Swipe around or inward, or tap the stone to turn it.", "Yards are twelve staged silos with a ring goal on each."],
       fine: "Forest Forge · original work. Masonry mood only.",
       app: true
     });
   }
 
   function update(dt) {
-    if (mode !== "play" || over || won) return;
+    idleT += dt;
+    if (window.FFX) FFX.step(dt);
     if (flash) { flash.t -= dt; if (flash.t <= 0) flash = null; }
+    if (mode !== "play" || over || won) return;
     if (ui.hit("L")) { if (orbit(-1)) S.move(); }
     if (ui.hit("R")) { if (orbit(1)) S.move(); }
     if (ui.hit("ROT")) { if (rotatePiece()) S.rot(); }
@@ -389,35 +455,80 @@
     if (fill) { c.fillStyle = fill; c.fill(); }
     if (stroke) { c.strokeStyle = stroke; c.lineWidth = 1.2; c.stroke(); }
   }
+  function paintStone(c, x, y, s, col, ghost) {
+    var fill = STONE[(col - 1) % STONE.length], dk = STONE_DK[(col - 1) % STONE_DK.length];
+    if (ghost) { c.globalAlpha = 0.38; }
+    if (window.FFX) {
+      FFX.bevelHex(c, x, y, s, fill, dk, "rgba(255,255,240,.4)");
+      // mason tool-mark
+      c.save();
+      FFX.hexPath(c, x, y, s * 0.92); c.clip();
+      c.strokeStyle = "rgba(60,30,10,.12)"; c.lineWidth = 1;
+      for (var i = -2; i < 3; i++) { c.beginPath(); c.moveTo(x - s, y + i * s * 0.28); c.lineTo(x + s, y + i * s * 0.28 + s * 0.08); c.stroke(); }
+      c.restore();
+    } else {
+      drawHex(c, x, y, s, fill, dk, 0);
+      drawHex(c, x - s * 0.08, y - s * 0.1, s * 0.55, "rgba(255,255,240,.25)", null, 0);
+    }
+    c.globalAlpha = 1;
+  }
+  function drawBackdrop(c, W, H, L) {
+    if (window.FFX) {
+      FFX.sky(c, W, H, "#8fd4f0", "#f4d9a4", "#c4783a");
+      FFX.clouds(c, W, H * 0.45, idleT, "rgba(255,255,255,.22)");
+    } else {
+      var g = c.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, "#7ec8e8"); g.addColorStop(0.45, "#f0d8a0"); g.addColorStop(1, "#c4783a");
+      c.fillStyle = g; c.fillRect(0, 0, W, H);
+    }
+    // distant quarry terraces
+    c.fillStyle = "#b07a3c";
+    c.beginPath(); c.moveTo(0, H * 0.62); c.quadraticCurveTo(W * 0.25, H * 0.5, W * 0.5, H * 0.58); c.quadraticCurveTo(W * 0.75, H * 0.66, W, H * 0.52); c.lineTo(W, H); c.lineTo(0, H); c.fill();
+    c.fillStyle = "#8a5a28";
+    c.beginPath(); c.moveTo(0, H * 0.78); c.quadraticCurveTo(W * 0.4, H * 0.68, W, H * 0.74); c.lineTo(W, H); c.lineTo(0, H); c.fill();
+    // silo bowl with rim highlight
+    var rad = L.s * (R + 1.7) * 1.55;
+    var bg = c.createRadialGradient(L.cx - rad * 0.15, L.cy - rad * 0.2, rad * 0.2, L.cx, L.cy, rad);
+    bg.addColorStop(0, "#9a6a38"); bg.addColorStop(0.7, "#6a4420"); bg.addColorStop(1, "#3a2410");
+    c.beginPath(); c.arc(L.cx, L.cy, rad, 0, Math.PI * 2); c.fillStyle = bg; c.fill();
+    c.beginPath(); c.arc(L.cx, L.cy, rad, 0, Math.PI * 2);
+    c.strokeStyle = "#e8c878"; c.lineWidth = 6; c.stroke();
+    c.beginPath(); c.arc(L.cx, L.cy, rad - 5, 0, Math.PI * 2);
+    c.strokeStyle = "rgba(80,40,10,.5)"; c.lineWidth = 3; c.stroke();
+    // inner well
+    var ir = L.s * (R + 1.15) * 1.5;
+    var ig = c.createRadialGradient(L.cx, L.cy, ir * 0.2, L.cx, L.cy, ir);
+    ig.addColorStop(0, "#7a542c"); ig.addColorStop(1, "#4a3018");
+    c.beginPath(); c.arc(L.cx, L.cy, ir, 0, Math.PI * 2); c.fillStyle = ig; c.fill();
+  }
   function render(c) {
     var W = ui.VW, H = ui.VH, L = layoutHex();
-    // sky and quarry bowl
-    var g = c.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#7ec8e8"); g.addColorStop(0.45, "#f0d8a0"); g.addColorStop(1, "#c4783a");
-    c.fillStyle = g; c.fillRect(0, 0, W, H);
-    // bowl
-    c.beginPath(); c.arc(L.cx, L.cy, L.s * (R + 1.65) * 1.55, 0, Math.PI * 2);
-    c.fillStyle = "#6a4a28"; c.fill();
-    c.beginPath(); c.arc(L.cx, L.cy, L.s * (R + 1.15) * 1.5, 0, Math.PI * 2);
-    c.fillStyle = "#8a6234"; c.fill();
+    var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
+    c.save(); c.translate(sh.x, sh.y);
+    drawBackdrop(c, W, H, L);
 
     function paintCell(q, r, col, ghost) {
       var p = pix(q, r, L);
-      var fill = STONE[(col - 1) % STONE.length], dk = STONE_DK[(col - 1) % STONE_DK.length];
-      if (ghost) { c.globalAlpha = 0.35; }
-      drawHex(c, p[0], p[1], L.s * 0.92, fill, dk, 0);
-      drawHex(c, p[0] - L.s * 0.08, p[1] - L.s * 0.1, L.s * 0.55, "rgba(255,255,240,.25)", null, 0);
-      c.globalAlpha = 1;
+      paintStone(c, p[0], p[1], L.s * 0.92, col, ghost);
     }
-    // empty sockets
+    // empty sockets with mortar depth
     for (var q = -R; q <= R; q++) for (var r = -R; r <= R; r++) if (inBoard(q, r)) {
       var p = pix(q, r, L);
-      drawHex(c, p[0], p[1], L.s * 0.92, "#5a3c20", "#3a2814", 0);
+      if (window.FFX) FFX.bevelHex(c, p[0], p[1], L.s * 0.92, "#4a3018", "#2a1808", "rgba(80,50,20,.25)");
+      else drawHex(c, p[0], p[1], L.s * 0.92, "#5a3c20", "#3a2814", 0);
     }
-    // keystone
+    // keystone — polished brass with glow
     var k = pix(0, 0, L);
-    drawHex(c, k[0], k[1], L.s * 0.95, "#c8a04a", "#7a5018", 0);
-    drawHex(c, k[0], k[1], L.s * 0.5, "#efe0a8", "#a07828", 0);
+    if (window.FFX) {
+      c.save();
+      c.shadowColor = "rgba(255,210,80,.55)"; c.shadowBlur = 18;
+      FFX.bevelHex(c, k[0], k[1], L.s * 0.98, "#d4b05a", "#7a5018", "rgba(255,245,200,.55)");
+      c.restore();
+      FFX.bevelHex(c, k[0], k[1], L.s * 0.48, "#efe0a8", "#a07828", "rgba(255,255,230,.6)");
+    } else {
+      drawHex(c, k[0], k[1], L.s * 0.95, "#c8a04a", "#7a5018", 0);
+      drawHex(c, k[0], k[1], L.s * 0.5, "#efe0a8", "#a07828", 0);
+    }
     // locked stones
     Object.keys(board || {}).forEach(function (key) {
       if (!board[key]) return;
@@ -425,15 +536,15 @@
       paintCell(+p[0], +p[1], board[key], false);
     });
     if (flash && flash.cells) {
-      c.globalAlpha = Math.max(0, flash.t / 0.3);
+      c.globalAlpha = Math.max(0, flash.t / 0.45);
       flash.cells.forEach(function (cell) {
         var p = pix(cell[0], cell[1], L);
-        drawHex(c, p[0], p[1], L.s * 1.02, "#fff4c0", "#fff", 0);
+        if (window.FFX) FFX.bevelHex(c, p[0], p[1], L.s * 1.05, "#fff8d0", "#fff", "rgba(255,255,255,.8)");
+        else drawHex(c, p[0], p[1], L.s * 1.02, "#fff4c0", "#fff", 0);
       });
       c.globalAlpha = 1;
     }
-    if (cur) {
-      // ghost rest
+    if (cur && mode === "play") {
       var gcells = cur.cells.map(function (x) { return x.slice(); }), safety = 0;
       while (safety++ < 12) {
         var nxtc = inward(gcells);
@@ -453,17 +564,21 @@
       cur.cells.forEach(function (p) { paintCell(p[0], p[1], cur.col, false); });
     }
     // next
-    if (nxt) {
-      ui.text("NEXT", W - 70, 28, 11, "#3a2410", "center");
-      var ns = L.s * 0.45, nx = W - 70, ny = 70;
+    if (nxt && mode === "play") {
+      var ns = L.s * 0.48, nx = W - 72, ny = 78;
+      if (window.FFX) FFX.bevelRoundRect(c, nx - 36, 14, 72, 86, 10, "#6a4a24", "#3a2810");
+      else { c.fillStyle = "#6a4a24"; c.fillRect(nx - 36, 14, 72, 86); }
+      ui.text("NEXT", nx, 28, 11, "#ffe9c4", "center");
       nxt.cells.forEach(function (p) {
         var x = nx + ns * (3 / 2 * (p[0] - nxt.cells[0][0]));
         var y = ny + ns * (Math.sqrt(3) / 2 * (p[0] - nxt.cells[0][0]) + Math.sqrt(3) * (p[1] - nxt.cells[0][1]));
-        drawHex(c, x, y, ns * 0.9, STONE[(nxt.col - 1) % STONE.length], STONE_DK[(nxt.col - 1) % STONE.length], 0);
+        paintStone(c, x, y, ns * 0.9, nxt.col, false);
       });
     }
+    if (window.FFX) { FFX.vignette(c, W, H, 0.3); FFX.draw(c); }
+    c.restore();
     if (mode === "title") {
-      // idle stones already drawn if board exists
+      // banner plate under the HTML menu
     }
   }
 
@@ -480,6 +595,7 @@
     play: play,
     qa: {
       play: play,
+      playYard: playYard,
       fillRing: qaFillRing,
       hardDrop: function () { if (cur) { hardDrop(); lockPiece(); } },
       state: function () { return { mode: mode, score: score, rings: rings, over: over, won: won, hasCur: !!cur, cells: board ? Object.keys(board).filter(function (k) { return board[k]; }).length : 0 }; }

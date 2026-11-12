@@ -8,7 +8,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#2a3a3a;--water:#1e2c2c;--amber:#f0e4c4;--amber-hi:#e8c878;--amber-soft:#f4ecd4;--amber-line:#6aaa9a;--ember:#c87a3a;--btn:#2a3c3c;--lamp:#fff6e0;--glow-line:rgba(80,180,160,.4);--glow-fill:rgba(80,180,160,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #3a5850 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#2a3c3c,#1a2828);border-bottom-color:rgba(106,170,154,.4)}`);
+  })(`:root{--bg:#2a3a3a;--water:#1e2c2c;--amber:#f0e4c4;--amber-hi:#e8c878;--amber-soft:#f4ecd4;--amber-line:#6aaa9a;--ember:#c87a3a;--btn:#2a3c3c;--lamp:#fff6e0;--glow-line:rgba(80,180,160,.4);--glow-fill:rgba(80,180,160,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #3a5850 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#2a3c3c,#1a2828);border-bottom-color:rgba(106,170,154,.4)}` + (window.FFX ? FFX.menuChrome() : ""));
 
   var TS = 20;
   var ui = FF.create({
@@ -110,6 +110,75 @@
         "#P     C                  G    #",
         "#                         G    #",
         "##########B#####################",
+        "################################"
+      ] },
+    { name: "Long pit", blurb: "A wider drop. Floor hatch in the pit, far ledge hatch out.",
+      map: [
+        "################################",
+        "#P                             #",
+        "#                              #",
+        "########          ##############",
+        "#              ^              X#",
+        "#              ^               #",
+        "################################"
+      ] },
+    { name: "High catch", blurb: "Fall into a floor hatch and leave through a ceiling hatch onto the high ledge.",
+      map: [
+        "################################",
+        "#                             X#",
+        "#                              #",
+        "#P                             #",
+        "#                              #",
+        "################################"
+      ] },
+    { name: "Crate bay", blurb: "Push the crate onto the plate. The gate hides the door.",
+      map: [
+        "################################",
+        "#P     C              G       X#",
+        "#                     G        #",
+        "############B###################",
+        "################################"
+      ] },
+    { name: "Thick wall", blurb: "A hatch this side, a hatch the other side of the chimney breast.",
+      map: [
+        "################################",
+        "#P              ##            X#",
+        "#               ##             #",
+        "################################"
+      ] },
+    { name: "Cupboard", blurb: "Drop in and come out of a wall hatch onto the cupboard.",
+      map: [
+        "################################",
+        "#                      ####   X#",
+        "#                      ####    #",
+        "#P                             #",
+        "#                              #",
+        "################################"
+      ] },
+    { name: "Twin plates", blurb: "Two crates, two plates, one gate.",
+      map: [
+        "################################",
+        "#P  C         C          G    X#",
+        "#                        G     #",
+        "#######B#########B##############",
+        "################################"
+      ] },
+    { name: "Nail well", blurb: "The well is nailed. Drop through a hatch, not into the points.",
+      map: [
+        "################################",
+        "#P               #############X#",
+        "#                ##############",
+        "#     ^^^^^^^^                  #",
+        "################################"
+      ] },
+    { name: "Joiner's end", blurb: "A high shelf, a crate, a gate and a drop. Pair the plates with care.",
+      map: [
+        "################################",
+        "#                     ####    X#",
+        "#                     ####     #",
+        "#P    C                   G    #",
+        "#                         G    #",
+        "#########B######################",
         "################################"
       ] }
   ];
@@ -263,7 +332,10 @@
       app: true
     });
   }
+  var idleT = 0;
   function update(dt) {
+    idleT += dt;
+    if (window.FFX) FFX.step(dt);
     if (mode !== "play" || dead || won) return;
     look = ui.down("UP") ? "up" : ui.down("DN") ? "down" : "side";
     var ax = (ui.down("R") ? 1 : 0) - (ui.down("L") ? 1 : 0);
@@ -313,52 +385,81 @@
   }
   function drawHatch(c, h, iron, L) {
     if (!h) return;
-    var s = L.s, x = L.ox + h.tx * s, y = L.oy + h.ty * s, col = iron ? "#6a6e70" : "#b87333";
+    var s = L.s, x = L.ox + h.tx * s, y = L.oy + h.ty * s, col = iron ? "#6a6e70" : "#b87333", hi = iron ? "#d0d4d8" : "#e0a060";
+    var glow = iron ? "rgba(200,210,220,.55)" : "rgba(200,140,60,.55)";
+    c.save(); c.shadowColor = glow; c.shadowBlur = 10;
     c.fillStyle = col;
-    if (h.side === "N") c.fillRect(x + 2, y, s - 4, 5);
-    if (h.side === "S") c.fillRect(x + 2, y + s - 5, s - 4, 5);
-    if (h.side === "W") c.fillRect(x, y + 2, 5, s - 4);
-    if (h.side === "E") c.fillRect(x + s - 5, y + 2, 5, s - 4);
-    c.fillStyle = iron ? "#c8ccd0" : "#e0a060";
+    if (h.side === "N") c.fillRect(x + 2, y, s - 4, 6);
+    if (h.side === "S") c.fillRect(x + 2, y + s - 6, s - 4, 6);
+    if (h.side === "W") c.fillRect(x, y + 2, 6, s - 4);
+    if (h.side === "E") c.fillRect(x + s - 6, y + 2, 6, s - 4);
+    c.restore();
+    c.fillStyle = hi;
     var hp = hatchPos(h);
     c.fillRect(L.ox + hp.x * s - 3, L.oy + hp.y * s - 3, 6, 6);
+    // rivets
+    c.fillStyle = "rgba(0,0,0,.35)";
+    if (h.side === "N" || h.side === "S") { c.fillRect(x + 4, (h.side === "N" ? y : y + s - 6) + 2, 2, 2); c.fillRect(x + s - 8, (h.side === "N" ? y : y + s - 6) + 2, 2, 2); }
   }
   function render(c) {
     var Wv = ui.VW, Hv = ui.VH, L = layout(), s = L.s;
-    var g = c.createLinearGradient(0, 0, 0, Hv);
-    g.addColorStop(0, "#7aa0a8"); g.addColorStop(1, "#3a4a48");
-    c.fillStyle = g; c.fillRect(0, 0, Wv, Hv);
-    if (!grid) return;
-    for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
-      var ch = grid[y][x], px = L.ox + x * s, py = L.oy + y * s;
-      if (ch === "#" || ch === "=") {
-        c.fillStyle = (x + y) % 2 ? "#c8b890" : "#b8a878"; c.fillRect(px, py, s, s);
-        c.strokeStyle = "#8a7850"; c.strokeRect(px, py, s, s);
-      } else if (ch === "^") {
-        c.fillStyle = "#a03020";
-        c.beginPath(); c.moveTo(px, py + s); c.lineTo(px + s / 2, py + 4); c.lineTo(px + s, py + s); c.fill();
-      } else if (ch === "B") {
-        c.fillStyle = "#6a6a6a"; c.fillRect(px, py, s, s);
-        var on = buttons.some(function (b) { return b.x === x && b.y === y && b.on; });
-        c.fillStyle = on ? "#80d070" : "#d0a040"; c.fillRect(px + 4, py, s - 8, 6);
-      } else if (ch === "g") {
-        if (!gatesOpen()) { c.fillStyle = "#5a3040"; c.fillRect(px + 4, py, s - 8, s); }
-      } else if (ch === "x") {
-        c.fillStyle = "#e8c060"; c.fillRect(px + 3, py + 3, s - 6, s - 6);
-        c.strokeStyle = "#6a4a10"; c.strokeRect(px + 3, py + 3, s - 6, s - 6);
-      }
+    var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
+    c.save(); c.translate(sh.x, sh.y);
+    if (window.FFX) FFX.sky(c, Wv, Hv, "#9ec4cc", "#7aa0a8", "#3a4a48");
+    else {
+      var g = c.createLinearGradient(0, 0, 0, Hv);
+      g.addColorStop(0, "#7aa0a8"); g.addColorStop(1, "#3a4a48");
+      c.fillStyle = g; c.fillRect(0, 0, Wv, Hv);
     }
-    drawHatch(c, hatches[0], true, L); drawHatch(c, hatches[1], false, L);
-    crates.forEach(function (cr) {
-      c.fillStyle = "#8a5a28"; c.fillRect(L.ox + cr.x * s, L.oy + cr.y * s, cr.w * s, cr.h * s);
-      c.strokeStyle = "#3a2410"; c.strokeRect(L.ox + cr.x * s, L.oy + cr.y * s, cr.w * s, cr.h * s);
-    });
-    // Rowan: brown coat, apron — not an orange jumpsuit
-    var px = L.ox + p.x * s, py = L.oy + p.y * s, pw = p.w * s, ph = p.h * s;
-    c.fillStyle = "#5a3a20"; c.fillRect(px + 2, py + 8, pw - 4, ph - 10);
-    c.fillStyle = "#d8c8a0"; c.fillRect(px + 4, py + 14, pw - 8, ph * 0.4);
-    c.fillStyle = "#e0c8a0"; c.beginPath(); c.arc(px + pw / 2, py + 7, 5, 0, Math.PI * 2); c.fill();
-    c.fillStyle = "#2a1a10"; c.fillRect(px + pw / 2 + p.face * 2, py + 6, 2, 2);
+    // attic window
+    c.fillStyle = "rgba(200,230,240,.2)"; c.beginPath(); c.arc(Wv * 0.18, 40, 36, 0, Math.PI * 2); c.fill();
+    if (grid) {
+      for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
+        var ch = grid[y][x], px = L.ox + x * s, py = L.oy + y * s;
+        if (ch === "#" || ch === "=") {
+          if (window.FFX) FFX.bevelRoundRect(c, px, py, s, s, 2, (x + y) % 2 ? "#d0c09a" : "#b8a878", "#7a6840");
+          else { c.fillStyle = (x + y) % 2 ? "#c8b890" : "#b8a878"; c.fillRect(px, py, s, s); c.strokeStyle = "#8a7850"; c.strokeRect(px, py, s, s); }
+        } else if (ch === "^") {
+          c.fillStyle = "#a03020";
+          c.beginPath(); c.moveTo(px, py + s); c.lineTo(px + s / 2, py + 3); c.lineTo(px + s, py + s); c.fill();
+          c.fillStyle = "rgba(255,200,200,.2)"; c.beginPath(); c.moveTo(px + s * 0.3, py + s * 0.55); c.lineTo(px + s / 2, py + 8); c.lineTo(px + s * 0.55, py + s * 0.55); c.fill();
+        } else if (ch === "B") {
+          if (window.FFX) FFX.bevelRoundRect(c, px, py, s, s, 2, "#6a6a6a", "#303030");
+          else { c.fillStyle = "#6a6a6a"; c.fillRect(px, py, s, s); }
+          var on = buttons.some(function (b) { return b.x === x && b.y === y && b.on; });
+          c.fillStyle = on ? "#80d070" : "#d0a040"; c.fillRect(px + 4, py, s - 8, 6);
+        } else if (ch === "g") {
+          if (!gatesOpen()) {
+            if (window.FFX) FFX.bevelRoundRect(c, px + 4, py, s - 8, s, 2, "#5a3040", "#2a1018");
+            else { c.fillStyle = "#5a3040"; c.fillRect(px + 4, py, s - 8, s); }
+          }
+        } else if (ch === "x") {
+          c.save(); c.shadowColor = "rgba(255,200,80,.6)"; c.shadowBlur = 12;
+          if (window.FFX) FFX.bevelRoundRect(c, px + 3, py + 3, s - 6, s - 6, 3, "#e8c060", "#6a4a10");
+          else { c.fillStyle = "#e8c060"; c.fillRect(px + 3, py + 3, s - 6, s - 6); }
+          c.restore();
+        } else {
+          // plaster
+          c.fillStyle = (x + y) % 2 ? "rgba(240,230,210,.08)" : "rgba(200,210,200,.05)";
+          c.fillRect(px, py, s, s);
+        }
+      }
+      drawHatch(c, hatches[0], true, L); drawHatch(c, hatches[1], false, L);
+      crates.forEach(function (cr) {
+        if (window.FFX) FFX.bevelRoundRect(c, L.ox + cr.x * s, L.oy + cr.y * s, cr.w * s, cr.h * s, 3, "#8a5a28", "#3a2410");
+        else { c.fillStyle = "#8a5a28"; c.fillRect(L.ox + cr.x * s, L.oy + cr.y * s, cr.w * s, cr.h * s); c.strokeStyle = "#3a2410"; c.strokeRect(L.ox + cr.x * s, L.oy + cr.y * s, cr.w * s, cr.h * s); }
+      });
+      var px = L.ox + p.x * s, py = L.oy + p.y * s, pw = p.w * s, ph = p.h * s;
+      // Rowan: coat, apron, hair — original joiner's apprentice
+      c.fillStyle = "rgba(0,0,0,.2)"; c.beginPath(); c.ellipse(px + pw / 2, py + ph, pw * 0.4, 3, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#4a2c18"; c.fillRect(px + 2, py + 8, pw - 4, ph - 10);
+      c.fillStyle = "#d8c8a0"; c.fillRect(px + 4, py + 14, pw - 8, ph * 0.42);
+      c.fillStyle = "#e0c8a0"; c.beginPath(); c.arc(px + pw / 2, py + 7, 5, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#3a2410"; c.beginPath(); c.arc(px + pw / 2, py + 5, 5, Math.PI, 0); c.fill();
+      c.fillStyle = "#2a1a10"; c.fillRect(px + pw / 2 + p.face * 2, py + 6, 2, 2);
+    }
+    if (window.FFX) { FFX.vignette(c, Wv, Hv, 0.28); FFX.draw(c); }
+    c.restore();
   }
   var game = {
     toTitle: toTitle, update: update, render: render, onPointer: onPointer,

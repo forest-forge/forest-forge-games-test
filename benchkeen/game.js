@@ -8,7 +8,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#2a2a28;--water:#1e1e1c;--amber:#f0ead8;--amber-hi:#f0d070;--amber-soft:#f6f0e0;--amber-line:#c8a050;--ember:#e0a040;--btn:#3a3a34;--lamp:#fff8e8;--glow-line:rgba(200,160,80,.4);--glow-fill:rgba(200,160,80,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #4a4a40 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#3a3a34,#1e1e1c);border-bottom-color:rgba(200,160,80,.4)}`);
+  })(`:root{--bg:#2a2a28;--water:#1e1e1c;--amber:#f0ead8;--amber-hi:#f0d070;--amber-soft:#f6f0e0;--amber-line:#c8a050;--ember:#e0a040;--btn:#3a3a34;--lamp:#fff8e8;--glow-line:rgba(200,160,80,.4);--glow-fill:rgba(200,160,80,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #4a4a40 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#3a3a34,#1e1e1c);border-bottom-color:rgba(200,160,80,.4)}` + (window.FFX ? FFX.menuChrome() : ""));
 
   var ui = FF.create({
     id: "benchkeen", title: "Benchkeen", course: "The bench", view: { w: 390, h: 720, flex: true },
@@ -148,7 +148,7 @@
   function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 
   function mark(ok) {
-    if (ok) { cur.correct++; score += 120; keen = FF.clamp(keen + 3, 40, 100); S.ok(); }
+    if (ok) { cur.correct++; score += 120; keen = FF.clamp(keen + 3, 40, 100); S.ok(); if (window.FFX) { FFX.burst(ui.VW / 2, ui.VH * 0.4, "#f0d070", 16, { spd: 120, r: 2.6, kind: "spark", g: 60 }); FFX.kick(0.2, "#fff4c0"); } }
     else { keen = FF.clamp(keen - 4, 40, 100); S.bad(); }
     hud();
     phase = "result"; timer = 0; flash = ok;
@@ -182,7 +182,7 @@
       title: "BENCHKEEN",
       body: "Five short desk drills for a morning at the bench. Your Keen index goes up with clean, quick answers. It is a practice score, not an age, and not a test of health.",
       stats: "<span>BEST KEEN " + (save.best || "-") + "</span><span>LAST " + (save.last || "-") + "</span>",
-      buttons: [{ label: "Today's three", act: playDaily }],
+      buttons: [{ label: "Today's three", act: playDaily }, { label: "Full bench", act: function () { startSet(EX.map(function (e) { return e.id; }).concat(EX.map(function (e) { return e.id; }))); } }],
       row: EX.map(function (e) { return { label: e.name, act: function () { startPractice(e.id); } }; }),
       help: ["Today's three is a fresh mix each day.", "Tap answers on the board."],
       fine: "Forest Forge · original work. A bit of desk practice, not a test of health.",
@@ -191,7 +191,10 @@
   }
   function startPractice(id) { startSet([id]); }
 
+  var idleT = 0;
   function update(dt) {
+    idleT += dt;
+    if (window.FFX) FFX.step(dt);
     if (mode !== "play") return;
     timer += dt;
     if (phase === "intro") {
@@ -237,22 +240,39 @@
 
   function render(c) {
     var W = ui.VW, H = ui.VH;
-    c.fillStyle = "#3a3a34"; c.fillRect(0, 0, W, H);
-    c.fillStyle = "#6a5a38"; c.fillRect(0, H * 0.72, W, H * 0.28);
+    var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
+    c.save(); c.translate(sh.x, sh.y);
+    if (window.FFX) FFX.sky(c, W, H, "#4a4a42", "#3a3a34", "#1e1e1c");
+    else { c.fillStyle = "#3a3a34"; c.fillRect(0, 0, W, H); }
+    // lamp glow
+    var lg = c.createRadialGradient(W * 0.5, 20, 10, W * 0.5, 20, W * 0.7);
+    lg.addColorStop(0, "rgba(255,220,140,.18)"); lg.addColorStop(1, "rgba(255,200,80,0)");
+    c.fillStyle = lg; c.fillRect(0, 0, W, H);
+    if (window.FFX) FFX.bevelRoundRect(c, 0, H * 0.72, W, H * 0.28, 0, "#6a5a38", "#3a2c14");
+    else { c.fillStyle = "#6a5a38"; c.fillRect(0, H * 0.72, W, H * 0.28); }
     c.fillStyle = "#c8b080"; c.fillRect(0, H * 0.72, W, 8);
+    // vise and lamp silhouettes
+    c.fillStyle = "rgba(30,30,24,.4)";
+    c.fillRect(18, H * 0.64, 36, H * 0.1);
+    c.fillStyle = "#d8c070"; c.beginPath(); c.arc(W - 36, 28, 10, 0, Math.PI * 2); c.fill();
     hitBoxes = [];
-    if (mode !== "play" || !cur) return;
-    var ex = EX.filter(function (e) { return e.id === cur.id; })[0];
-    ui.text(ex.name, W / 2, 36, 22, "#f0d070", "center");
-    if (phase === "intro") { ui.text("Ready", W / 2, 200, 28, "#f0ead8", "center"); return; }
-    if (cur.id === "bolts") drawBolts(c);
-    if (cur.id === "change") drawChange(c);
-    if (cur.id === "keyway") drawKeyway(c);
-    if (cur.id === "tin") drawTin(c);
-    if (cur.id === "odd") drawOdd(c);
-    if (phase === "result") {
-      ui.text(flash ? "Clean" : "Not that one", W / 2, H * 0.68, 22, flash ? "#80d070" : "#e07060", "center");
+    if (mode === "play" && cur) {
+      var ex = EX.filter(function (e) { return e.id === cur.id; })[0];
+      ui.text(ex.name, W / 2, 36, 22, "#f0d070", "center");
+      if (phase === "intro") { ui.text("Ready", W / 2, 200, 28, "#f0ead8", "center"); }
+      else {
+        if (cur.id === "bolts") drawBolts(c);
+        if (cur.id === "change") drawChange(c);
+        if (cur.id === "keyway") drawKeyway(c);
+        if (cur.id === "tin") drawTin(c);
+        if (cur.id === "odd") drawOdd(c);
+        if (phase === "result") {
+          ui.text(flash ? "Clean" : "Not that one", W / 2, H * 0.68, 22, flash ? "#80d070" : "#e07060", "center");
+        }
+      }
     }
+    if (window.FFX) { FFX.vignette(c, W, H, 0.3); FFX.draw(c); }
+    c.restore();
   }
   function drawBolts(c) {
     if (phase === "show" || (phase === "result" && flash)) {
@@ -283,7 +303,7 @@
     ui.text(phase === "show" ? "Watch the path" : "Trace it back", ui.VW / 2, 140, 16, "#f0ead8", "center");
     for (var r = 0; r < 5; r++) for (var col = 0; col < 5; col++) {
       var x = L.ox + col * L.s, y = L.oy + r * L.s;
-      c.fillStyle = "#2a2a28"; c.fillRect(x + 3, y + 3, L.s - 6, L.s - 6);
+      if (window.FFX) FFX.bevelRoundRect(c, x + 3, y + 3, L.s - 6, L.s - 6, 4, "#2a2a28", "#111"); else { c.fillStyle = "#2a2a28"; c.fillRect(x + 3, y + 3, L.s - 6, L.s - 6); }
       var step = -1;
       if (phase === "show") {
         var shown = Math.min(cur.path.length, Math.floor(timer / 0.28) + 1);
@@ -297,7 +317,8 @@
   function drawTin(c) {
     ui.text("Tap the colour of the tin, not the word on the label.", ui.VW / 2, 110, 14, "#f0ead8", "center");
     var cx = ui.VW / 2, cy = 230;
-    c.fillStyle = cur.body.col; c.fillRect(cx - 40, cy - 50, 80, 90);
+    if (window.FFX) FFX.bevelRoundRect(c, cx - 40, cy - 50, 80, 90, 8, cur.body.col, "#1a1a14");
+    else { c.fillStyle = cur.body.col; c.fillRect(cx - 40, cy - 50, 80, 90); }
     c.fillStyle = "#3a3a34"; c.fillRect(cx - 30, cy - 18, 60, 32);
     c.fillStyle = "#f0ead8"; c.font = "14px Georgia"; c.textAlign = "center"; c.textBaseline = "middle";
     c.fillText(cur.label.name, cx, cy);
@@ -331,8 +352,9 @@
     values = values || labels;
     labels.forEach(function (lab, i) {
       var x = 30 + (i % 2) * 170, y = 340 + Math.floor(i / 2) * 70;
-      c.fillStyle = "#3a3a34"; c.strokeStyle = "#c8a050"; c.lineWidth = 2;
-      c.fillRect(x, y, 150, 58); c.strokeRect(x, y, 150, 58);
+      if (window.FFX) FFX.bevelRoundRect(c, x, y, 150, 58, 8, "#3a3a34", "#1a1a14");
+      else { c.fillStyle = "#3a3a34"; c.strokeStyle = "#c8a050"; c.lineWidth = 2; c.fillRect(x, y, 150, 58); c.strokeRect(x, y, 150, 58); }
+      c.strokeStyle = "#c8a050"; c.lineWidth = 1.5; c.strokeRect(x, y, 150, 58);
       ui.text(String(lab), x + 75, y + 29, 18, "#f0ead8", "center");
       hitBoxes.push({ x: x, y: y, w: 150, h: 58, v: values[i] });
     });

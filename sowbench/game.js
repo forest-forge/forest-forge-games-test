@@ -9,7 +9,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#4a6a2a;--water:#3a5620;--amber:#f4ecd0;--amber-hi:#e8d080;--amber-soft:#f0e8c8;--amber-line:#c47838;--ember:#c45a2a;--btn:#3a4a18;--lamp:#fff8e0;--glow-line:rgba(200,140,60,.4);--glow-fill:rgba(200,140,60,.1)}.ff-host{background:radial-gradient(ellipse at 50% 25%, #7a9a48 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#4a6a2a,#2a3a14);border-bottom-color:rgba(196,120,56,.4)}`);
+  })(`:root{--bg:#4a6a2a;--water:#3a5620;--amber:#f4ecd0;--amber-hi:#e8d080;--amber-soft:#f0e8c8;--amber-line:#c47838;--ember:#c45a2a;--btn:#3a4a18;--lamp:#fff8e0;--glow-line:rgba(200,140,60,.4);--glow-fill:rgba(200,140,60,.1)}.ff-host{background:radial-gradient(ellipse at 50% 25%, #7a9a48 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#4a6a2a,#2a3a14);border-bottom-color:rgba(196,120,56,.4)}` + (window.FFX ? FFX.menuChrome() : ""));
 
   var COLS = 8, ROWS = 12;
   var SEED = ["#d45a2a", "#e0b02a", "#3a8a48", "#7a4a28"];
@@ -59,7 +59,17 @@
     { name: "Mixed sow", colors: 4, husks: 18, seed: 47 },
     { name: "Tight compost", colors: 4, husks: 20, seed: 59 },
     { name: "Late husks", colors: 4, husks: 22, seed: 61 },
-    { name: "The last rake", colors: 4, husks: 24, seed: 73 }
+    { name: "The last rake", colors: 4, husks: 24, seed: 73 },
+    { name: "Spring tray", colors: 3, husks: 10, seed: 79 },
+    { name: "Leaf and clay", colors: 3, husks: 14, seed: 83 },
+    { name: "Four again", colors: 4, husks: 14, seed: 89 },
+    { name: "Busy bench", colors: 3, husks: 18, seed: 97 },
+    { name: "Deep compost", colors: 4, husks: 18, seed: 101 },
+    { name: "Mixed rake", colors: 4, husks: 20, seed: 107 },
+    { name: "Crowded soil", colors: 4, husks: 22, seed: 109 },
+    { name: "Late sow", colors: 4, husks: 24, seed: 113 },
+    { name: "Full tray", colors: 4, husks: 26, seed: 127 },
+    { name: "Master bench", colors: 4, husks: 28, seed: 131 }
   ];
 
   var mode = "title", li = 0, grid, piece, nxt, tick, interval, score, colors, over, won, das;
@@ -137,8 +147,13 @@
       }
       var n = Object.keys(clear).length;
       if (n) {
-        Object.keys(clear).forEach(function (k) { var p = k.split(","); grid[+p[1]][+p[0]] = 0; });
+        Object.keys(clear).forEach(function (k) {
+          var p = k.split(","), Lx = layout(), val = grid[+p[1]][+p[0]];
+          if (window.FFX) FFX.burst(Lx.ox + (+p[0] + 0.5) * Lx.s, Lx.oy + (+p[1] + 0.5) * Lx.s, val < 0 ? "#8a6a40" : SEED[(Math.abs(val) - 1) % SEED.length], 8, { spd: 90, r: 2.4, kind: "fluff", g: 120 });
+          grid[+p[1]][+p[0]] = 0;
+        });
         chain++; score += n * 70 * chain; S.clear(); moved = true;
+        if (window.FFX) FFX.kick(0.28, "#e8f0b0");
         // gravity
         for (var c = 0; c < COLS; c++) {
           var stack = [];
@@ -196,7 +211,10 @@
       app: true
     });
   }
+  var idleT = 0;
   function update(dt) {
+    idleT += dt;
+    if (window.FFX) FFX.step(dt);
     if (mode !== "play" || over || won || !piece) return;
     function hold(id, fn, first, repeat) {
       if (ui.hit(id)) { fn(); das[id] = first; }
@@ -234,11 +252,14 @@
   function drawCake(c, x, y, s, val) {
     var husk = val < 0, col = colorOf(val), k = (col - 1) % SEED.length;
     var pad = 2;
-    c.fillStyle = husk ? "#8a6a40" : SEED[k];
-    c.fillRect(x + pad, y + pad, s - pad * 2, s - pad * 2);
-    c.strokeStyle = husk ? "#5a4020" : SEED_DK[k]; c.lineWidth = 2;
-    c.strokeRect(x + pad, y + pad, s - pad * 2, s - pad * 2);
-    // seed stamp (dot / dash / sprout / slit) — not a capsule
+    if (window.FFX) {
+      FFX.bevelRoundRect(c, x + pad, y + pad, s - pad * 2, s - pad * 2, 5, husk ? "#8a6a40" : SEED[k], husk ? "#5a4020" : SEED_DK[k]);
+    } else {
+      c.fillStyle = husk ? "#8a6a40" : SEED[k];
+      c.fillRect(x + pad, y + pad, s - pad * 2, s - pad * 2);
+      c.strokeStyle = husk ? "#5a4020" : SEED_DK[k]; c.lineWidth = 2;
+      c.strokeRect(x + pad, y + pad, s - pad * 2, s - pad * 2);
+    }
     var cx = x + s / 2, cy = y + s / 2;
     c.fillStyle = husk ? "#3a2a14" : "rgba(40,20,10,.45)";
     if (k === 0) { c.beginPath(); c.arc(cx, cy, s * 0.12, 0, Math.PI * 2); c.fill(); }
@@ -246,35 +267,51 @@
     else if (k === 2) { c.beginPath(); c.moveTo(cx, cy + s * 0.16); c.quadraticCurveTo(cx - s * 0.2, cy, cx, cy - s * 0.18); c.quadraticCurveTo(cx + s * 0.2, cy, cx, cy + s * 0.16); c.fill(); }
     else { c.fillRect(cx - 2, cy - s * 0.16, 4, s * 0.32); }
     if (husk) {
-      c.strokeStyle = "#3a2a14"; c.beginPath();
+      c.strokeStyle = "#3a2a14"; c.lineWidth = 2; c.beginPath();
       c.moveTo(x + 6, y + 6); c.lineTo(x + s - 6, y + s - 6); c.stroke();
     }
   }
   function render(c) {
     var W = ui.VW, H = ui.VH, L = layout();
-    var g = c.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#b8d078"); g.addColorStop(1, "#5a6a30");
-    c.fillStyle = g; c.fillRect(0, 0, W, H);
-    // bench wood
-    c.fillStyle = "#8a5a28"; c.fillRect(L.ox - 12, L.oy - 8, L.s * COLS + 24, L.s * ROWS + 16);
-    c.fillStyle = "#5a3a14"; c.fillRect(L.ox - 4, L.oy, L.s * COLS + 8, L.s * ROWS);
-    if (!grid) return;
-    for (var r = 0; r < ROWS; r++) for (var col = 0; col < COLS; col++) {
-      var x = L.ox + col * L.s, y = L.oy + r * L.s;
-      c.fillStyle = (r + col) % 2 ? "#c4a06a" : "#b89058";
-      c.fillRect(x, y, L.s, L.s);
-      if (grid[r][col]) drawCake(c, x, y, L.s, grid[r][col]);
+    var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
+    c.save(); c.translate(sh.x, sh.y);
+    if (window.FFX) FFX.sky(c, W, H, "#d8ec9a", "#b8d078", "#5a6a30");
+    else {
+      var g = c.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, "#b8d078"); g.addColorStop(1, "#5a6a30");
+      c.fillStyle = g; c.fillRect(0, 0, W, H);
+    }
+    // leaves
+    c.fillStyle = "rgba(40,70,20,.18)";
+    for (var i = 0; i < 8; i++) { c.beginPath(); c.ellipse((i * 97 + 20) % W, (i * 53 + 40) % H, 18, 8, i, 0, Math.PI * 2); c.fill(); }
+    if (window.FFX) {
+      FFX.bevelRoundRect(c, L.ox - 14, L.oy - 10, L.s * COLS + 28, L.s * ROWS + 20, 8, "#8a5a28", "#4a3010");
+      FFX.bevelRoundRect(c, L.ox - 4, L.oy, L.s * COLS + 8, L.s * ROWS, 3, "#5a3a14", "#2a1808");
+    } else {
+      c.fillStyle = "#8a5a28"; c.fillRect(L.ox - 12, L.oy - 8, L.s * COLS + 24, L.s * ROWS + 16);
+      c.fillStyle = "#5a3a14"; c.fillRect(L.ox - 4, L.oy, L.s * COLS + 8, L.s * ROWS);
+    }
+    if (grid) {
+      for (var r = 0; r < ROWS; r++) for (var col = 0; col < COLS; col++) {
+        var x = L.ox + col * L.s, y = L.oy + r * L.s;
+        c.fillStyle = (r + col) % 2 ? "#c4a06a" : "#b89058";
+        c.fillRect(x, y, L.s, L.s);
+        if (grid[r][col]) drawCake(c, x, y, L.s, grid[r][col]);
+      }
     }
     if (piece) cellsOf(piece).forEach(function (cell) {
       if (cell[1] >= 0) drawCake(c, L.ox + cell[0] * L.s, L.oy + cell[1] * L.s, L.s, cell[2]);
     });
     if (nxt) {
       var nx = L.ox, ny = L.oy + L.s * ROWS + 20;
-      ui.text("NEXT", nx, ny, 11, "#2a3a10", "left");
+      if (window.FFX) FFX.bevelRoundRect(c, nx - 6, ny - 14, 130, 44, 6, "#6a4a20", "#3a2810");
+      ui.text("NEXT", nx, ny, 11, "#f0e8c8", "left");
       nxt.shape.forEach(function (p, i) {
         drawCake(c, nx + 50 + p[0] * 20, ny - 8 + p[1] * 20, 20, nxt.cols[i]);
       });
     }
+    if (window.FFX) { FFX.vignette(c, W, H, 0.28); FFX.draw(c); }
+    c.restore();
   }
   var game = {
     toTitle: toTitle, update: update, render: render, onPointer: onPointer,

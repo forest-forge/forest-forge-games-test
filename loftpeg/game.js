@@ -9,7 +9,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#3a2414;--water:#2a1a0e;--amber:#f6e6c4;--amber-hi:#f0d080;--amber-soft:#f8ecce;--amber-line:#d4924a;--ember:#e06830;--btn:#4a2c14;--lamp:#fff6e0;--glow-line:rgba(220,150,70,.4);--glow-fill:rgba(220,150,70,.12)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #6a4a24 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#4a2c14,#2a180c);border-bottom-color:rgba(212,146,74,.4)}`);
+  })(`:root{--bg:#3a2414;--water:#2a1a0e;--amber:#f6e6c4;--amber-hi:#f0d080;--amber-soft:#f8ecce;--amber-line:#d4924a;--ember:#e06830;--btn:#4a2c14;--lamp:#fff6e0;--glow-line:rgba(220,150,70,.4);--glow-fill:rgba(220,150,70,.12)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #6a4a24 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#4a2c14,#2a180c);border-bottom-color:rgba(212,146,74,.4)}` + (window.FFX ? FFX.menuChrome() : ""));
 
   var COLS = 8, ROWS = 12, COLORS = 5;
   var PEG = ["#2a9aaa", "#e0a020", "#c43a28", "#4a7ad0", "#8a3a88"];
@@ -66,7 +66,17 @@
     { name: "Patchwork", colors: 5, dens: 0.85, seed: 71, dropEvery: 6 },
     { name: "Tight loft", colors: 5, dens: 0.9, seed: 83, dropEvery: 6 },
     { name: "Rafter jam", colors: 5, dens: 0.9, seed: 97, dropEvery: 5 },
-    { name: "Last beam", colors: 5, dens: 0.95, seed: 101, dropEvery: 5 }
+    { name: "Last beam", colors: 5, dens: 0.95, seed: 101, dropEvery: 5 },
+    { name: "Dawn rail", colors: 3, dens: 0.8, seed: 107, dropEvery: 7 },
+    { name: "Brick and plum", colors: 4, dens: 0.82, seed: 113, dropEvery: 7 },
+    { name: "Slant eaves", colors: 4, dens: 0.88, seed: 127, dropEvery: 6 },
+    { name: "Thick paint", colors: 5, dens: 0.85, seed: 131, dropEvery: 6 },
+    { name: "Low window", colors: 5, dens: 0.88, seed: 139, dropEvery: 6 },
+    { name: "Packed hatch", colors: 5, dens: 0.92, seed: 149, dropEvery: 5 },
+    { name: "Old beam", colors: 5, dens: 0.9, seed: 151, dropEvery: 5 },
+    { name: "Crowded eave", colors: 5, dens: 0.94, seed: 163, dropEvery: 5 },
+    { name: "Narrow loft", colors: 5, dens: 0.95, seed: 167, dropEvery: 5 },
+    { name: "Master rafter", colors: 5, dens: 0.97, seed: 173, dropEvery: 4 }
   ];
 
   var mode = "title", li = 0, grid, angle, shot, nextCol, curCol, shots, score, dropT, colors, over, won, falling;
@@ -133,9 +143,18 @@
     for (var r = 0; r < ROWS; r++) for (var c = 0; c < colsIn(r); c++) if (grid[r][c] && !seen[c + "," + r]) {
       var g = flood(c, r);
       g.forEach(function (p) { seen[p[0] + "," + p[1]] = 1; });
-      if (g.length >= 3) { g.forEach(function (p) { grid[p[1]][p[0]] = 0; }); popped += g.length; }
+      if (g.length >= 3) {
+        g.forEach(function (p) {
+          if (window.FFX) {
+            var Lx = layout(), q = cellPos(p[0], p[1], Lx);
+            FFX.burst(q.x, q.y, PEG[(grid[p[1]][p[0]] - 1) % PEG.length], 10, { spd: 100, r: 2.6, kind: "spark", g: 180 });
+          }
+          grid[p[1]][p[0]] = 0;
+        });
+        popped += g.length;
+      }
     }
-    if (popped) { S.pop(); score += popped * 80; }
+    if (popped) { S.pop(); score += popped * 80; if (window.FFX) FFX.kick(0.35, "#ffe8b0"); }
     var hang = hung(), fell = 0;
     falling = [];
     for (var r = 0; r < ROWS; r++) for (var c = 0; c < colsIn(r); c++) if (grid[r][c] && !hang[c + "," + r]) {
@@ -232,7 +251,7 @@
     for (var r = 0; r < ROWS; r++) { while (grid[r].length < colsIn(r)) grid[r].push(0); grid[r] = grid[r].slice(0, colsIn(r)); }
     angle = 0; shot = null; falling = []; shots = 0; score = 0; dropT = 0; over = false; won = false;
     curCol = 1 + Math.floor(Math.random() * colors); nextCol = 1 + Math.floor(Math.random() * colors);
-    ui.setCourse((i + 1) + ". " + lv.name); hud(); mode = "play"; A.playSong(SONG); ui.go(); ui.showPads(true);
+    if (window.FFX) FFX.reset(); ui.setCourse((i + 1) + ". " + lv.name); hud(); mode = "play"; A.playSong(SONG); ui.go(); ui.showPads(true);
   }
   function toTitle() {
     ui.stop(); mode = "title"; A.playSong(SONG); ui.showPads(false); ui.setCourse("The loft");
@@ -256,7 +275,10 @@
     }
     if (type === "pointerup" && Math.hypot(x - sx, y - sy) < 40) fire();
   }
+  var idleT = 0;
   function update(dt) {
+    idleT += dt;
+    if (window.FFX) FFX.step(dt);
     if (mode !== "play" || over || won) return;
     if (ui.down("L")) angle = Math.max(-1.2, angle - 2.2 * dt);
     if (ui.down("R")) angle = Math.min(1.2, angle + 2.2 * dt);
@@ -281,39 +303,75 @@
   }
   function drawPeg(c, x, y, s, col) {
     var k = (col - 1) % PEG.length;
-    c.beginPath(); c.arc(x, y, s * 0.4, 0, Math.PI * 2); c.fillStyle = "#6a4a28"; c.fill();
-    c.beginPath(); c.arc(x, y, s * 0.32, 0, Math.PI * 2); c.fillStyle = PEG[k]; c.fill();
-    c.strokeStyle = PEG_DK[k]; c.lineWidth = 2; c.stroke();
-    c.beginPath(); c.arc(x - s * 0.1, y - s * 0.1, s * 0.1, 0, Math.PI * 2); c.fillStyle = "rgba(255,255,240,.35)"; c.fill();
+    c.fillStyle = "rgba(0,0,0,.2)";
+    c.beginPath(); c.ellipse(x, y + s * 0.38, s * 0.32, s * 0.1, 0, 0, Math.PI * 2); c.fill();
+    if (window.FFX) {
+      FFX.bevelCircle(c, x, y, s * 0.42, "#6a4a28", "#3a2810", "#c8a060");
+      FFX.bevelCircle(c, x, y, s * 0.32, PEG[k], PEG_DK[k], FFX.lighten(PEG[k], 0.35));
+      c.save(); c.beginPath(); c.arc(x, y, s * 0.3, 0, Math.PI * 2); c.clip();
+      c.strokeStyle = "rgba(40,20,8,.15)"; c.lineWidth = 1;
+      for (var i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(x - s, y + i * s * 0.1); c.lineTo(x + s, y + i * s * 0.1 + 2); c.stroke(); }
+      c.restore();
+    } else {
+      c.beginPath(); c.arc(x, y, s * 0.4, 0, Math.PI * 2); c.fillStyle = "#6a4a28"; c.fill();
+      c.beginPath(); c.arc(x, y, s * 0.32, 0, Math.PI * 2); c.fillStyle = PEG[k]; c.fill();
+      c.strokeStyle = PEG_DK[k]; c.lineWidth = 2; c.stroke();
+      c.beginPath(); c.arc(x - s * 0.1, y - s * 0.1, s * 0.1, 0, Math.PI * 2); c.fillStyle = "rgba(255,255,240,.35)"; c.fill();
+    }
   }
   function render(c) {
     var W = ui.VW, H = ui.VH, L = layout();
-    var g = c.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#c8a060"); g.addColorStop(0.3, "#8a5a30"); g.addColorStop(1, "#3a2210");
-    c.fillStyle = g; c.fillRect(0, 0, W, H);
-    // slats
-    c.fillStyle = "rgba(80,50,20,.35)";
-    for (var i = 0; i < 8; i++) c.fillRect(0, 20 + i * 28, W, 8);
-    // rafter
-    c.fillStyle = "#5a3a18"; c.fillRect(8, L.oy - 18, W - 16, 16);
-    c.fillStyle = "#c8a060"; c.fillRect(8, L.oy - 18, W - 16, 4);
+    var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
+    c.save(); c.translate(sh.x, sh.y);
+    if (window.FFX) FFX.sky(c, W, H, "#e8c888", "#8a5a30", "#3a2210");
+    else {
+      var g = c.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, "#c8a060"); g.addColorStop(0.3, "#8a5a30"); g.addColorStop(1, "#3a2210");
+      c.fillStyle = g; c.fillRect(0, 0, W, H);
+    }
+    for (var i = 0; i < 9; i++) {
+      var gy = c.createLinearGradient(0, 16 + i * 30, 0, 28 + i * 30);
+      gy.addColorStop(0, "rgba(255,220,140,.16)"); gy.addColorStop(1, "rgba(80,50,20,.28)");
+      c.fillStyle = gy; c.fillRect(0, 16 + i * 30, W, 12);
+    }
+    if (window.FFX) {
+      FFX.bevelRoundRect(c, 0, 0, 14, H, 0, "#5a3a18", "#2a1808");
+      FFX.bevelRoundRect(c, W - 14, 0, 14, H, 0, "#5a3a18", "#2a1808");
+      FFX.bevelRoundRect(c, 8, L.oy - 20, W - 16, 18, 3, "#6a4a20", "#3a2410");
+    } else {
+      c.fillStyle = "#5a3a18"; c.fillRect(8, L.oy - 18, W - 16, 16);
+      c.fillStyle = "#c8a060"; c.fillRect(8, L.oy - 18, W - 16, 4);
+    }
     if (grid) {
+      c.strokeStyle = "rgba(80,50,20,.45)"; c.lineWidth = 1.5;
+      for (var col = 0; col < colsIn(0); col++) {
+        var p0 = cellPos(col, 0, L);
+        c.beginPath(); c.moveTo(p0.x, L.oy - 4); c.lineTo(p0.x, p0.y - L.s * 0.32); c.stroke();
+      }
       for (var r = 0; r < ROWS; r++) for (var col = 0; col < colsIn(r); col++) if (grid[r][col]) {
         var p = cellPos(col, r, L); drawPeg(c, p.x, p.y, L.s, grid[r][col]);
       }
     }
     (falling || []).forEach(function (f) { drawPeg(c, f.x, f.y, L.s, f.col); });
-    // danger line
-    c.strokeStyle = "rgba(220,60,40,.5)"; c.setLineDash([6, 6]);
+    c.strokeStyle = "rgba(220,60,40,.55)"; c.setLineDash([6, 6]);
     var dy = L.oy + (ROWS - 2) * L.s * 0.86;
     c.beginPath(); c.moveTo(L.pad, dy); c.lineTo(W - L.pad, dy); c.stroke(); c.setLineDash([]);
-    // aim
     var sx = W / 2, sy = H - 100;
-    c.strokeStyle = "rgba(255,240,200,.55)"; c.lineWidth = 2;
+    if (window.FFX) FFX.bevelRoundRect(c, sx - 28, sy - 10, 56, 22, 8, "#6a4a24", "#3a2410");
+    c.strokeStyle = "rgba(255,240,200,.7)"; c.lineWidth = 2;
     c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx + Math.sin(angle) * 80, sy - Math.cos(angle) * 80); c.stroke();
+    c.fillStyle = "rgba(255,240,200,.4)";
+    for (var i = 1; i < 5; i++) {
+      c.beginPath(); c.arc(sx + Math.sin(angle) * 18 * i, sy - Math.cos(angle) * 18 * i, 2, 0, Math.PI * 2); c.fill();
+    }
     if (curCol) drawPeg(c, sx, sy, L.s, curCol);
-    if (nextCol) { ui.text("NEXT", W - 50, H - 150, 11, "#f0e0c0", "center"); drawPeg(c, W - 50, H - 118, L.s * 0.8, nextCol); }
+    if (nextCol) {
+      if (window.FFX) FFX.bevelRoundRect(c, W - 78, H - 168, 64, 70, 8, "#5a3a18", "#2a1808");
+      ui.text("NEXT", W - 46, H - 150, 11, "#f0e0c0", "center"); drawPeg(c, W - 46, H - 118, L.s * 0.8, nextCol);
+    }
     if (shot) drawPeg(c, shot.x, shot.y, L.s, shot.col);
+    if (window.FFX) { FFX.vignette(c, W, H, 0.3); FFX.draw(c); }
+    c.restore();
   }
   var game = {
     toTitle: toTitle, update: update, render: render, onPointer: onPointer,

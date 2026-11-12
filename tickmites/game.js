@@ -8,7 +8,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#2a1a10;--water:#1e140c;--amber:#f0d8a0;--amber-hi:#f0c060;--amber-soft:#f8e8c0;--amber-line:#c88840;--ember:#e07030;--btn:#3a2414;--lamp:#fff4d8;--glow-line:rgba(220,160,70,.4);--glow-fill:rgba(220,160,70,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #4a2e18 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#3a2414,#1e140c);border-bottom-color:rgba(200,136,64,.4)}`);
+  })(`:root{--bg:#2a1a10;--water:#1e140c;--amber:#f0d8a0;--amber-hi:#f0c060;--amber-soft:#f8e8c0;--amber-line:#c88840;--ember:#e07030;--btn:#3a2414;--lamp:#fff4d8;--glow-line:rgba(220,160,70,.4);--glow-fill:rgba(220,160,70,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #4a2e18 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#3a2414,#1e140c);border-bottom-color:rgba(200,136,64,.4)}` + (window.FFX ? FFX.menuChrome() : ""));
 
   var TS = 20;
   var ui = FF.create({
@@ -112,6 +112,75 @@
         "#     ####    ####        ####   ####  #",
         "#             ####               ####  #",
         "########################################"
+      ] },
+    { name: "Long lobby", need: 5, out: 8, time: 50, tools: { BRACE: 2, BORE: 0, RATCH: 0, FUSE: 0, VENT: 0 },
+      map: [
+        "################################",
+        "#S                            E#",
+        "#                              #",
+        "################################"
+      ] },
+    { name: "Second gap", need: 4, out: 6, time: 55, tools: { BRACE: 0, BORE: 0, RATCH: 0, FUSE: 4, VENT: 0 },
+      map: [
+        "################################",
+        "#S         #                  E#",
+        "#          #                   #",
+        "##########   ##       ##########",
+        "################################"
+      ] },
+    { name: "Two plates", need: 4, out: 6, time: 55, tools: { BRACE: 0, BORE: 6, RATCH: 0, FUSE: 0, VENT: 0 },
+      map: [
+        "################################",
+        "#S      ######    ######      E#",
+        "#       ######    ######       #",
+        "################################"
+      ] },
+    { name: "Clock stair", need: 5, out: 8, time: 65, tools: { BRACE: 1, BORE: 0, RATCH: 6, FUSE: 0, VENT: 0 },
+      map: [
+        "################################",
+        "#                    ######   E#",
+        "#                    ###########",
+        "#                    ###########",
+        "#S                   ###########",
+        "################################"
+      ] },
+    { name: "Lower hall", need: 5, out: 8, time: 65, tools: { BRACE: 1, BORE: 0, RATCH: 0, FUSE: 0, VENT: 5 },
+      map: [
+        "################################",
+        "#S              #              #",
+        "#               #              #",
+        "################################",
+        "#                             E#",
+        "#                              #",
+        "################################"
+      ] },
+    { name: "Turn and gap", need: 5, out: 8, time: 65, tools: { BRACE: 4, BORE: 0, RATCH: 0, FUSE: 3, VENT: 0 },
+      map: [
+        "################################",
+        "#S      #                     E#",
+        "#       #                      #",
+        "######  ######   ####    #######",
+        "################################"
+      ] },
+    { name: "Gear hall", need: 6, out: 10, time: 80, tools: { BRACE: 2, BORE: 3, RATCH: 3, FUSE: 2, VENT: 1 },
+      map: [
+        "########################################",
+        "#S         ####          #            #",
+        "#          ####          #            #",
+        "#####      ####   ####   #    #########",
+        "#                   #    #           E#",
+        "#                   #                 #",
+        "########################################"
+      ] },
+    { name: "Great arbor", need: 7, out: 12, time: 90, tools: { BRACE: 3, BORE: 4, RATCH: 4, FUSE: 3, VENT: 3 },
+      map: [
+        "########################################",
+        "#                     #####           E#",
+        "#                     #####            #",
+        "#S     ####                ####        #",
+        "#      ####    ####        ####  ####  #",
+        "#              ####              ####  #",
+        "########################################"
       ] }
   ];
 
@@ -168,7 +237,10 @@
     for (var dy = -1; dy <= 1 && !atE; dy++) for (var dx = -1; dx <= 1; dx++) {
       if (grid[ty + dy] && grid[ty + dy][tx + dx] === "e") atE = true;
     }
-    if (atE) { m.st = "home"; home++; S.home(); hud(); if (home >= need) winLevel(); return; }
+    if (atE) {
+      if (window.FFX) { var Lh = layout(); FFX.burst(Lh.ox + m.x * Lh.s + Lh.s / 2, Lh.oy + m.y * Lh.s + Lh.s / 2, "#e8c050", 12, { spd: 90, r: 2.4, kind: "spark", g: 40 }); FFX.kick(0.25, "#ffe8a0"); }
+      m.st = "home"; home++; S.home(); hud(); if (home >= need) winLevel(); return;
+    }
     if (m.st === "job") {
       if (m.job === "BRACE") { m.st = "brace"; grid[ty] && (grid[ty][tx] = "b"); return; }
       if (m.job === "BORE") {
@@ -239,7 +311,7 @@
     grid = p.g.map(function (r) { return r.slice(); }); W = p.w; H = p.h; spawns = p.spawn;
     mites = []; tools = lv.tools; stock = Object.assign({}, lv.tools); sel = null;
     time = lv.time; need = lv.need; home = 0; lost = 0; over = false; won = false; spawnI = 0; spawnT = 0;
-    ui.setCourse((i + 1) + ". " + lv.name); hud(); paintStock(); mode = "play"; A.playSong(SONG); ui.go(); ui.showPads(true);
+    if (window.FFX) FFX.reset(); ui.setCourse((i + 1) + ". " + lv.name); hud(); paintStock(); mode = "play"; A.playSong(SONG); ui.go(); ui.showPads(true);
   }
   var TOOL_NAME = { BRACE: "Brace", BORE: "Bore", RATCH: "Ratchet", FUSE: "Fuse", VENT: "Vent" };
   function paintStock() {
@@ -275,7 +347,10 @@
     });
     if (best != null) { sel = best; S.pick(); }
   }
+  var idleT = 0;
   function update(dt) {
+    idleT += dt;
+    if (window.FFX) FFX.step(dt);
     if (mode !== "play" || over || won) return;
     TOOLS.forEach(function (t) { if (ui.hit(t)) assign(t); });
     time -= dt; hud();
@@ -289,37 +364,60 @@
   }
   function render(c) {
     var Wv = ui.VW, Hv = ui.VH;
-    var g = c.createLinearGradient(0, 0, 0, Hv);
-    g.addColorStop(0, "#4a2c14"); g.addColorStop(1, "#1a1008");
-    c.fillStyle = g; c.fillRect(0, 0, Wv, Hv);
-    if (!grid) return;
+    var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
+    c.save(); c.translate(sh.x, sh.y);
+    if (window.FFX) FFX.sky(c, Wv, Hv, "#6a3c18", "#3a2210", "#140c06");
+    else {
+      var g = c.createLinearGradient(0, 0, 0, Hv);
+      g.addColorStop(0, "#4a2c14"); g.addColorStop(1, "#1a1008");
+      c.fillStyle = g; c.fillRect(0, 0, Wv, Hv);
+    }
+    // clock-tower window
+    c.fillStyle = "rgba(80,140,180,.12)";
+    c.beginPath(); c.arc(Wv * 0.8, 36, 40, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = "rgba(200,160,80,.25)"; c.lineWidth = 3; c.stroke();
+    if (!grid) { if (window.FFX) { FFX.vignette(c, Wv, Hv, 0.35); FFX.draw(c); } c.restore(); return; }
     var L = layout(), s = L.s;
     for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
       var ch = grid[y][x], px = L.ox + x * s, py = L.oy + y * s;
-      if (ch === "#") { c.fillStyle = (x + y) % 2 ? "#6a4a28" : "#5a3c20"; c.fillRect(px, py, s, s); c.fillStyle = "#c8a060"; c.fillRect(px, py, s, 2); }
-      else if (ch === "b") { c.fillStyle = "#c87020"; c.fillRect(px + 2, py + 2, s - 4, s - 4); }
-      else if (ch === "e") { c.fillStyle = "#e8c050"; c.fillRect(px + 2, py + 2, s - 4, s - 4); c.fillStyle = "#6a4a10"; c.fillRect(px + s * 0.35, py + s * 0.2, s * 0.3, s * 0.6); }
-      else { c.fillStyle = "rgba(40,24,10,.35)"; c.fillRect(px, py, s, s); }
+      if (ch === "#") {
+        if (window.FFX) FFX.bevelRoundRect(c, px, py, s, s, 2, (x + y) % 2 ? "#6e4a28" : "#5a3c20", "#2a1808");
+        else { c.fillStyle = (x + y) % 2 ? "#6a4a28" : "#5a3c20"; c.fillRect(px, py, s, s); }
+        c.fillStyle = "#c8a060"; c.fillRect(px, py, s, 2);
+      } else if (ch === "b") {
+        if (window.FFX) FFX.bevelRoundRect(c, px + 2, py + 2, s - 4, s - 4, 3, "#d08030", "#7a4010");
+        else { c.fillStyle = "#c87020"; c.fillRect(px + 2, py + 2, s - 4, s - 4); }
+      } else if (ch === "e") {
+        c.save(); c.shadowColor = "rgba(255,200,60,.7)"; c.shadowBlur = 12;
+        if (window.FFX) FFX.bevelRoundRect(c, px + 2, py + 2, s - 4, s - 4, 3, "#e8c050", "#6a4a10");
+        else { c.fillStyle = "#e8c050"; c.fillRect(px + 2, py + 2, s - 4, s - 4); }
+        c.restore();
+        c.fillStyle = "#6a4a10"; c.fillRect(px + s * 0.35, py + s * 0.2, s * 0.3, s * 0.6);
+      } else {
+        c.fillStyle = "rgba(40,24,10,.28)"; c.fillRect(px, py, s, s);
+      }
     }
     mites.forEach(function (m, i) {
       if (m.st === "lost") return;
       var px = L.ox + m.x * s + s / 2, py = L.oy + m.y * s + s / 2;
-      if (m.st === "home") { c.globalAlpha = 0.4; }
-      c.beginPath(); c.arc(px, py, s * 0.38, 0, Math.PI * 2); c.fillStyle = "#c8a050"; c.fill();
-      c.strokeStyle = "#6a4a18"; c.lineWidth = 1.2; c.stroke();
-      // gear teeth
-      for (var t = 0; t < 6; t++) {
-        var a = t * Math.PI / 3 + m.x; c.fillStyle = "#e0c070";
-        c.fillRect(px + Math.cos(a) * s * 0.32 - 1.5, py + Math.sin(a) * s * 0.32 - 1.5, 3, 3);
+      if (m.st === "home") c.globalAlpha = 0.4;
+      if (window.FFX) FFX.bevelCircle(c, px, py, s * 0.38, "#d4b05a", "#6a4a18", "#fff0c0");
+      else { c.beginPath(); c.arc(px, py, s * 0.38, 0, Math.PI * 2); c.fillStyle = "#c8a050"; c.fill(); c.strokeStyle = "#6a4a18"; c.lineWidth = 1.2; c.stroke(); }
+      var rot = (m.x + idleT * (m.st === "walk" ? 8 : 2));
+      for (var tt = 0; tt < 8; tt++) {
+        var a = tt * Math.PI / 4 + rot;
+        c.fillStyle = "#e8c878";
+        c.fillRect(px + Math.cos(a) * s * 0.34 - 1.6, py + Math.sin(a) * s * 0.34 - 1.6, 3.2, 3.2);
       }
       c.fillStyle = "#2a1a08"; c.fillRect(px - 2 + m.dir * 3, py - 3, 2, 2); c.fillRect(px - 2 + m.dir * 6, py - 3, 2, 2);
-      if (i === sel) { c.strokeStyle = "#fff0a0"; c.lineWidth = 2; c.beginPath(); c.arc(px, py, s * 0.5, 0, Math.PI * 2); c.stroke(); }
+      if (i === sel) { c.strokeStyle = "#fff0a0"; c.lineWidth = 2; c.shadowColor = "#fff0a0"; c.shadowBlur = 8; c.beginPath(); c.arc(px, py, s * 0.52, 0, Math.PI * 2); c.stroke(); c.shadowBlur = 0; }
       c.globalAlpha = 1;
     });
-    // timber walls in the unused margins
     c.fillStyle = "rgba(60,36,16,.55)";
     c.fillRect(0, 0, Wv, L.oy);
     c.fillRect(0, L.oy + H * s, Wv, Hv - (L.oy + H * s));
+    if (window.FFX) { FFX.vignette(c, Wv, Hv, 0.32); FFX.draw(c); }
+    c.restore();
   }
   var game = {
     toTitle: toTitle, update: update, render: render, onPointer: onPointer,

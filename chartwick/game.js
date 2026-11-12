@@ -8,11 +8,11 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#1a3a5a;--water:#123044;--amber:#e8f0f8;--amber-hi:#f0d080;--amber-soft:#e8f4f8;--amber-line:#6aa8c8;--ember:#e08050;--btn:#1e3a54;--lamp:#fff8e8;--glow-line:rgba(100,180,210,.4);--glow-fill:rgba(100,180,210,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #3a6a8a 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#1e4a6a,#123044);border-bottom-color:rgba(106,168,200,.4)}`);
+  })(`:root{--bg:#1a3a5a;--water:#123044;--amber:#e8f0f8;--amber-hi:#f0d080;--amber-soft:#e8f4f8;--amber-line:#6aa8c8;--ember:#e08050;--btn:#1e3a54;--lamp:#fff8e8;--glow-line:rgba(100,180,210,.4);--glow-fill:rgba(100,180,210,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #3a6a8a 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#1e4a6a,#123044);border-bottom-color:rgba(106,168,200,.4)}` + (window.FFX ? FFX.menuChrome() : ""));
 
   var ui = FF.create({
     id: "chartwick", title: "Chartwick", course: "The harbour", view: { w: 390, h: 720, flex: true },
-    stats: [{ id: "ch", label: "Chapter", value: "1/8" }, { id: "solved", label: "Solved", value: "0" }]
+    stats: [{ id: "ch", label: "Chapter", value: "1/12" }, { id: "solved", label: "Solved", value: "0" }]
   });
   var A = ui.audio, save = ui.save; save.open = save.open || 1; save.solved = save.solved || 0;
   var S = {
@@ -37,12 +37,16 @@
     { title: "The gong crate", story: "A crate marked with a gong has been left in the sail loft, boxed in by other chests. Slide it to the door." },
     { title: "Lamp walk", story: "Five harbour lamps must be lit in an order so that each newly lit lamp can see the last one along a clear line of the quay." },
     { title: "The punt", story: "Nedda has a small punt, room for herself and one bundle. She must get a loaf, a basket of eels and a lively quay dog to the far slip. The dog will eat the loaf if left alone with it; the eels will be nosed overboard if left alone with the dog. The loaf and the eels keep." },
-    { title: "The loft number", story: "Bryn's last note is a short cipher. The gong, she writes, hangs behind the door whose number is the answer." }
+    { title: "The loft number", story: "Bryn's last note is a short cipher. The gong, she writes, hangs behind the door whose number is the answer.", kind: "cipher" },
+    { title: "Quay lanterns", story: "A second row of lanterns hangs by the sail loft. One was left unlit after the night watch. Which wick is dark?", kind: "lanterns" },
+    { title: "The flour sacks", story: "Three flour sacks sit on the weigh-board. One is light, packed short by a sleepy miller. The beam-scale is still to hand.", kind: "weigh" },
+    { title: "The chart chest", story: "Nedda's own chart-chest has been boxed in among the sail bags. Slide it to the loft door.", kind: "slide2" },
+    { title: "The hook again", story: "A last scrap of paper is pinned to the hook. The gong, it says, was moved once more — behind a different door.", kind: "cipher2" }
   ];
 
   var mode = "title", ci = 0, phase = "story", st, hits, msg, busy;
 
-  function hud() { ui.setStat("ch", (ci + 1) + "/8"); ui.setStat("solved", String(save.solved || 0)); }
+  function hud() { ui.setStat("ch", (ci + 1) + "/" + CH.length); ui.setStat("solved", String(save.solved || 0)); }
   function startChapter(i) {
     ci = i; phase = "story"; st = null; msg = ""; busy = false;
     ui.setCourse((i + 1) + ". " + CH[i].title); hud();
@@ -50,20 +54,23 @@
   }
   function beginPuzzle() {
     phase = "puzzle"; msg = "";
-    if (ci === 0) st = makeLanterns();
-    if (ci === 1) st = makeWeigh();
-    if (ci === 2) st = makeSticks();
-    if (ci === 3) st = makeLogic();
-    if (ci === 4) st = makeSlide();
-    if (ci === 5) st = makeLamps();
-    if (ci === 6) st = makePunt();
-    if (ci === 7) st = makeCipher();
+    var k = (CH[ci] && CH[ci].kind) || ["lanterns","weigh","sticks","logic","slide","lamps","punt","cipher"][ci];
+    if (k === "lanterns") st = makeLanterns();
+    if (k === "weigh") st = makeWeigh();
+    if (k === "sticks") st = makeSticks();
+    if (k === "logic") st = makeLogic();
+    if (k === "slide") st = makeSlide();
+    if (k === "slide2") st = makeSlide2();
+    if (k === "lamps") st = makeLamps();
+    if (k === "punt") st = makePunt();
+    if (k === "cipher") st = makeCipher();
+    if (k === "cipher2") st = makeCipher2();
   }
   function solved() {
     S.ok(); phase = "done";
-    if (ci + 2 > save.open) save.open = Math.min(8, ci + 2);
+    if (ci + 2 > save.open) save.open = Math.min(CH.length, ci + 2);
     save.solved = Math.max(save.solved || 0, ci + 1); ui.persist(); hud();
-    if (ci === 7) {
+    if (ci === CH.length - 1) {
       ui.stop(); S.done(); ui.runEnded();
       ui.menu({
         title: "The gong is home",
@@ -134,6 +141,18 @@
     // Simpler: a short sum on the quay: doors numbered 4, 7, 9, 12. Clue: "the even doors are stores; the gong is one more than the years since the pier was mended, and the pier was mended eight years ago."
     return { kind: "cipher", doors: [4, 7, 9, 12], answer: 9, clue: "The even-numbered doors are only stores. The gong is behind a door one more than the years since the pier was mended. The pier was mended eight years ago." };
   }
+  function makeSlide2() {
+    var rows = [
+      "bbG.",
+      ".#b.",
+      "b..b",
+      ".#D."
+    ];
+    return { kind: "slide", g: rows.map(function (r) { return r.split(""); }), sel: null };
+  }
+  function makeCipher2() {
+    return { kind: "cipher", doors: [5, 8, 11, 14], answer: 11, clue: "Store-rooms use even numbers. The gong is behind the door three more than the years the quay lamp has stood, and the lamp was put up eight years ago." };
+  }
 
   function legalPunt(bank) {
     function side(s) {
@@ -150,9 +169,9 @@
     var open = save.open || 1;
     ui.menu({
       title: "CHARTWICK",
-      body: "Nedda Cray, who draws the harbour charts, is asked to find Chartwick's missing gong. Eight short riddles and desk puzzles, told on the quay.",
-      stats: "<span>CHAPTERS " + open + "/8</span>",
-      buttons: [{ label: "Begin at " + CH[Math.min(open, 8) - 1].title, act: function () { startChapter(Math.min(open, 8) - 1); } }],
+      body: "Nedda Cray, who draws the harbour charts, is asked to find Chartwick's missing gong. Twelve short riddles and desk puzzles, told on the quay.",
+      stats: "<span>CHAPTERS " + open + "/" + CH.length + "</span>",
+      buttons: [{ label: "Begin at " + CH[Math.min(open, CH.length) - 1].title, act: function () { startChapter(Math.min(open, CH.length) - 1); } }],
       row: CH.map(function (ch, i) { return { label: String(i + 1), act: function () { startChapter(i); }, disabled: i >= open }; }),
       help: ["Read the short note, then work the puzzle on the page.", "Tap to choose, drag where the puzzle needs it."],
       fine: "Forest Forge · original work. A harbour-riddle mood only.",
@@ -160,13 +179,14 @@
     });
   }
 
-  function update() {}
+  var idleT = 0;
+  function update(dt) { idleT += dt || 0.016; if (window.FFX) FFX.step(dt || 0.016); }
   var drag = null;
   function onPointer(type, x, y) {
     if (mode !== "play") return;
     if (phase === "story" && type === "pointerdown") { beginPuzzle(); return; }
     if (phase === "done" && type === "pointerdown") {
-      if (ci < 7) startChapter(ci + 1);
+      if (ci < CH.length - 1) startChapter(ci + 1);
       return;
     }
     if (phase !== "puzzle" || !st) return;
@@ -274,14 +294,25 @@
 
   function render(c) {
     var W = ui.VW, H = ui.VH;
-    var g = c.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#7eb0d0"); g.addColorStop(0.45, "#f0c070"); g.addColorStop(1, "#1a4a6a");
-    c.fillStyle = g; c.fillRect(0, 0, W, H);
-    // quay
+    var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
+    c.save(); c.translate(sh.x, sh.y);
+    if (window.FFX) FFX.sky(c, W, H, "#8ec4e0", "#f0c070", "#1a4a6a");
+    else {
+      var g = c.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, "#7eb0d0"); g.addColorStop(0.45, "#f0c070"); g.addColorStop(1, "#1a4a6a");
+      c.fillStyle = g; c.fillRect(0, 0, W, H);
+    }
+    // sun
+    c.fillStyle = "#f8e0a0"; c.beginPath(); c.arc(W * 0.82, H * 0.18, 22, 0, Math.PI * 2); c.fill();
     c.fillStyle = "#6a5a40"; c.fillRect(0, H * 0.78, W, H * 0.22);
-    c.fillStyle = "#3a7aaa"; c.fillRect(0, H * 0.7, W, H * 0.08);
+    // plank lines
+    c.strokeStyle = "rgba(30,20,10,.25)"; c.lineWidth = 1;
+    for (var i = 0; i < 6; i++) { c.beginPath(); c.moveTo(0, H * 0.8 + i * 12); c.lineTo(W, H * 0.8 + i * 12); c.stroke(); }
+    var wg = c.createLinearGradient(0, H * 0.7, 0, H * 0.78);
+    wg.addColorStop(0, "#5aa0c8"); wg.addColorStop(1, "#2a6a88");
+    c.fillStyle = wg; c.fillRect(0, H * 0.7, W, H * 0.08);
     hits = [];
-    if (mode !== "play") return;
+    if (mode !== "play") { if (window.FFX) { FFX.vignette(c, W, H, 0.28); FFX.draw(c); } c.restore(); return; }
     if (phase === "story") {
       ui.text(CH[ci].title, W / 2, 80, 26, "#f0d080", "center");
       wrap(c, CH[ci].story, W / 2, 130, W - 48, 18, "#e8f0f8");
@@ -292,7 +323,7 @@
     }
     if (phase === "done") {
       ui.text("That's the piece.", W / 2, 120, 26, "#f0d080", "center");
-      wrap(c, ci === 7 ? "The gong hangs on its hook again." : "Nedda pencils a note on the chart and goes on.", W / 2, 170, W - 48, 18, "#e8f0f8");
+      wrap(c, ci === CH.length - 1 ? "The gong hangs on its hook again." : "Nedda pencils a note on the chart and goes on.", W / 2, 170, W - 48, 18, "#e8f0f8");
       ui.text("Tap to go on", W / 2, H * 0.62, 16, "#f0d080", "center");
       return;
     }
@@ -398,6 +429,8 @@
         hits.push({ x: x, y: y, w: 70, h: 110, v: n });
       });
     }
+    if (window.FFX) { FFX.vignette(c, W, H, 0.28); FFX.draw(c); }
+    c.restore();
   }
   function drawBank(c, side, x, y, title) {
     c.fillStyle = "#5a4a30"; c.fillRect(x, y, 150, 200);

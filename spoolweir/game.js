@@ -8,7 +8,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#1a4a3a;--water:#143c30;--amber:#e8f0d8;--amber-hi:#d8e878;--amber-soft:#eef4d8;--amber-line:#6aaa70;--ember:#e09040;--btn:#1a3a2c;--lamp:#f8ffe0;--glow-line:rgba(120,200,130,.4);--glow-fill:rgba(120,200,130,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #2a6a50 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#1a4a3a,#0e2a22);border-bottom-color:rgba(106,170,112,.4)}`);
+  })(`:root{--bg:#1a4a3a;--water:#143c30;--amber:#e8f0d8;--amber-hi:#d8e878;--amber-soft:#eef4d8;--amber-line:#6aaa70;--ember:#e09040;--btn:#1a3a2c;--lamp:#f8ffe0;--glow-line:rgba(120,200,130,.4);--glow-fill:rgba(120,200,130,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #2a6a50 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#1a4a3a,#0e2a22);border-bottom-color:rgba(106,170,112,.4)}` + (window.FFX ? FFX.menuChrome() : ""));
 
   var COLS = ["#c43a28", "#e0a020", "#2a8a7a", "#f0e0c0", "#7a3a88"];
   var COLS_DK = ["#8a2010", "#a87810", "#1a5a4e", "#c0b090", "#4a2060"];
@@ -84,7 +84,23 @@
     { name: "Long weir", colors: 5, n: 26, spd: 36, seed: 23, hop: [320, 180],
       pts: [[30, 40], [600, 40], [600, 160], [40, 160], [40, 280], [620, 280]] },
     { name: "The last fall", colors: 5, n: 28, spd: 38, seed: 29, hop: [80, 200],
-      pts: [[40, 300], [140, 60], [280, 300], [400, 60], [520, 300], [620, 80]] }
+      pts: [[40, 300], [140, 60], [280, 300], [400, 60], [520, 300], [620, 80]] },
+    { name: "Meadow cut", colors: 3, n: 18, spd: 30, seed: 31, hop: [320, 280],
+      pts: [[40, 100], [180, 60], [320, 140], [480, 60], [620, 120]] },
+    { name: "Bank hook", colors: 4, n: 20, spd: 32, seed: 37, hop: [80, 200],
+      pts: [[40, 60], [400, 60], [400, 220], [80, 220], [80, 320], [620, 320]] },
+    { name: "Willow bend", colors: 4, n: 22, spd: 33, seed: 41, hop: [560, 200],
+      pts: [[40, 80], [200, 200], [360, 80], [520, 200], [620, 80]] },
+    { name: "Mill race", colors: 5, n: 22, spd: 34, seed: 43, hop: [320, 40],
+      pts: [[40, 300], [40, 80], [240, 80], [240, 240], [480, 240], [480, 80], [620, 80]] },
+    { name: "Low sluice", colors: 4, n: 24, spd: 35, seed: 47, hop: [160, 280],
+      pts: [[40, 40], [300, 40], [300, 180], [540, 180], [540, 60], [620, 60]] },
+    { name: "Deep leat", colors: 5, n: 26, spd: 36, seed: 53, hop: [500, 280],
+      pts: [[40, 180], [140, 60], [280, 180], [420, 60], [560, 180], [620, 80]] },
+    { name: "Crowded cut", colors: 5, n: 28, spd: 37, seed: 59, hop: [100, 180],
+      pts: [[40, 40], [200, 40], [200, 160], [420, 160], [420, 40], [600, 40], [600, 300], [40, 300]] },
+    { name: "Master weir", colors: 5, n: 30, spd: 38, seed: 61, hop: [320, 200],
+      pts: [[30, 40], [600, 40], [600, 160], [40, 160], [40, 280], [620, 280]] }
   ];
 
   var mode = "title", li = 0, path, acc, chain, shot, angle, cur, nxt, colors, spd, hop, score, over, won, rad = 14, gapT;
@@ -113,6 +129,13 @@
         while (j < chain.length && chain[j].col === chain[i].col) j++;
         if (j - i >= 3) {
           var removed = chain.splice(i, j - i);
+          if (window.FFX) {
+            removed.forEach(function (s) {
+              var p = atT(path, acc, s.t), v = toView([p.x, p.y]);
+              FFX.burst(v[0], v[1], COLS[(s.col - 1) % COLS.length], 10, { spd: 110, r: 2.6, kind: "spark", g: 80 });
+            });
+            FFX.kick(0.3, "#c8f0e0");
+          }
           score += removed.length * 80 * (chainN + 1);
           // close gap: later spools (higher t) slide back? In a weir-bound chain, the FRONT (higher t, nearer weir) should fall back toward the rear if a gap opens behind them? Classic Zuma: the group after the gap (closer to start, lower t) stays, the front group backs up if same color to connect, otherwise a gap remains until they meet... Standard: all after the pop (higher t) get their t reduced so they pack against the previous.
           var end = i > 0 ? chain[i - 1].t + rad * 2.05 : 20;
@@ -184,7 +207,7 @@
       if (d < bd && d > 40) { bd = d; best = path[pi]; }
     }
     angle = Math.atan2(best[1] - hop[1], best[0] - hop[0]);
-    ui.setCourse((li + 1) + ". " + lv.name); hud(); mode = "play"; A.playSong(SONG); ui.go(); ui.showPads(true);
+    if (window.FFX) FFX.reset(); ui.setCourse((li + 1) + ". " + lv.name); hud(); mode = "play"; A.playSong(SONG); ui.go(); ui.showPads(true);
   }
   function toTitle() {
     ui.stop(); mode = "title"; A.playSong(SONG); ui.showPads(false); ui.setCourse("The leat");
@@ -210,7 +233,10 @@
     if (type === "pointerdown" || type === "pointermove") angle = Math.atan2(y - h[1], x - h[0]);
     if (type === "pointerup" && Math.hypot(x - h[0], y - h[1]) < 36) fire();
   }
+  var idleT = 0;
   function update(dt) {
+    idleT += dt;
+    if (window.FFX) FFX.step(dt);
     if (mode !== "play" || over || won) return;
     if (ui.down("L")) angle -= 2.4 * dt;
     if (ui.down("R")) angle += 2.4 * dt;
@@ -238,38 +264,68 @@
   }
   function drawSpool(c, x, y, col, sc) {
     sc = sc || 1; var k = (col - 1) % COLS.length, r = rad * sc;
-    c.fillStyle = "#6a4a28"; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill();
-    c.fillStyle = COLS[k]; c.beginPath(); c.arc(x, y, r * 0.72, 0, Math.PI * 2); c.fill();
-    c.strokeStyle = COLS_DK[k]; c.lineWidth = 2; c.stroke();
-    c.fillStyle = "#3a2410"; c.beginPath(); c.arc(x, y, r * 0.16, 0, Math.PI * 2); c.fill();
+    c.fillStyle = "rgba(0,0,0,.2)"; c.beginPath(); c.ellipse(x, y + r * 0.7, r * 0.7, r * 0.22, 0, 0, Math.PI * 2); c.fill();
+    if (window.FFX) {
+      FFX.bevelCircle(c, x, y, r, "#6a4a28", "#3a2410", "#c8a060");
+      FFX.bevelCircle(c, x, y, r * 0.72, COLS[k], COLS_DK[k], FFX.lighten(COLS[k], 0.35));
+      c.beginPath(); c.arc(x, y, r * 0.16, 0, Math.PI * 2); c.fillStyle = "#3a2410"; c.fill();
+      c.beginPath(); c.arc(x - r * 0.06, y - r * 0.06, r * 0.07, 0, Math.PI * 2); c.fillStyle = "rgba(255,255,240,.3)"; c.fill();
+    } else {
+      c.fillStyle = "#6a4a28"; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill();
+      c.fillStyle = COLS[k]; c.beginPath(); c.arc(x, y, r * 0.72, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = COLS_DK[k]; c.lineWidth = 2; c.stroke();
+      c.fillStyle = "#3a2410"; c.beginPath(); c.arc(x, y, r * 0.16, 0, Math.PI * 2); c.fill();
+    }
   }
   function render(c) {
     var W = ui.VW, H = ui.VH;
-    var g = c.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#8ec8a0"); g.addColorStop(1, "#2a5a40");
-    c.fillStyle = g; c.fillRect(0, 0, W, H);
-    if (!path) return;
-    // leat
-    c.lineCap = "round"; c.lineJoin = "round";
-    c.strokeStyle = "#3a6a50"; c.lineWidth = rad * 2.8 * (W / 640);
-    c.beginPath();
-    path.forEach(function (p, i) { var v = toView(p); if (i) c.lineTo(v[0], v[1]); else c.moveTo(v[0], v[1]); });
-    c.stroke();
-    c.strokeStyle = "#5a9aaa"; c.lineWidth = rad * 2.1 * (W / 640);
-    c.beginPath();
-    path.forEach(function (p, i) { var v = toView(p); if (i) c.lineTo(v[0], v[1]); else c.moveTo(v[0], v[1]); });
-    c.stroke();
-    // weir lip
-    var end = toView(path[path.length - 1]);
-    c.fillStyle = "#c8d0d8"; c.fillRect(end[0] - 10, end[1] - 16, 20, 32);
-    chain.forEach(function (s) { var p = atT(path, acc, s.t), v = toView([p.x, p.y]); drawSpool(c, v[0], v[1], s.col, W / 640); });
-    var h = hopV();
-    c.fillStyle = "#5a3a18"; c.fillRect(h[0] - 16, h[1] - 10, 32, 22);
-    c.strokeStyle = "rgba(255,255,220,.5)"; c.lineWidth = 2;
-    c.beginPath(); c.moveTo(h[0], h[1]); c.lineTo(h[0] + Math.cos(angle) * 50, h[1] + Math.sin(angle) * 50); c.stroke();
-    if (cur) drawSpool(c, h[0], h[1], cur, W / 640);
-    if (nxt) drawSpool(c, h[0] + 36, h[1] + 18, nxt, 0.7 * W / 640);
-    if (shot) { var v = toView([shot.x, shot.y]); drawSpool(c, v[0], v[1], shot.col, W / 640); }
+    var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
+    c.save(); c.translate(sh.x, sh.y);
+    if (window.FFX) FFX.sky(c, W, H, "#b8e0c8", "#8ec8a0", "#2a5a40");
+    else {
+      var g = c.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, "#8ec8a0"); g.addColorStop(1, "#2a5a40");
+      c.fillStyle = g; c.fillRect(0, 0, W, H);
+    }
+    // far bank and reeds
+    c.fillStyle = "#3a6a40";
+    c.beginPath(); c.moveTo(0, H * 0.82);
+    for (var i = 0; i <= 12; i++) c.lineTo(W * i / 12, H * 0.78 - (i % 3) * 10);
+    c.lineTo(W, H); c.lineTo(0, H); c.fill();
+    if (path) {
+      c.lineCap = "round"; c.lineJoin = "round";
+      c.strokeStyle = "#2a4a38"; c.lineWidth = rad * 3.1 * (W / 640);
+      c.beginPath();
+      path.forEach(function (p, i) { var v = toView(p); if (i) c.lineTo(v[0], v[1]); else c.moveTo(v[0], v[1]); });
+      c.stroke();
+      var water = c.createLinearGradient(0, 0, 0, H);
+      water.addColorStop(0, "#7ec8d8"); water.addColorStop(1, "#3a7a88");
+      c.strokeStyle = water; c.lineWidth = rad * 2.15 * (W / 640);
+      c.beginPath();
+      path.forEach(function (p, i) { var v = toView(p); if (i) c.lineTo(v[0], v[1]); else c.moveTo(v[0], v[1]); });
+      c.stroke();
+      // highlight streak on the water
+      c.strokeStyle = "rgba(220,255,255,.28)"; c.lineWidth = rad * 0.45 * (W / 640);
+      c.beginPath();
+      path.forEach(function (p, i) { var v = toView(p); if (i) c.lineTo(v[0], v[1] - 3); else c.moveTo(v[0], v[1] - 3); });
+      c.stroke();
+      var end = toView(path[path.length - 1]);
+      if (window.FFX) FFX.bevelRoundRect(c, end[0] - 12, end[1] - 18, 24, 36, 3, "#d0d8e0", "#6a7078");
+      else { c.fillStyle = "#c8d0d8"; c.fillRect(end[0] - 10, end[1] - 16, 20, 32); }
+      chain.forEach(function (s) { var p = atT(path, acc, s.t), v = toView([p.x, p.y]); drawSpool(c, v[0], v[1], s.col, W / 640); });
+      var h = hopV();
+      if (window.FFX) FFX.bevelRoundRect(c, h[0] - 18, h[1] - 12, 36, 26, 6, "#6a4a20", "#3a2410");
+      else { c.fillStyle = "#5a3a18"; c.fillRect(h[0] - 16, h[1] - 10, 32, 22); }
+      c.strokeStyle = "rgba(255,255,220,.7)"; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(h[0], h[1]); c.lineTo(h[0] + Math.cos(angle) * 50, h[1] + Math.sin(angle) * 50); c.stroke();
+      c.fillStyle = "rgba(255,255,220,.4)";
+      for (var i = 1; i < 5; i++) { c.beginPath(); c.arc(h[0] + Math.cos(angle) * 12 * i, h[1] + Math.sin(angle) * 12 * i, 2, 0, Math.PI * 2); c.fill(); }
+      if (cur) drawSpool(c, h[0], h[1], cur, W / 640);
+      if (nxt) drawSpool(c, h[0] + 36, h[1] + 18, nxt, 0.7 * W / 640);
+      if (shot) { var v = toView([shot.x, shot.y]); drawSpool(c, v[0], v[1], shot.col, W / 640); }
+    }
+    if (window.FFX) { FFX.vignette(c, W, H, 0.28); FFX.draw(c); }
+    c.restore();
   }
   var game = {
     toTitle: toTitle, update: update, render: render, onPointer: onPointer,

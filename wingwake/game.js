@@ -8,9 +8,19 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#1a2850;--water:#141e42;--amber:#f8e8c8;--amber-hi:#ffd18a;--amber-soft:#ffe8c8;--amber-line:#e08a6a;--ember:#ff6a8a;--btn:#24305a;--lamp:#fff0d0;--glow-line:rgba(255,160,140,.4);--glow-fill:rgba(255,160,140,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #3a4a88 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#24305a,#121830);border-bottom-color:rgba(224,138,106,.4)}.ff{border-left-color:rgba(224,138,106,.3);border-right-color:rgba(224,138,106,.3)}`);
+  })(`:root{--bg:#1a2850;--water:#141e42;--amber:#f8e8c8;--amber-hi:#ffd18a;--amber-soft:#ffe8c8;--amber-line:#e08a6a;--ember:#ff6a8a;--btn:#24305a;--lamp:#fff0d0;--glow-line:rgba(255,160,140,.4);--glow-fill:rgba(255,160,140,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #3a4a88 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#24305a,#121830);border-bottom-color:rgba(224,138,106,.4)}.ff{border-left-color:rgba(224,138,106,.3);border-right-color:rgba(224,138,106,.3)}` + (window.FFX ? FFX.menuChrome() : ""));
 
-  var COLS = 8, ROWS = 8, COLORS = 6;
+  var COLS = 8, ROWS = 8, COLORS = 6, colorN = 6, grove = -1, goalScore = 0, idleT = 0;
+  var GROVES = [
+    { name: "First hedge", colors: 4, time: 50, goal: 1200 },
+    { name: "Coral dusk", colors: 5, time: 55, goal: 1800 },
+    { name: "Leaf lanterns", colors: 5, time: 55, goal: 2200 },
+    { name: "Violet ride", colors: 6, time: 60, goal: 2600 },
+    { name: "Cream flight", colors: 6, time: 60, goal: 3000 },
+    { name: "Long hedge", colors: 6, time: 70, goal: 3800 },
+    { name: "Deep dusk", colors: 6, time: 65, goal: 4200 },
+    { name: "Last lantern", colors: 6, time: 75, goal: 5200 }
+  ];
   var WING = ["#ff6a6a", "#f0c03a", "#3cbcb0", "#a05ae0", "#f8f0d8", "#6ac04a"];
   var WING_DK = ["#c03838", "#c09018", "#217870", "#6a38a0", "#c8c0a0", "#3a8030"];
   var ui = FF.create({
@@ -18,7 +28,7 @@
     stats: [{ id: "score", label: "Score", value: "0" }, { id: "mult", label: "Lift", value: "x1" }]
   });
   var A = ui.audio, save = ui.save;
-  save.hi = save.hi || 0; save.hiDusk = save.hiDusk || 0;
+  save.hi = save.hi || 0; save.hiDusk = save.hiDusk || 0; save.grove = save.grove || 0;
 
   var S = {
     swap: function () { A.tone({ f: 640, f2: 720, dur: 0.05, type: "sine", gain: 0.05 }); },
@@ -90,7 +100,7 @@
         var row = [];
         for (var c = 0; c < COLS; c++) {
           var col, guard = 0;
-          do { col = 1 + Math.floor(Math.random() * COLORS); guard++; }
+          do { col = 1 + Math.floor(Math.random() * colorN); guard++; }
           while (guard < 12 && ((c >= 2 && row[c - 1].col === col && row[c - 2].col === col) || (r >= 2 && g[r - 1][c].col === col && g[r - 2][c].col === col)));
           row.push(make(col));
         }
@@ -146,9 +156,14 @@
       var p = k.split(","), c = +p[0], r = +p[1], cell = grid[r][c];
       if (!cell.col) return;
       if (stamp && stamp.c === c && stamp.r === r) { cell.special = stamp.special; return; }
+      if (window.FFX && cell.col) {
+        var Lx = layout();
+        FFX.burst(Lx.ox + c * Lx.s + Lx.s / 2, Lx.oy + r * Lx.s + Lx.s / 2, WING[(cell.col - 1) % WING.length], 9, { spd: 80, r: 2.2, kind: "fluff", g: 10, lift: 90 });
+      }
       score += 50 * mult; n++; cell.col = 0; cell.special = 0; cell.pop = 0.25;
     });
-    if (n) { S.lift(cascade); if (stamp) S.breeze(); cascade++; if (cascade > 1) mult = Math.min(8, cascade); }
+    if (n) { S.lift(cascade); if (stamp) S.breeze(); cascade++; if (cascade > 1) mult = Math.min(8, cascade); if (window.FFX) FFX.kick(0.22 + cascade * 0.06, "#ffe0c0"); }
+    if (grove >= 0 && score >= goalScore) { hud(); wonGrove(); }
     hud(); return true;
   }
   function gravity() {
@@ -158,7 +173,7 @@
       for (var r = ROWS - 1; r >= 0; r--) {
         var src = stack[ROWS - 1 - r];
         if (src) { if (grid[r][c] !== src) src.fall = (src.fall || 0) + 1; grid[r][c] = src; }
-        else { grid[r][c] = make(1 + Math.floor(Math.random() * COLORS)); grid[r][c].fall = 2; }
+        else { grid[r][c] = make(1 + Math.floor(Math.random() * colorN)); grid[r][c].fall = 2; }
       }
     }
   }
@@ -213,25 +228,56 @@
     var hi = score > best;
     if (timed) { if (hi) save.hiDusk = score; } else if (hi) save.hi = score;
     ui.persist(); ui.runEnded();
+    var btns = [{ label: "Again", act: function () { if (grove >= 0) playGrove(grove); else play(timed); } }, { label: "Menu", small: true, act: toTitle }];
     ui.menu({
       title: timed ? "Dusk ends" : "Board at rest",
       body: msg,
       stats: '<b class="ff-score-xl">' + FF.n(score) + "</b><span>" + (hi ? "NEW HIGH SCORE" : "HIGH SCORE " + FF.n(best)) + "</span>",
-      buttons: [{ label: "Again", act: function () { play(timed); } }, { label: "Menu", small: true, act: toTitle }]
+      buttons: btns
+    });
+  }
+  function wonGrove() {
+    if (over) return;
+    over = true; ui.stop(); S.over(); // will play win-ish via tones already; keep simple
+    if (score > save.hiDusk) save.hiDusk = score;
+    save.grove = Math.max(save.grove || 0, grove + 1);
+    ui.persist(); ui.runEnded();
+    var btns = [];
+    if (grove + 1 < GROVES.length) btns.push({ label: "Next hedge", act: function () { playGrove(grove + 1); } });
+    btns.push({ label: "Again", act: function () { playGrove(grove); } }, { label: "Menu", small: true, act: toTitle });
+    ui.menu({
+      title: GROVES[grove].name + " lifted",
+      body: "The moths took the hedge in time.",
+      stats: '<b class="ff-score-xl">' + FF.n(score) + "</b><span>goal " + FF.n(goalScore) + "</span>",
+      buttons: btns
     });
   }
   function play(dusk) {
+    grove = -1; goalScore = 0; colorN = COLORS;
+    if (window.FFX) FFX.reset();
     timed = !!dusk; grid = fillFresh(); score = 0; mult = 1; timeLeft = 60; sel = null; busy = false; anim = null; cascade = 0; hintT = 0; hint = null; over = false;
     ui.setCourse(timed ? "Dusk flight" : "Open board"); hud(); mode = "play"; A.playSong(SONG); ui.go(); ui.showPads(false);
   }
+  function playGrove(i) {
+    grove = i; var gv = GROVES[i]; colorN = gv.colors; goalScore = gv.goal;
+    if (window.FFX) FFX.reset();
+    timed = true; grid = fillFresh(); score = 0; mult = 1; timeLeft = gv.time; sel = null; busy = false; anim = null; cascade = 0; hintT = 0; hint = null; over = false;
+    ui.setCourse((i + 1) + ". " + gv.name); hud(); mode = "play"; A.playSong(SONG); ui.go(); ui.showPads(false);
+  }
   function toTitle() {
     ui.stop(); mode = "title"; A.playSong(SONG); ui.showPads(false); ui.setCourse("Dusk board");
+    if (window.FFX) FFX.reset();
+    save.grove = save.grove || 0;
     ui.menu({
       title: "WINGWAKE",
       body: "Swap neighbouring moths so a run of the same wings can lift into the dusk. Keep a cascade going to raise the lift.",
       stats: "<span>OPEN BOARD " + (save.hi ? FF.n(save.hi) : "-") + "</span><span>DUSK FLIGHT " + (save.hiDusk ? FF.n(save.hiDusk) : "-") + "</span>",
-      buttons: [{ label: "Open board", act: function () { play(false); } }, { label: "Dusk flight (60s)", act: function () { play(true); } }],
-      help: ["Swipe or tap two neighbours.", "Four in a line wakes a breeze; five wakes a lantern moth.", "A hint shimmers if you wait."],
+      buttons: [
+        { label: "Open board", act: function () { play(false); } },
+        { label: "Dusk flight (60s)", act: function () { play(true); } },
+        { label: save.grove ? "Hedges · " + Math.min(save.grove + 1, GROVES.length) + "/" + GROVES.length : "Hedges", act: function () { playGrove(Math.min(save.grove || 0, GROVES.length - 1)); } }
+      ],
+      help: ["Swipe or tap two neighbours.", "Four in a line wakes a breeze; five wakes a lantern moth.", "A hint shimmers if you wait.", "Hedges are eight short dusk flights with a score to beat before the light goes."],
       fine: "Forest Forge · original work. Dusk-moth mood only — not jewels.",
       app: true
     });
@@ -267,6 +313,8 @@
     }
   }
   function update(dt) {
+    idleT += dt;
+    if (window.FFX) FFX.step(dt);
     if (mode !== "play" || over) return;
     if (timed) { timeLeft -= dt; if (timeLeft <= 0) { timeLeft = 0; hud(); return endRun("The light goes, and the moths take to the hedges."); } hud(); }
     if (anim) tickAnim(dt);
@@ -283,37 +331,80 @@
   function moth(c, x, y, s, col, sp, pop) {
     var k = (col - 1) % WING.length, cx = x + s / 2, cy = y + s / 2, sc = s * (0.42 + (pop || 0));
     c.save(); c.translate(cx, cy);
-    var flap = Math.sin((x + y + performance.now() * 0.004) * 0.8) * 0.12;
+    var flap = Math.sin((x + y + performance.now() * 0.004) * 0.8) * 0.14;
     function wing(side) {
       c.save(); c.scale(side, 1); c.rotate(flap);
       c.beginPath(); c.ellipse(sc * 0.45, 0, sc * 0.55, sc * 0.72, 0.2, 0, Math.PI * 2);
-      c.fillStyle = WING[k]; c.fill(); c.strokeStyle = WING_DK[k]; c.lineWidth = 1.4; c.stroke();
-      c.beginPath(); c.ellipse(sc * 0.4, -sc * 0.15, sc * 0.22, sc * 0.28, 0.3, 0, Math.PI * 2);
-      c.fillStyle = "rgba(255,255,240,.28)"; c.fill();
+      var g = c.createRadialGradient(sc * 0.25, -sc * 0.2, sc * 0.05, sc * 0.45, 0, sc * 0.7);
+      g.addColorStop(0, window.FFX ? FFX.lighten(WING[k], 0.4) : "#fff");
+      g.addColorStop(0.45, WING[k]);
+      g.addColorStop(1, WING_DK[k]);
+      c.fillStyle = g; c.fill(); c.strokeStyle = WING_DK[k]; c.lineWidth = 1.4; c.stroke();
+      // original marks: pale crescent + two small speckles
+      c.beginPath(); c.ellipse(sc * 0.42, -sc * 0.18, sc * 0.2, sc * 0.12, 0.5, 0, Math.PI * 2);
+      c.fillStyle = "rgba(255,255,240,.35)"; c.fill();
+      c.fillStyle = "rgba(20,10,20,.22)";
+      c.beginPath(); c.arc(sc * 0.55, sc * 0.18, sc * 0.07, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(sc * 0.38, sc * 0.28, sc * 0.05, 0, Math.PI * 2); c.fill();
       c.restore();
     }
+    // soft shadow
+    c.fillStyle = "rgba(0,0,0,.18)"; c.beginPath(); c.ellipse(0, sc * 0.55, sc * 0.55, sc * 0.16, 0, 0, Math.PI * 2); c.fill();
     wing(-1); wing(1);
-    c.fillStyle = WING_DK[k]; c.beginPath(); c.ellipse(0, 0, sc * 0.12, sc * 0.28, 0, 0, Math.PI * 2); c.fill();
-    if (sp) { c.fillStyle = "#fff6c8"; c.font = "bold " + Math.floor(s * 0.28) + "px Georgia"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(sp === 2 ? "L" : "B", 0, 0); }
+    // body
+    var bg = c.createLinearGradient(0, -sc * 0.3, 0, sc * 0.3);
+    bg.addColorStop(0, window.FFX ? FFX.lighten(WING_DK[k], 0.2) : WING_DK[k]);
+    bg.addColorStop(1, WING_DK[k]);
+    c.fillStyle = bg; c.beginPath(); c.ellipse(0, 0, sc * 0.13, sc * 0.3, 0, 0, Math.PI * 2); c.fill();
+    // antennae
+    c.strokeStyle = WING_DK[k]; c.lineWidth = 1.1; c.lineCap = "round";
+    c.beginPath(); c.moveTo(0, -sc * 0.22); c.quadraticCurveTo(-sc * 0.12, -sc * 0.5, -sc * 0.22, -sc * 0.62); c.stroke();
+    c.beginPath(); c.moveTo(0, -sc * 0.22); c.quadraticCurveTo(sc * 0.12, -sc * 0.5, sc * 0.22, -sc * 0.62); c.stroke();
+    if (sp) {
+      c.shadowColor = "rgba(255,240,160,.8)"; c.shadowBlur = 10;
+      c.fillStyle = "#fff6c8"; c.font = "bold " + Math.floor(s * 0.28) + "px Georgia"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(sp === 2 ? "L" : "B", 0, 0);
+      c.shadowBlur = 0;
+    }
     c.restore();
   }
   function render(c) {
     var W = ui.VW, H = ui.VH;
-    var g = c.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#1a2060"); g.addColorStop(0.45, "#8a3a60"); g.addColorStop(1, "#f08a4a");
-    c.fillStyle = g; c.fillRect(0, 0, W, H);
-    // a couple of original stars / lamps, not a jewel board
-    c.fillStyle = "rgba(255,240,200,.8)";
-    for (var i = 0; i < 18; i++) c.fillRect((i * 73 + 20) % W, (i * 47 + 10) % (H * 0.45), 2, 2);
-    var L = layout();
-    if (!grid) return;
-    for (var r = 0; r < ROWS; r++) for (var col = 0; col < COLS; col++) {
-      var x = L.ox + col * L.s, y = L.oy + r * L.s, cell = grid[r][col];
-      c.fillStyle = "rgba(20,16,40," + (0.22 + ((r + col) % 2) * 0.08) + ")";
-      c.beginPath(); c.roundRect(x + 3, y + 3, L.s - 6, L.s - 6, 10); c.fill();
-      if (cell.col) moth(c, x, y + (cell.fall || 0) * L.s * -0.5, L.s, cell.col, cell.special, cell.pop);
+    var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
+    c.save(); c.translate(sh.x, sh.y);
+    if (window.FFX) FFX.sky(c, W, H, "#141848", "#8a3a60", "#f08a4a");
+    else {
+      var g = c.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, "#1a2060"); g.addColorStop(0.45, "#8a3a60"); g.addColorStop(1, "#f08a4a");
+      c.fillStyle = g; c.fillRect(0, 0, W, H);
     }
-    if (sel) { c.strokeStyle = "#ffe0a0"; c.lineWidth = 3; c.strokeRect(L.ox + sel[0] * L.s + 4, L.oy + sel[1] * L.s + 4, L.s - 8, L.s - 8); }
+    // moon
+    c.beginPath(); c.arc(W * 0.82, H * 0.14, 28, 0, Math.PI * 2);
+    c.fillStyle = "#f8e8c0"; c.fill();
+    c.beginPath(); c.arc(W * 0.82 + 8, H * 0.12, 22, 0, Math.PI * 2);
+    c.fillStyle = "#8a3a60"; c.fill(); // sky-coloured bite, a waxing sliver
+    // stars
+    for (var i = 0; i < 28; i++) {
+      var tw = 0.45 + 0.55 * Math.abs(Math.sin(idleT * 1.4 + i));
+      c.globalAlpha = tw; c.fillStyle = "#fff4d0";
+      c.beginPath(); c.arc((i * 73 + 20) % W, 8 + (i * 47 + 10) % (H * 0.42), i % 4 === 0 ? 1.8 : 1.1, 0, Math.PI * 2); c.fill();
+    }
+    c.globalAlpha = 1;
+    // hedge silhouette
+    c.fillStyle = "#1a1028";
+    c.beginPath(); c.moveTo(0, H);
+    for (var i = 0; i <= 10; i++) c.quadraticCurveTo(W * (i + 0.3) / 10, H * 0.72 - (i % 3) * 16, W * (i + 1) / 10, H * 0.78);
+    c.lineTo(W, H); c.closePath(); c.fill();
+    var L = layout();
+    if (grid) {
+      for (var r = 0; r < ROWS; r++) for (var col = 0; col < COLS; col++) {
+        var x = L.ox + col * L.s, y = L.oy + r * L.s, cell = grid[r][col];
+        c.fillStyle = "rgba(16,12,36," + (0.32 + ((r + col) % 2) * 0.1) + ")";
+        if (window.FFX) { FFX.roundRect(c, x + 3, y + 3, L.s - 6, L.s - 6, 12); c.fill(); }
+        else { c.beginPath(); c.roundRect(x + 3, y + 3, L.s - 6, L.s - 6, 10); c.fill(); }
+        if (cell.col) moth(c, x, y + (cell.fall || 0) * L.s * -0.5, L.s, cell.col, cell.special, cell.pop);
+      }
+    }
+    if (sel) { c.strokeStyle = "#ffe0a0"; c.lineWidth = 3; c.shadowColor = "#ffe0a0"; c.shadowBlur = 8; c.strokeRect(L.ox + sel[0] * L.s + 4, L.oy + sel[1] * L.s + 4, L.s - 8, L.s - 8); c.shadowBlur = 0; }
     if (hint && !sel && !busy) {
       var a = hint, tw = 0.5 + 0.5 * Math.sin(performance.now() / 200);
       c.globalAlpha = 0.35 + 0.35 * tw; c.strokeStyle = "#fff4c0"; c.lineWidth = 2;
@@ -321,6 +412,11 @@
       c.strokeRect(L.ox + a[2] * L.s + 6, L.oy + a[3] * L.s + 6, L.s - 12, L.s - 12);
       c.globalAlpha = 1;
     }
+    if (grove >= 0 && mode === "play") {
+      ui.text("GOAL " + FF.n(goalScore), W / 2, ui.VH - 18, 12, "#ffe0c0", "center");
+    }
+    if (window.FFX) { FFX.vignette(c, W, H, 0.34); FFX.draw(c); }
+    c.restore();
   }
   // roundRect fallback
   if (!CanvasRenderingContext2D.prototype.roundRect) {
@@ -332,6 +428,7 @@
     play: play,
     qa: {
       play: play,
+      playGrove: playGrove,
       autoSwap: function () {
         if (busy || mode !== "play") return false;
         var m = anyMove(grid); if (!m) return false;

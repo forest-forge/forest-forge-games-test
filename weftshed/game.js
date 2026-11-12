@@ -8,7 +8,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#5a3418;--water:#4a2c14;--amber:#f8ecd0;--amber-hi:#f0d48a;--amber-soft:#f6e8c8;--amber-line:#c47838;--ember:#c43a2a;--btn:#3a2414;--lamp:#fff6e0;--glow-line:rgba(220,140,60,.45);--glow-fill:rgba(220,140,60,.12)}.ff-host{background:radial-gradient(ellipse at 50% 30%, #8a5a28 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#6a3c18,#3a2410);border-bottom-color:rgba(196,120,56,.45)}.ff{border-left-color:rgba(196,120,56,.3);border-right-color:rgba(196,120,56,.3)}`);
+  })(`:root{--bg:#5a3418;--water:#4a2c14;--amber:#f8ecd0;--amber-hi:#f0d48a;--amber-soft:#f6e8c8;--amber-line:#c47838;--ember:#c43a2a;--btn:#3a2414;--lamp:#fff6e0;--glow-line:rgba(220,140,60,.45);--glow-fill:rgba(220,140,60,.12)}.ff-host{background:radial-gradient(ellipse at 50% 30%, #8a5a28 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#6a3c18,#3a2410);border-bottom-color:rgba(196,120,56,.45)}.ff{border-left-color:rgba(196,120,56,.3);border-right-color:rgba(196,120,56,.3)}` + (window.FFX ? FFX.menuChrome() : ""));
 
   var COLS = 8, ROWS = 8;
   var YARN = ["#c43a2a", "#e0a01a", "#2a4a9a", "#3a8a48", "#f0e0c0", "#c45a28"];
@@ -54,7 +54,22 @@
     { name: "All six dyes", colors: 6, moves: 26, collect: { 4: 12, 5: 12 }, tangles: 8, boats: 0 },
     { name: "Knot garden", colors: 6, moves: 22, collect: {}, tangles: 16, boats: 0 },
     { name: "Late shuttle", colors: 6, moves: 26, collect: { 1: 12 }, tangles: 6, boats: 3 },
-    { name: "Closing the warp", colors: 6, moves: 24, collect: { 0: 10, 2: 10, 3: 10 }, tangles: 8, boats: 1 }
+    { name: "Closing the warp", colors: 6, moves: 24, collect: { 0: 10, 2: 10, 3: 10 }, tangles: 8, boats: 1 },
+    { name: "Evening madder", colors: 6, moves: 24, collect: { 0: 18 }, tangles: 6, boats: 0 },
+    { name: "Weld and rust", colors: 6, moves: 24, collect: { 1: 14, 5: 12 }, tangles: 8, boats: 0 },
+    { name: "Boat run", colors: 6, moves: 26, collect: {}, tangles: 6, boats: 4 },
+    { name: "Knot lattice", colors: 6, moves: 22, collect: {}, tangles: 18, boats: 0 },
+    { name: "Woad deep", colors: 6, moves: 24, collect: { 2: 20 }, tangles: 8, boats: 1 },
+    { name: "Flax field", colors: 6, moves: 24, collect: { 4: 18 }, tangles: 10, boats: 0 },
+    { name: "Cross dyes", colors: 6, moves: 26, collect: { 0: 12, 1: 12, 3: 10 }, tangles: 8, boats: 0 },
+    { name: "Packed shed", colors: 6, moves: 22, collect: { 3: 16 }, tangles: 12, boats: 2 },
+    { name: "Four boats", colors: 6, moves: 28, collect: {}, tangles: 8, boats: 4 },
+    { name: "Heavy knots", colors: 6, moves: 24, collect: { 5: 14 }, tangles: 16, boats: 1 },
+    { name: "Long warp", colors: 6, moves: 26, collect: { 1: 14, 4: 14 }, tangles: 10, boats: 2 },
+    { name: "Three dyes again", colors: 6, moves: 26, collect: { 0: 10, 2: 10, 4: 10 }, tangles: 10, boats: 2 },
+    { name: "Last boats", colors: 6, moves: 28, collect: { 3: 12 }, tangles: 12, boats: 5 },
+    { name: "Crowded cloth", colors: 6, moves: 24, collect: { 0: 14, 5: 14 }, tangles: 14, boats: 2 },
+    { name: "Master loom", colors: 6, moves: 26, collect: { 1: 12, 2: 12, 3: 12 }, tangles: 14, boats: 3 }
   ];
 
   var mode = "title", li = 0, grid, moves, need, got, boatsLeft, anim, sel, busy, score, cascade, rng;
@@ -236,9 +251,13 @@
       if (stamp && stamp.c === c && stamp.r === r) {
         cell.special = stamp.special; cell.pop = 0; return;
       }
+      if (window.FFX && (cell.col || cell.boat)) {
+        var Lx = layout();
+        FFX.burst(Lx.ox + c * Lx.s + Lx.s / 2, Lx.oy + r * Lx.s + Lx.s / 2, YARN[(cell.col ? cell.col - 1 : 0) % YARN.length], 10, { spd: 90, r: 2.6, kind: "fluff", g: 40, lift: 40 });
+      }
       cell.col = 0; cell.special = 0; cell.pop = 0.22;
     });
-    if (n) S.match(cascade);
+    if (n) { S.match(cascade); if (window.FFX) FFX.kick(0.25 + cascade * 0.08, "#fff4d0"); }
     if (stamp) S.special();
     cascade++;
     hud();
@@ -358,7 +377,7 @@
     need = { collect: Object.assign({}, lv.collect), tangles: lv.tangles, boats: lv.boats };
     got = { collect: {} }; boatsLeft = lv.boats;
     ui.setCourse((i + 1) + ". " + lv.name);
-    hud(); mode = "play"; A.playSong(SONG); ui.go(); ui.showPads(false);
+    if (window.FFX) FFX.reset(); hud(); mode = "play"; A.playSong(SONG); ui.go(); ui.showPads(false);
   }
   function toTitle() {
     ui.stop(); mode = "title"; A.playSong(SONG); ui.showPads(false);
@@ -410,7 +429,10 @@
     }
   }
 
+  var idleT = 0;
   function update(dt) {
+    idleT += dt;
+    if (window.FFX) FFX.step(dt);
     if (mode !== "play") return;
     if (anim) tickAnim(dt);
     for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
@@ -421,61 +443,115 @@
     }
   }
 
-  function drawYarn(c, x, y, s, col, knot, boat, special, pop) {
-    var k = (col - 1) % YARN.length, cx = x + s / 2, cy = y + s / 2, rad = s * 0.38 * (pop ? 1 + pop : 1);
-    c.beginPath(); c.arc(cx, cy, rad, 0, Math.PI * 2);
-    c.fillStyle = YARN[k]; c.fill();
-    c.strokeStyle = YARN_DK[k]; c.lineWidth = 2; c.stroke();
-    // yarn wrap
-    c.beginPath(); c.arc(cx, cy, rad * 0.62, 0, Math.PI * 2);
-    c.strokeStyle = "rgba(255,255,240,.35)"; c.lineWidth = 2; c.stroke();
-    c.beginPath(); c.strokeStyle = YARN_DK[k]; c.lineWidth = 1.4;
-    c.moveTo(cx - rad * 0.2, cy - rad * 0.5); c.quadraticCurveTo(cx + rad * 0.4, cy, cx - rad * 0.15, cy + rad * 0.5); c.stroke();
+  function drawYarn(c, x, y, s, col, knot, boat, special, pop, born) {
+    var k = (col - 1) % YARN.length, cx = x + s / 2, cy = y + s / 2;
+    var scale = (pop ? 1 + pop * 1.4 : 1) * (born ? (1 - born * 0.45) : 1);
+    var rad = s * 0.38 * scale;
+    if (window.FFX) {
+      FFX.bevelCircle(c, cx, cy, rad, YARN[k], YARN_DK[k], FFX.lighten(YARN[k], 0.4));
+      // winding strands
+      c.save();
+      c.beginPath(); c.arc(cx, cy, rad * 0.92, 0, Math.PI * 2); c.clip();
+      c.strokeStyle = "rgba(255,255,240,.28)"; c.lineWidth = 1.3;
+      for (var i = -3; i <= 3; i++) {
+        c.beginPath();
+        c.moveTo(cx - rad, cy + i * rad * 0.22);
+        c.quadraticCurveTo(cx, cy + i * rad * 0.22 + rad * 0.16, cx + rad, cy + i * rad * 0.22);
+        c.stroke();
+      }
+      c.restore();
+      // core hole of the skein
+      c.beginPath(); c.arc(cx, cy, rad * 0.22, 0, Math.PI * 2);
+      c.fillStyle = YARN_DK[k]; c.fill();
+      c.beginPath(); c.arc(cx - 1, cy - 1, rad * 0.12, 0, Math.PI * 2);
+      c.fillStyle = "rgba(0,0,0,.25)"; c.fill();
+    } else {
+      c.beginPath(); c.arc(cx, cy, rad, 0, Math.PI * 2);
+      c.fillStyle = YARN[k]; c.fill();
+      c.strokeStyle = YARN_DK[k]; c.lineWidth = 2; c.stroke();
+      c.beginPath(); c.arc(cx, cy, rad * 0.62, 0, Math.PI * 2);
+      c.strokeStyle = "rgba(255,255,240,.35)"; c.lineWidth = 2; c.stroke();
+    }
     if (knot) {
-      c.strokeStyle = "#3a2410"; c.lineWidth = 3;
-      c.beginPath(); c.moveTo(cx - 6, cy - 6); c.lineTo(cx + 6, cy + 6); c.moveTo(cx + 6, cy - 6); c.lineTo(cx - 6, cy + 6); c.stroke();
-      if (knot > 1) { c.beginPath(); c.arc(cx, cy, 8, 0, Math.PI * 2); c.stroke(); }
+      c.strokeStyle = "#3a2410"; c.lineWidth = 3.2; c.lineCap = "round";
+      c.beginPath(); c.moveTo(cx - 7, cy - 7); c.lineTo(cx + 7, cy + 7); c.moveTo(cx + 7, cy - 7); c.lineTo(cx - 7, cy + 7); c.stroke();
+      if (knot > 1) { c.beginPath(); c.arc(cx, cy, 9, 0, Math.PI * 2); c.stroke(); }
     }
     if (boat) {
-      c.fillStyle = "#6a3a14";
-      c.fillRect(cx - 8, cy - 4, 16, 7);
-      c.fillStyle = "#d8c070";
-      c.beginPath(); c.moveTo(cx, cy - 10); c.lineTo(cx + 6, cy - 3); c.lineTo(cx, cy - 3); c.fill();
+      if (window.FFX) FFX.bevelRoundRect(c, cx - 10, cy - 5, 20, 10, 3, "#7a4a18", "#3a2410");
+      else { c.fillStyle = "#6a3a14"; c.fillRect(cx - 8, cy - 4, 16, 7); }
+      c.fillStyle = "#f0d878";
+      c.beginPath(); c.moveTo(cx, cy - 13); c.lineTo(cx + 7, cy - 3); c.lineTo(cx - 1, cy - 3); c.closePath(); c.fill();
+      c.strokeStyle = "#6a4a14"; c.lineWidth = 1; c.stroke();
     }
     if (special) {
       c.fillStyle = "#fff6d0"; c.font = "bold " + Math.floor(s * 0.32) + "px Georgia"; c.textAlign = "center"; c.textBaseline = "middle";
+      c.shadowColor = "rgba(0,0,0,.35)"; c.shadowBlur = 4;
       c.fillText(special === 3 ? "B" : special === 4 ? "H" : "S", cx, cy + 1);
+      c.shadowBlur = 0;
     }
   }
   function render(c) {
     var W = ui.VW, H = ui.VH;
-    var bg = c.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, "#8a5a30"); bg.addColorStop(1, "#3a2210");
-    c.fillStyle = bg; c.fillRect(0, 0, W, H);
-    // loom frame
+    var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
+    c.save(); c.translate(sh.x, sh.y);
+    if (window.FFX) FFX.sky(c, W, H, "#c48a48", "#8a5a30", "#3a2210");
+    else {
+      var bg = c.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, "#8a5a30"); bg.addColorStop(1, "#3a2210");
+      c.fillStyle = bg; c.fillRect(0, 0, W, H);
+    }
+    // workshop window light
+    var lg = c.createRadialGradient(W * 0.2, 40, 10, W * 0.2, 40, W * 0.8);
+    lg.addColorStop(0, "rgba(255,230,160,.22)"); lg.addColorStop(1, "rgba(255,200,80,0)");
+    c.fillStyle = lg; c.fillRect(0, 0, W, H);
+    // wall planks
+    c.strokeStyle = "rgba(40,20,8,.18)"; c.lineWidth = 2;
+    for (var i = 0; i < 10; i++) { c.beginPath(); c.moveTo(0, 40 + i * 70); c.lineTo(W, 50 + i * 70); c.stroke(); }
     var L = layout();
-    c.fillStyle = "#6a3e1c";
-    c.fillRect(L.ox - 10, L.oy - 10, L.s * COLS + 20, L.s * ROWS + 20);
-    c.fillStyle = "#c8a060";
-    c.fillRect(L.ox - 10, L.oy - 14, L.s * COLS + 20, 8);
-    c.fillRect(L.ox - 10, L.oy + L.s * ROWS + 6, L.s * COLS + 20, 8);
-    if (!grid) return;
+    // loom posts
+    var fw = L.s * COLS + 28, fh = L.s * ROWS + 28, fx = L.ox - 14, fy = L.oy - 14;
+    if (window.FFX) {
+      FFX.bevelRoundRect(c, fx - 10, fy - 16, fw + 20, fh + 36, 8, "#6a3e1c", "#3a2010");
+      FFX.bevelRoundRect(c, fx, fy, fw, fh, 4, "#8a5a2c", "#4a3014");
+    } else {
+      c.fillStyle = "#6a3e1c";
+      c.fillRect(L.ox - 10, L.oy - 10, L.s * COLS + 20, L.s * ROWS + 20);
+    }
+    // heddle beam
+    if (window.FFX) {
+      FFX.bevelRoundRect(c, fx - 10, fy - 18, fw + 20, 14, 4, "#d0a060", "#7a5020");
+      FFX.bevelRoundRect(c, fx - 10, fy + fh + 4, fw + 20, 14, 4, "#d0a060", "#7a5020");
+    } else {
+      c.fillStyle = "#c8a060";
+      c.fillRect(L.ox - 10, L.oy - 14, L.s * COLS + 20, 8);
+      c.fillRect(L.ox - 10, L.oy + L.s * ROWS + 6, L.s * COLS + 20, 8);
+    }
+    // warp threads behind the cloth
+    c.strokeStyle = "rgba(240,220,180,.18)"; c.lineWidth = 1;
+    for (var col = 0; col < COLS; col++) {
+      c.beginPath(); c.moveTo(L.ox + col * L.s + L.s / 2, L.oy - 8); c.lineTo(L.ox + col * L.s + L.s / 2, L.oy + L.s * ROWS + 8); c.stroke();
+    }
+    if (!grid) { if (window.FFX) { FFX.vignette(c, W, H, 0.32); FFX.draw(c); } c.restore(); return; }
     for (var r = 0; r < ROWS; r++) for (var col = 0; col < COLS; col++) {
       var x = L.ox + col * L.s, y = L.oy + r * L.s, cell = grid[r][col];
-      c.fillStyle = (r + col) % 2 ? "#d8c49a" : "#c8b078";
-      c.fillRect(x + 1, y + 1, L.s - 2, L.s - 2);
+      if (window.FFX) FFX.bevelRoundRect(c, x + 1, y + 1, L.s - 2, L.s - 2, 4, (r + col) % 2 ? "#e0cc9a" : "#c8b078", "#6a4a24");
+      else { c.fillStyle = (r + col) % 2 ? "#d8c49a" : "#c8b078"; c.fillRect(x + 1, y + 1, L.s - 2, L.s - 2); }
       if (cell.col) {
-        var fy = (cell.fall || 0) * L.s * -0.6;
-        drawYarn(c, x, y + fy, L.s, cell.col, cell.knot, cell.boat, cell.special, cell.pop);
+        var fy2 = (cell.fall || 0) * L.s * -0.6;
+        drawYarn(c, x, y + fy2, L.s, cell.col, cell.knot, cell.boat, cell.special, cell.pop, cell.born);
       } else if (cell.pop > 0) {
-        c.globalAlpha = cell.pop * 4; c.fillStyle = "#fff4d0";
-        c.beginPath(); c.arc(x + L.s / 2, y + L.s / 2, L.s * 0.3, 0, Math.PI * 2); c.fill(); c.globalAlpha = 1;
+        c.globalAlpha = Math.min(1, cell.pop * 4); c.fillStyle = "#fff4d0";
+        c.beginPath(); c.arc(x + L.s / 2, y + L.s / 2, L.s * 0.28 * (1 + cell.pop), 0, Math.PI * 2); c.fill(); c.globalAlpha = 1;
       }
     }
     if (sel) {
-      c.strokeStyle = "#fff4c0"; c.lineWidth = 3;
+      c.strokeStyle = "#fff4c0"; c.lineWidth = 3; c.shadowColor = "rgba(255,240,160,.8)"; c.shadowBlur = 8;
       c.strokeRect(L.ox + sel[0] * L.s + 2, L.oy + sel[1] * L.s + 2, L.s - 4, L.s - 4);
+      c.shadowBlur = 0;
     }
+    if (window.FFX) { FFX.vignette(c, W, H, 0.3); FFX.draw(c); }
+    c.restore();
   }
 
   var game = {
