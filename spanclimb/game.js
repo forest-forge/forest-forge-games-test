@@ -71,11 +71,31 @@
 
   // ---------- state ----------
   var mode = "title", si = 0, lv, L, hero, cam = { x: 0, y: 0 }, bridges = [], pieces = [], foes = [], items = [], parts = PF.Parts(), tide = 0, lives = 3, score = 0, tm = 0, won = 0, dead = 0, god = false, jellyT = 3;
+  var boss = null, irisT = 0, bannerT = 0;
+  function hitBoss() { var b = boss; if (!b || !b.alive || b.inv > 0) return; b.hp--; b.inv = 0.7; S.pop(); parts.add(b.x + 14, b.y + 8, 16, b.col, 110, 0.7); score += 300; hud(); if (b.hp <= 0) { b.alive = false; score += 3000; hud(); parts.add(b.x + 14, b.y + 8, 40, "#ffffff", 160, 1); S.win(); } }
+  function stepBoss(dt) {
+    var b = boss, h = hero; if (!b || !b.alive) return; if (!b.seen && h.y < 12 * TS) { b.seen = true; bannerT = 2.2; } if (!b.seen) return;
+    b.t += dt; if (b.inv > 0) b.inv -= dt; var sp = 34 + si * 8; b.x += b.dir * sp * dt; if (b.x < 1.2 * TS) { b.x = 1.2 * TS; b.dir = 1; } if (b.x > (LW - 1.2) * TS - b.w) { b.x = (LW - 1.2) * TS - b.w; b.dir = -1; }
+    if (b.t > 2.6 - si * 0.25) { b.t = 0; foes.push({ k: "bubble", x: b.x + 12, y: b.y - 4, w: 8, h: 8, alive: true, t: 0, vx: (h.x > b.x ? 1 : -1) * (40 + si * 10), vy: -60 }); }
+    bridges.forEach(function (br) { if (br.p >= 1) return; arcPts(br).forEach(function (p) { if (p.x > b.x - 2 && p.x < b.x + b.w + 2 && p.y > b.y - 2 && p.y < b.y + b.h + 2) hitBoss(); }); });
+    pieces.forEach(function (p) { if (p.x > b.x && p.x < b.x + b.w && p.y > b.y && p.y < b.y + b.h) hitBoss(); });
+    if (PF.aabb({ x: h.x + 1, y: h.y + 2, w: h.w - 2, h: h.h - 2 }, b)) hurt();
+  }
+  function drawBoss(tt, cx, cy) {
+    var b = boss; if (!b || !b.alive) return; if (b.inv > 0 && Math.floor(tt * 14) % 2) return; var x = Math.round(b.x - cx), y = Math.round(b.y - cy), w2 = Math.floor(tt * 6) % 2, c = b.col, d = FXP.shade(c, -0.3);
+    for (var l = 0; l < 3; l++) { R(x + 3 + l * 4, y + 14 + ((l + w2) % 2), 2, 4, d); R(x + 19 + l * 3, y + 14 + ((l + 1 + w2) % 2), 2, 4, d); }
+    g.fillStyle = d; g.beginPath(); g.ellipse(x + 14, y + 11, 14, 7, 0, 0, 7); g.fill(); g.fillStyle = c; g.beginPath(); g.ellipse(x + 14, y + 10, 13, 6, 0, 0, 7); g.fill();
+    R(x + 7, y + 7, 14, 2, FXP.shade(c, 0.35)); R(x - 6, y + 2 - w2 * 2, 8, 6, c); R(x - 6, y + 2 - w2 * 2, 3, 3, "#ffffff"); R(x + 26, y + 2 - (1 - w2) * 2, 8, 6, c); R(x + 31, y + 2 - (1 - w2) * 2, 3, 3, "#ffffff");
+    R(x + 9, y - 1, 2, 5, d); R(x + 17, y - 1, 2, 5, d); R(x + 8, y - 3, 4, 4, "#ffffff"); R(x + 16, y - 3, 4, 4, "#ffffff"); R(x + 9 + (hero.x > b.x ? 1 : 0), y - 2, 2, 2, "#111"); R(x + 17 + (hero.x > b.x ? 1 : 0), y - 2, 2, 2, "#111");
+    R(x + 4, y - 7, 20, 3, "#1a1a3a"); R(x + 9, y - 11, 10, 4, "#1a1a3a"); R(x + 4, y - 5, 20, 1, "#ffe23a");
+  }
   function load(i, keep) {
     si = i; lv = build(i); L = lv.L; bridges = []; pieces = []; parts.clear(); tm = 0; won = 0; dead = 0; jellyT = 3;
     foes = lv.ents.filter(function (e) { return e.k === "crab" || e.k === "gull"; }).map(function (e) { var f = Object.assign({}, e); f.w = 12; f.h = 10; f.alive = true; return f; });
     items = lv.ents.filter(function (e) { return e.k === "sweet" || e.k === "goal"; }).map(function (e) { return Object.assign({}, e); });
     hero = { x: 3 * TS, y: (lv.h - 2) * TS - 14, w: 10, h: 14, vx: 0, vy: 0, face: 1, ground: false, coyote: 0, buffer: 0, inv: 1, ph: 0, on: null };
+    var BN = [["Old Nipper", "#ff5a8a"], ["Captain Clatterclaw", "#ff9a3a"], ["Madame Pincer", "#b05aff"], ["The Pier Crab", "#2ab0ff"]];
+    boss = { x: (LW / 2) * TS - 14, y: 4 * TS - 18, w: 28, h: 18, hp: 3 + i, max: 3 + i, dir: 1, inv: 0, alive: true, seen: false, name: BN[i][0], col: BN[i][1], t: 0 }; irisT = 1; bannerT = 0;
     tide = L.ph + 120; cam.y = hero.y - H * 0.55; ui.setCourse(STAGES[i].name); hud();
   }
   function hud() { ui.setStat("score", FF.n(score)); ui.setStat("lives", String(lives)); }
@@ -117,15 +137,17 @@
     foes.forEach(function (f) { if (!f.alive) return;
       if (f.k === "crab") { f.x += f.dir * 28 * dt; if (f.x < f.a) { f.x = f.a; f.dir = 1; } if (f.x > f.b) { f.x = f.b; f.dir = -1; } }
       else if (f.k === "gull") { f.t += dt; f.x += f.dir * 45 * dt; if (f.x < TS || f.x > (LW - 1) * TS - f.w) f.dir *= -1; f.y = f.y0 + Math.sin(f.t * 2) * 10; }
+      else if (f.k === "bubble") { f.t += dt; f.vy += 120 * dt; f.x += f.vx * dt; f.y += f.vy * dt; if (f.t > 4 || f.x < 0 || f.x > LW * TS) f.alive = false; }
       else if (f.k === "jelly") { f.t += dt; f.y -= 22 * dt; f.x += Math.sin(f.t * 3) * 12 * dt; if (f.y < cam.y - 40) f.alive = false; }
       if (PF.aabb({ x: h.x + 1, y: h.y + 2, w: h.w - 2, h: h.h - 2 }, f)) hurt(); });
     if (foes.length > 60) foes = foes.filter(function (f) { return f.alive; });
     jellyT -= dt; if (jellyT <= 0) { jellyT = 5 - si * 0.6; foes.push({ k: "jelly", x: (2 + Math.random() * 15) * TS, y: tide - 6, w: 10, h: 10, alive: true, t: 0 }); }
+    stepBoss(dt);
     // items
     items.forEach(function (it) { if (it.got) return; if (it.fall) { it.vy += 600 * dt; it.y += it.vy * dt; var ty = Math.floor((it.y + 8) / TS), tx = Math.floor((it.x + 4) / TS); if (it.vy > 0 && (L.solid(tx, ty) || L.flag(tx, ty, "oneway")) && it.y + 8 <= ty * TS + 6) { it.y = ty * TS - 8; it.vy = 0; it.fall = 0; } }
-      if (PF.aabb(h, { x: it.x, y: it.y, w: 8, h: 8 })) { if (it.k === "goal") { won = 2.2; S.win(); score += 1000 + Math.max(0, Math.round((tide - h.y) / TS) * 20); if (score > save.hi) save.hi = score; if (si + 2 > save.open) save.open = Math.min(STAGES.length, si + 2); ui.persist(); hud(); return; } it.got = 1; score += it.v; S.sweet(); hud(); } });
+      if (PF.aabb(h, { x: it.x, y: it.y, w: 8, h: 8 })) { if (it.k === "goal" && boss && boss.alive) { } else if (it.k === "goal") { won = 2.2; S.win(); score += 1000 + Math.max(0, Math.round((tide - h.y) / TS) * 20); if (score > save.hi) save.hi = score; if (si + 2 > save.open) save.open = Math.min(STAGES.length, si + 2); ui.persist(); hud(); return; } it.got = 1; score += it.v; S.sweet(); hud(); } });
     // tide
-    tide -= st.tide * dt * (1 + tm / 300); if (h.y + h.h > tide + 4) loseLife("tide");
+    if (!(boss && boss.alive && boss.seen)) tide -= st.tide * dt * (1 + tm / 300); if (h.y + h.h > tide + 4) loseLife("tide");
     if (h.y > L.ph) loseLife("tide");
     cam.x = (L.pw - W) / 2; var ty2 = h.y - H * 0.55; cam.y += (ty2 - cam.y) * Math.min(1, dt * 5); cam.y = clamp(cam.y, -20, L.ph - H + 10);
     parts.step(dt);
@@ -135,7 +157,8 @@
   function render(c, tt) {
     if (!W) sizeLo(); if (!L) load(0);
     var st = STAGES[si], cx = Math.round(cam.x), cy = Math.round(cam.y);
-    var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, st.sky[0]); gr.addColorStop(1, st.sky[1]); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, FXP.shade(st.sky[0], -0.1)); gr.addColorStop(0.5, st.sky[0]); gr.addColorStop(1, st.sky[1]); g.fillStyle = gr; g.fillRect(0, 0, W, H); FXP.glow(g, W * 0.78, H * 0.18, 80, "#fff8d0", 0.5);
+    for (var ck = 0; ck < 5; ck++) FXP.cloud(g, ((ck * 131 + tt * (3 + ck)) % (W + 120)) - 60, ((ck * 47 - cy * 0.08) % (H + 60) + H + 60) % (H + 60) - 30, 5 + ck % 3 * 2, "rgba(255,255,255,0.9)", "rgba(150,190,240,0.35)");
     for (var k = 0; k < 6; k++) { var bx = ((k * 83 + tt * 6 * (k % 2 ? 1 : 0.6)) % (W + 80)) - 40, by = ((k * 57 - cy * 0.2) % (H + 40) + H + 40) % (H + 40) - 20; R(bx, by, 34, 8, "rgba(255,255,255,0.85)"); R(bx + 6, by - 5, 18, 6, "rgba(255,255,255,0.85)"); }
     for (var s2 = 0; s2 < 5; s2++) { var sx = s2 * 90 - 30 - (cx * 0.2), sh = 60 + (s2 * 37) % 50; R(sx, H - sh + 40 - cy * 0.05 % 20, 26, sh, st.stack); R(sx + 4, H - sh + 36 - cy * 0.05 % 20, 18, 6, st.stack); }
     // tiles
@@ -146,19 +169,25 @@
     // side margins when the screen is wider than the stack
     if (cx < 0) { R(0, 0, -cx, H, "rgba(255,255,255,0.35)"); R(L.pw - cx, 0, W, H, "rgba(255,255,255,0.35)"); }
     items.forEach(function (it) { if (it.got) return; var x = Math.round(it.x - cx), y = Math.round(it.y - cy); if (y < -20 || y > H + 20) return;
+      if (it.k === "goal" && boss && boss.alive) return;
       if (it.k === "goal") { R(x - 1, y - 40, 3, 40, "#ffffff"); for (var b = 0; b < 4; b++) { R(x + 2, y - 40 + b * 6, 10 - b * 2, 5, PASTEL_D[b]); } R(x - 8, y - 6, 18, 6, "#ff8ab0"); return; }
       R(x, y + 2, 8, 5, PASTEL_D[it.c]); R(x + 2, y, 4, 9, PASTEL_D[it.c]); R(x + 2, y + 2, 2, 2, "#ffffff"); });
     bridges.forEach(function (b) { var pts = arcPts(b), fade = b.life < 1 && Math.floor(tt * 12) % 2; if (fade) return; for (var n = 0; n < pts.length - 1; n++) { var p = pts[n], q = pts[n + 1]; for (var u = 0; u < 1; u += 0.2) R(p.x + (q.x - p.x) * u - cx, p.y + (q.y - p.y) * u - cy, 2, 2, "#ffffff"); if (n % 1 === 0) { var fx = p.x - cx, fy = p.y - cy + 1; g.fillStyle = ["#ff8ab0", "#ffffff", "#7ac0ff"][n % 3]; g.beginPath(); g.moveTo(fx, fy); g.lineTo(fx + 5 * b.dir, fy); g.lineTo(fx + 2.5 * b.dir, fy + 6); g.closePath(); g.fill(); } } });
     pieces.forEach(function (p) { g.fillStyle = PASTEL_D[p.c]; g.beginPath(); g.moveTo(p.x - cx, p.y - cy); g.lineTo(p.x - cx + 5, p.y - cy); g.lineTo(p.x - cx + 2.5, p.y - cy + 6); g.closePath(); g.fill(); });
-    foes.forEach(function (f) { if (!f.alive) return; var x = Math.round(f.x - cx), y = Math.round(f.y - cy), w2 = Math.floor(tt * 8) % 2; if (y < -20 || y > H + 20) return;
+    var g0 = g; g = FXP.layer(W, H); drawBoss(tt, cx, cy);
+    foes.forEach(function (f) { if (!f.alive) return; if (f.k === "bubble") { var bx2 = Math.round(f.x - cx), by2 = Math.round(f.y - cy); g.fillStyle = "rgba(200,240,255,0.85)"; g.beginPath(); g.arc(bx2 + 4, by2 + 4, 4, 0, 7); g.fill(); R(bx2 + 2, by2 + 2, 2, 2, "#ffffff"); return; } var x = Math.round(f.x - cx), y = Math.round(f.y - cy), w2 = Math.floor(tt * 8) % 2; if (y < -20 || y > H + 20) return;
       if (f.k === "crab") { R(x, y + 3, 12, 6, "#ff7a9a"); R(x - 2, y + w2, 4, 4, "#ff7a9a"); R(x + 10, y + 1 - w2, 4, 4, "#ff7a9a"); R(x + 3, y + 1, 2, 2, "#fff"); R(x + 7, y + 1, 2, 2, "#fff"); R(x + 4, y + 1, 1, 1, "#111"); R(x + 8, y + 1, 1, 1, "#111"); R(x + 1, y + 9, 2, 1, "#e85a7a"); R(x + 9, y + 9, 2, 1, "#e85a7a"); }
       else if (f.k === "gull") { R(x + 2, y + 3, 9, 5, "#ffffff"); R(f.dir > 0 ? x + 10 : x, y + 2, 3, 3, "#ffffff"); R(f.dir > 0 ? x + 13 : x - 2, y + 3, 2, 1, "#ffb84a"); R(x + 3, y + (w2 ? -1 : 4), 7, 2, "#c8d8e8"); R(f.dir > 0 ? x + 11 : x + 1, y + 3, 1, 1, "#111"); }
       else { R(x, y, 10, 6, "rgba(216,180,255,0.9)"); R(x + 1, y + 6, 1, 4 + w2, "#d8b4ff"); R(x + 4, y + 6, 1, 5 - w2, "#d8b4ff"); R(x + 8, y + 6, 1, 4 + w2, "#d8b4ff"); R(x + 2, y + 1, 2, 2, "#ffffff"); } });
     if (mode !== "title" && (!dead) && (hero.inv <= 0 || Math.floor(tt * 14) % 2)) drawPip(tt);
+    g = g0; FXP.flush(g, "#1a3a6a");
     parts.draw(g, cam);
     // tide
     var wy = Math.round(tide - cy); if (wy < H) { R(0, wy, W, H - wy, "rgba(40,150,230,0.72)"); for (var wx = 0; wx < W; wx += 12) R(wx + (Math.floor(tt * 10) % 12), wy - 1 + ((wx / 12) % 2), 8, 2, "#ffffff"); }
     if (mode === "play") { var gap = Math.max(0, Math.round((tide - hero.y - hero.h) / TS)); g.font = "bold 8px sans-serif"; g.textAlign = "left"; g.fillStyle = gap < 4 ? "#ff3a6a" : "#1a5a9a"; g.fillText("TIDE " + gap, 4, 10); var ht = Math.max(0, Math.round((L.ph - hero.y) / TS) - 2); g.fillStyle = "#1a5a9a"; g.textAlign = "right"; g.fillText(Math.min(100, Math.round(100 * ht / (lv.h - 6))) + "% UP", W - 4, 10); }
+    FXP.ambient(g, W, H, { x: cx, y: cy }, tt, "drift", "rgba(255,255,255,0.85)", 16); FXP.vignette(g, W, H, 0.28);
+    if (boss && boss.seen && boss.alive) { var bw = 90, bx3 = W / 2 - bw / 2; R(bx3 - 1, H - 13, bw + 2, 7, "#1a3a6a"); R(bx3, H - 12, bw * boss.hp / boss.max, 5, boss.col); R(bx3, H - 12, bw * boss.hp / boss.max, 1, "#ffffff"); if (bannerT > 0) FXP.banner(g, boss.name, W / 2, H * 0.4, 14, boss.col); }
+    if (bannerT > 0) bannerT -= 1 / 60; if (irisT > 0) { FXP.iris(g, W, H, irisT, hero.x - cx, hero.y - cy); irisT -= 1 / 40; }
     c.drawImage(lo, 0, 0, W * PX, H * PX);
   }
   function drawPip(tt) {
@@ -185,7 +214,7 @@
       fine: "An original Forest Forge game." }); }
   var game = { toTitle: toTitle, onResize: sizeLo, update: function (dt) { if (mode === "play") update(dt); }, render: render, idle: function (dt) { if (mode === "title" && L) { cam.x = (L.pw - W) / 2; cam.y -= dt * 25; if (cam.y < 0) cam.y = L.ph - H; } }, onBack: function () { if (mode === "play") { toTitle(); return true; } return false; } };
   ui.onAdsRemoved = function () { if (mode === "title") toTitle(); };
-  game.qa = { play: play, god: function (v) { god = v; }, lives: function (n) { lives = n; }, L: function () { return L; }, foes: function () { return foes; },
+  game.qa = { boss: function () { return boss && { x: boss.x, y: boss.y, hp: boss.hp, alive: boss.alive, seen: boss.seen }; }, toTop: function () { hero.x = 3 * TS; hero.y = 6 * TS; hero.vy = 0; tide = 18 * TS; }, play: play, god: function (v) { god = v; }, lives: function (n) { lives = n; }, L: function () { return L; }, foes: function () { return foes; },
     state: function () { return { mode: mode, si: si, x: hero.x, y: hero.y, tx: Math.floor((hero.x + 5) / TS), ty: Math.floor((hero.y + hero.h - 1) / TS), ground: hero.ground, tide: tide, lives: lives, won: won, dead: dead, score: score, bridges: bridges.length, h: lv.h }; } };
   ui.start(game);
 })();
