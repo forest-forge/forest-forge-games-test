@@ -72,9 +72,10 @@
     { wave: "drum", pat: "k h s h k h s h k h s h k h s s k h s h k h s h k k s h k s s o" }]] };
 
   // ---------- state ----------
+  var irisT = 0;
   var L, st = 0, mode = "title", cam = PF.Camera(), parts = PF.Parts(), hero, foes = [], items = [], shots = [], eshots = [], hooks = [], boss = null, arenaX = 0, locked = false, hp = 5, score = 0, lives = 3, cp = null, won = 0, dead = 0, tm = 0, whip = null, god = false;
   function hud() { ui.setStat("score", FF.n(score)); ui.setStat("lives", String(Math.max(0, lives))); }
-  function load(i, keep) {
+  function load(i, keep) { irisT = 1;
     st = i; var s = STAGES[i], c = compose(s.segs); arenaX = c.arena * TS; L = PF.Level(c.rows, { theme: s.th, seed: i + 17 });
     foes = []; items = []; shots = []; eshots = []; hooks = []; boss = null; locked = false; parts.clear(); won = 0; dead = 0; whip = null; if (!keep) { cp = null; tm = 0; }
     L.ents.forEach(function (e) {
@@ -154,6 +155,7 @@
     shots = shots.filter(function (s) { return s.life > 0; });
     eshots.forEach(function (s) { s.life -= dt; s.vy += s.grav * dt; s.x += s.vx * dt; s.y += s.vy * dt; if (s.bounce && s.vy > 0 && L.solid(Math.floor(s.x / TS), Math.floor((s.y + 8) / TS))) { s.vy = -260; s.bounce--; s.vx = s.vx || (hero.x > s.x ? 60 : -60); } if (PF.aabb(h, s)) { hurt(1, s.x); s.life = 0; } });
     eshots = eshots.filter(function (s) { return s.life > 0 && (s.bounce > 0 || s.y < L.ph); });
+
     foes.forEach(function (f) { if (!f.alive) return; f.t += dt; var dx = h.x - f.x;
       if (f.k === "m") { f.vx = (Math.abs(dx) < 150 ? Math.sign(dx) : f.dir) * 30; f.vy = Math.min(400, f.vy + 900 * dt); var rr = PF.move(L, f, dt); if (rr.wallL || rr.wallR) f.dir = -f.dir; }
       else if (f.k === "c") { f.vy = Math.min(400, f.vy + 900 * dt); var r3 = PF.move(L, f, dt); if (r3.ground) { f.vx = 0; if (f.t > 0.9) { f.t = 0; f.vy = -260; f.vx = Math.sign(dx || 1) * 70; } } }
@@ -182,6 +184,7 @@
       else if (it.k === "h") { R(x + 2, y + 6, 12, 8, "#ffe0a0"); R(x + 2, y + 9, 12, 2, "#ff3a6a"); R(x + 2, y + 6, 12, 1, "#c88a3a"); }
       else if (it.k === "K") { R(x + 2, y - 8, 12, 2, "#ffffff"); R(x + 4, y - 6, 2, 22, "#c8c8d8"); R(x + 10, y - 6, 2, 22, "#c8c8d8"); R(x + 5, y - 2, 6, 7, it.got ? "#3aff6a" : "#ff3ad8"); } });
     var ax = arenaX - cam.x; if (!locked && ax > -20 && ax < W + 20) { R(ax, 0, 16, (HT - 3) * TS - cam.y, "#5a1a8a"); for (var dy = 0; dy < (HT - 3) * TS - cam.y; dy += 10) R(ax + 3, dy + 2, 10, 5, "#e8ff1a"); }
+    var g0 = g; g = FXP.layer(W, H);
     foes.forEach(function (f) { if (!f.alive) return; var x = Math.round(f.x - cam.x), y = Math.round(f.y - cam.y); if (x < -20 || x > W + 20) return; var w2 = Math.floor(tt * 8) % 2;
       if (f.k === "m") { R(x + 2, y - 6, 8, 6, "#ff2a3a"); R(x + 4, y - 9, 4, 3, "#ff2a3a"); R(x + 1, y, 10, 4, "#ffe0b0"); R(x + 2, y + 2, 8, 4, "#ffffff"); R(x + 1, y + 6, 10, 4, "#3a6aff"); R(x + 3, y + 1, 2, 1, "#111"); R(x + 7, y + 1, 2, 1, "#111"); R(x + 2 + w2, y + 10, 3, 2, "#5a2a0a"); R(x + 7 - w2, y + 10, 3, 2, "#5a2a0a"); }
       else if (f.k === "c") { R(x, y + 2, 12, 4, "#ffffff"); R(x, y + 6 + (w2 ? 2 : 0), 12, 4, "#ffffff"); R(x, y + 5, 12, 1, "#ff6a8a"); R(x - 1, y + 3, 2, 6, "#ff6a8a"); R(x + 11, y + 3, 2, 6, "#ff6a8a"); }
@@ -191,7 +194,10 @@
     shots.forEach(function (sh) { var x = sh.x - cam.x, y = sh.y - cam.y; R(x - 2, y - 2, 5, 4, "#7ae8ff"); R(x - 1, y - 1, 2, 2, "#ffffff"); });
     eshots.forEach(function (sh) { var x = sh.x - cam.x, y = sh.y - cam.y; if (sh.k === "duck") { R(x, y + 3, 8, 5, "#ffe21a"); R(x + 4, y, 4, 4, "#ffe21a"); R(x + 8, y + 1, 2, 2, "#ff8a1a"); R(x + 5, y + 1, 1, 1, "#111"); } else { R(x + 2, y, 4, 7, "#fff0a8"); R(x + 3, y + 1, 2, 2, "#c8a050"); } });
     if (hero && mode === "play" && !(dead && Math.floor(tt * 10) % 2) && (hero.inv <= 0 || Math.floor(tt * 16) % 2)) drawBoot(tt);
+    g = g0; FXP.flush(g, "#1a0430");
     parts.draw(g, cam);
+    FXP.ambient(g, W, H, cam, tt, "drift", "rgba(240,255,120,0.85)", 20); FXP.vignette(g, W, H, 0.35);
+    if (irisT > 0) { FXP.iris(g, W, H, irisT, hero ? hero.x - cam.x : W / 2, hero ? hero.y - cam.y : H / 2); irisT -= 1 / 40; }
     if (mode === "play") { for (var i = 0; i < 5; i++) R(4 + i * 7, 4, 5, 6, i < hp ? "#3aff6a" : "rgba(0,0,0,0.35)"); if (boss) { R(W - 64, 4, 60, 6, "rgba(0,0,0,0.4)"); R(W - 63, 5, 58 * Math.max(0, boss.hp) / (boss.id === "tub" ? 30 : boss.id === "hoover" ? 34 : 26), 4, "#ff3ad8"); g.font = "bold 7px sans-serif"; g.textAlign = "right"; g.fillStyle = "#fff"; g.fillText(boss.name, W - 4, 18); } }
     c.drawImage(lo, 0, 0, W * PX, H * PX);
   }
