@@ -8,7 +8,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#082214;--water:#0a2818;--amber:#f3ead0;--amber-hi:#ffe7a0;--amber-soft:#e8f6d8;--amber-line:#2a9a48;--ember:#e86220;--btn:#12381c;--lamp:#fff0b0;--glow-line:rgba(80,200,90,.32);--glow-fill:rgba(80,200,90,.08)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #145828 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#145828,#081c10);border-bottom-color:rgba(42,154,72,.35)}.ff{border-left-color:rgba(42,154,72,.28);border-right-color:rgba(42,154,72,.28)}.ff-icon-btn:active{background:#1c6a30;box-shadow:0 0 16px rgba(80,200,90,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(80,200,90,.5)}`);
+  })(`:root{--bg:#082214;--water:#0a2818;--amber:#f3ead0;--amber-hi:#ffe7a0;--amber-soft:#e8f6d8;--amber-line:#2a9a48;--ember:#e86220;--btn:#12381c;--lamp:#fff0b0;--glow-line:rgba(80,200,90,.32);--glow-fill:rgba(80,200,90,.08)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #145828 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#145828,#081c10);border-bottom-color:rgba(42,154,72,.35)}.ff{border-left-color:rgba(42,154,72,.28);border-right-color:rgba(42,154,72,.28)}.ff-icon-btn:active{background:#1c6a30;box-shadow:0 0 16px rgba(80,200,90,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(80,200,90,.5)}.ff-shade{background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.52))!important}.ff-modal{text-shadow:0 2px 10px rgba(0,0,0,.7);animation:ffIn .35s ease}.ff-display{letter-spacing:.18em;filter:drop-shadow(0 0 16px var(--ember))}.ff-lede,.ff-stat-line,.ff-fine{text-shadow:0 1px 6px rgba(0,0,0,.7)}.ff-btns{background:rgba(0,0,0,.42);border:1px solid var(--glow-line);border-radius:16px;padding:14px 16px 16px;box-shadow:0 14px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);backdrop-filter:blur(7px)}.ff-btn{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 18px var(--glow-fill);letter-spacing:.06em}.ff-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.35)}.ff-hud{box-shadow:0 10px 24px rgba(0,0,0,.28)}.ff-toast{backdrop-filter:blur(6px)}@keyframes ffIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}`);
   var clamp = FF.clamp, lerp = FF.lerp;
   var ui = FF.create({
     id: "downcut", title: "Downcut", course: "Haul road", view: { w: 360, h: 640, flex: true },
@@ -253,14 +253,40 @@
     C0 = curv(camZ);
     g.save(); g.translate(Math.round(sh), Math.round(sh * 0.5));
     // sky
-    var gr = g.createLinearGradient(0, 0, 0, hz); gr.addColorStop(0, th.sky[0]); gr.addColorStop(1, th.sky[1]);
+    var gr = g.createLinearGradient(0, 0, 0, hz);
+    gr.addColorStop(0, th.sky[0]); gr.addColorStop(0.55, th.sky[0]); gr.addColorStop(1, th.sky[1]);
     g.fillStyle = gr; g.fillRect(-4, -4, W + 8, hz + 6);
-    if (th.night) for (var s = 0; s < 30; s++) R((s * 53 + 7) % W, (s * 29) % (hz - 10), 1, 1, s % 3 ? "#6a7088" : "#c8d0e8");
-    // far cliffs (parallax with curve)
+    if (th.night) {
+      for (var s = 0; s < 48; s++) { g.globalAlpha = s % 3 ? 0.5 : 0.95; R((s * 53 + 7 + now * 2) % W, (s * 29) % (hz - 10), s % 8 ? 1 : 2, 1, s % 3 ? "#8a90a8" : "#e8f0ff"); }
+      g.globalAlpha = 1;
+      var mx = W * 0.72, my = hz * 0.28;
+      var mg = g.createRadialGradient(mx, my, 2, mx, my, 16);
+      mg.addColorStop(0, "rgba(230,240,255,0.9)"); mg.addColorStop(1, "rgba(230,240,255,0)");
+      g.fillStyle = mg; g.beginPath(); g.arc(mx, my, 16, 0, 7); g.fill();
+      g.fillStyle = "#e8eef8"; g.beginPath(); g.arc(mx, my, 6, 0, 7); g.fill();
+    } else {
+      var sx = W * 0.78, sy = hz * 0.28;
+      var sg = g.createRadialGradient(sx, sy, 2, sx, sy, 22);
+      sg.addColorStop(0, "rgba(255,246,180,0.95)"); sg.addColorStop(0.4, "rgba(255,220,100,0.35)"); sg.addColorStop(1, "rgba(255,200,80,0)");
+      g.fillStyle = sg; g.beginPath(); g.arc(sx, sy, 22, 0, 7); g.fill();
+      g.fillStyle = "#fff4b0"; g.beginPath(); g.arc(sx, sy, 7, 0, 7); g.fill();
+      for (var ci = 0; ci < 5; ci++) {
+        var cx = ((ci * 70 + now * 8) % (W + 60)) - 30, cy = 8 + (ci * 11) % 22;
+        g.globalAlpha = 0.7; g.fillStyle = "#fff";
+        g.beginPath(); g.arc(cx, cy, 6, 0, 7); g.arc(cx + 8, cy - 2, 7, 0, 7); g.arc(cx + 16, cy + 1, 5, 0, 7); g.fill();
+      }
+      g.globalAlpha = 1;
+    }
+    // far ridges (two parallax layers)
     var cs = -C0 * 1800;
     for (var x = -8; x < W + 8; x += 4) {
-      var hh = 18 + 10 * Math.sin((x - cs) * 0.05) + 6 * Math.sin((x - cs) * 0.13 + 2);
+      var hh = 26 + 12 * Math.sin((x - cs * 0.45) * 0.035) + 7 * Math.sin((x - cs * 0.45) * 0.09 + 2);
       R(x, hz - hh, 4, hh + 1, th.cliff);
+    }
+    for (var x2 = -8; x2 < W + 8; x2 += 3) {
+      var hh2 = 16 + 9 * Math.sin((x2 - cs) * 0.05) + 5 * Math.sin((x2 - cs) * 0.13 + 2);
+      g.fillStyle = th.cliff; R(x2, hz - hh2, 3, hh2 + 1, th.wallA);
+      if (x2 % 15 === 0) { R(x2, hz - hh2 - 6, 2, 6, th.wallB); R(x2 - 3, hz - hh2 - 4, 8, 5, th.wallA); }
     }
     // ground rows
     for (var y = hz + 1; y < H + 4; y++) {
@@ -315,14 +341,17 @@
     drawSkip(now);
     if (th.rain) for (var d = 0; d < 50; d++) { var rx = (d * 37 + now * 60 * (d % 3 + 2)) % (W + 20) - 10, ry = (d * 71 + now * 260) % H; R(rx, ry, 1, 4, "rgba(200,210,230,0.5)"); }
     if (th.snow) for (var e = 0; e < 40; e++) { var sx2 = (e * 41 + Math.sin(now + e) * 10) % W, sy2 = (e * 67 + now * 40) % H; R(sx2, sy2, 1, 1, "#fff"); }
-    if (th.night) { var vg = g.createRadialGradient(W / 2, H * 0.72, 10, W / 2, H * 0.6, W * 0.9); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.55)"); g.fillStyle = vg; g.fillRect(-4, -4, W + 8, H + 8); }
+    var vg = g.createRadialGradient(W / 2, H * 0.72, 10, W / 2, H * 0.55, W * 0.95);
+    vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, th.night ? "rgba(0,0,0,0.58)" : "rgba(8,20,12,0.32)");
+    g.fillStyle = vg; g.fillRect(-4, -4, W + 8, H + 8);
     if (dying && dieKind === "skip") { g.globalAlpha = clamp(1.2 - dying, 0, 1); R(-4, -4, W + 8, H + 8, "#000"); g.globalAlpha = 1; }
     g.restore();
     c.drawImage(lo, 0, 0, W * PX, H * PX);
     // HUD text
     if (mode === "run" && !ui.menuOpen) {
       var prog = clamp(pz / rows[rows.length - 1].z, 0, 1), bw = ui.VW * 0.7, bx = (ui.VW - bw) / 2;
-      c.fillStyle = "rgba(5,5,5,0.55)"; c.fillRect(bx - 2, 10, bw + 4, 8); c.fillStyle = "#ffcf7a"; c.fillRect(bx, 12, bw * prog, 4);
+      c.fillStyle = "rgba(5,5,5,0.62)"; c.fillRect(bx - 3, 9, bw + 6, 10); c.strokeStyle = "rgba(255,207,122,0.45)"; c.strokeRect(bx - 3, 9, bw + 6, 10);
+      c.fillStyle = "#2a1a08"; c.fillRect(bx, 12, bw, 4); c.fillStyle = "#ffcf7a"; c.fillRect(bx, 12, bw * prog, 4); c.fillStyle = "rgba(255,255,255,0.35)"; c.fillRect(bx, 12, bw * prog, 1);
       rows.forEach(function (r) { if (r.cp) { c.fillStyle = "#ff9a2a"; c.fillRect(bx + bw * r.z / rows[rows.length - 1].z - 1, 8, 2, 12); } });
       ui.text(th.name.toUpperCase() + " · " + FF.fmtTime(t), ui.VW / 2, 32, 12, "#ffd38a", "center");
       if (skipD < 4.5 && !dying && Math.floor(now * 6) % 2) ui.text("SKIP!", ui.VW / 2, ui.VH * 0.5, 30, "#ff6a3a", "center", "#ff2a00");
@@ -333,8 +362,10 @@
   function crateBox(x, y, s, kind) {
     var w = s * 0.95, h = s * 0.95, l = x - w / 2, tp = y - h;
     if (kind === "i") { R(l, tp, w, h, "#6a6e76"); R(l, tp, w, Math.max(1, h * 0.12), "#9aa0aa"); R(l + w * 0.1, tp + h * 0.2, Math.max(1, w * 0.08), Math.max(1, w * 0.08), "#3a3e44"); R(l + w * 0.82, tp + h * 0.2, Math.max(1, w * 0.08), Math.max(1, w * 0.08), "#3a3e44"); R(l + w * 0.1, tp + h * 0.75, Math.max(1, w * 0.08), Math.max(1, w * 0.08), "#3a3e44"); R(l + w * 0.82, tp + h * 0.75, Math.max(1, w * 0.08), Math.max(1, w * 0.08), "#3a3e44"); return; }
+    g.fillStyle = "rgba(0,0,0,0.28)"; g.fillRect(l + 1, tp + h - 1, w, Math.max(1, h * 0.12));
     R(l, tp, w, h, kind === "h" ? "#d8a020" : "#a8743a");
-    R(l, tp, w, Math.max(1, h * 0.1), kind === "h" ? "#ffd050" : "#d0a060");
+    R(l, tp, w, Math.max(1, h * 0.12), kind === "h" ? "#ffd050" : "#d0a060");
+    R(l + w * 0.08, tp + h * 0.08, w * 0.2, Math.max(1, h * 0.08), "rgba(255,255,255,0.25)");
     var b = Math.max(1, w * 0.1);
     R(l, tp, b, h, "#6a4420"); R(l + w - b, tp, b, h, "#6a4420"); R(l, tp + h - b, w, b, "#6a4420");
     if (kind === "h") { R(x - w * 0.25, tp + h * 0.35, w * 0.5, h * 0.25, "#fff2a0"); R(x - w * 0.32, tp + h * 0.55, w * 0.64, Math.max(1, h * 0.08), "#fff2a0"); }
@@ -373,6 +404,9 @@
     // shadow
     var shw = (0.5 - Math.min(0.3, jy * 0.15)) * s;
     g.fillStyle = "rgba(0,0,0,0.35)"; g.beginPath(); g.ellipse(x, gy, shw, shw * 0.25, 0, 0, Math.PI * 2); g.fill();
+    if (jy < 0.05 && mode === "run") {
+      for (var d = 0; d < 5; d++) R(x + (d - 2) * 3 - 4, gy - 1 - (d % 2), 2, 1, "rgba(220,200,160," + (0.25 + 0.2 * Math.abs(Math.sin(now * 20 + d))) + ")");
+    }
     var y = gy - jy * s, run = Math.sin(stepPh), u = s / 30;
     var skin = "#d8a070", vest = "#ff7a1a", strip = "#e8f0e0", trou = "#2a3a5a", boot = "#2a1a0e", hair = "#3a2414";
     if (stumble > 0) y += Math.sin(now * 40) * u;
@@ -388,13 +422,16 @@
     R(x - 6 * u, y - 16 * u + Math.max(0, -l1) * u * 0.0, 5 * u, 14 * u - Math.max(0, l1) * u, trou); R(x - 6 * u, y - 3 * u - Math.max(0, l1) * u, 5 * u, 3 * u, boot);
     R(x + 1 * u, y - 16 * u, 5 * u, 14 * u - Math.max(0, l2) * u, trou); R(x + 1 * u, y - 3 * u - Math.max(0, l2) * u, 5 * u, 3 * u, boot);
     // torso
-    R(x - 8 * u, y - 31 * u, 16 * u, 16 * u, vest); R(x - 8 * u, y - 24 * u, 16 * u, 2 * u, strip); R(x - 1 * u, y - 31 * u, 2 * u, 16 * u, strip);
+    R(x - 9 * u, y - 30 * u, 18 * u, 16 * u, "#6a2a0a");
+    R(x - 8 * u, y - 31 * u, 16 * u, 16 * u, vest); R(x - 7 * u, y - 30 * u, 5 * u, 4 * u, "rgba(255,255,255,0.2)");
+    R(x - 8 * u, y - 24 * u, 16 * u, 2 * u, strip); R(x - 1 * u, y - 31 * u, 2 * u, 16 * u, strip);
     // arms swing opposite
     var a1 = air ? -8 : -run * 4, a2 = air ? -8 : run * 4;
     R(x - 12 * u, y - 30 * u + a1 * u, 4 * u, 11 * u, skin); R(x + 8 * u, y - 30 * u + a2 * u, 4 * u, 11 * u, skin);
     // head
+    R(x - 6 * u, y - 39 * u, 12 * u, 9 * u, "#2a1810");
     R(x - 5 * u, y - 40 * u, 10 * u, 9 * u, hair); R(x - 6 * u, y - 36 * u, 2 * u, 3 * u, skin); R(x + 4 * u, y - 36 * u, 2 * u, 3 * u, skin);
-    if (hat) { R(x - 6 * u, y - 43 * u, 12 * u, 5 * u, "#ffd040"); R(x - 8 * u, y - 39 * u, 16 * u, 2 * u, "#e8b020"); }
+    if (hat) { R(x - 6 * u, y - 43 * u, 12 * u, 5 * u, "#ffd040"); R(x - 8 * u, y - 39 * u, 16 * u, 2 * u, "#e8b020"); R(x - 4 * u, y - 42 * u, 4 * u, 2 * u, "#fff3a0"); }
   }
   function drawSkip(now) {
     if (mode !== "run") return;
@@ -403,8 +440,10 @@
     var top = lerp(H * 0.86, H * 0.5, Math.min(1, danger)), w = W * 1.0, x = W / 2 + Math.sin(now * 7) * 3;
     if (top > H) return;
     var wob = Math.sin(now * 13) * 2;
-    poly([x - w * 0.5, top + wob, x + w * 0.5, top - wob, x + w * 0.42, H + 10, x - w * 0.42, H + 10], "#d08a1a");
-    R(x - w * 0.5, top - 3, w, 5, "#f0b030");
+    var lg = g.createLinearGradient(0, top, 0, H);
+    lg.addColorStop(0, "#f0b030"); lg.addColorStop(0.25, "#d08a1a"); lg.addColorStop(1, "#6a3a08");
+    g.fillStyle = lg; g.beginPath(); g.moveTo(x - w * 0.5, top + wob); g.lineTo(x + w * 0.5, top - wob); g.lineTo(x + w * 0.42, H + 10); g.lineTo(x - w * 0.42, H + 10); g.closePath(); g.fill();
+    R(x - w * 0.5, top - 3, w, 5, "#ffe08a");
     R(x - w * 0.46, top + 10, w * 0.92, 3, "#9a5a10");
     R(x - w * 0.46, top + 24, w * 0.92, 3, "#9a5a10");
     for (var k = 0; k < 5; k++) R(x - w * 0.4 + k * w * 0.2, top + 4, 4, 4, "#6a4010");
@@ -453,7 +492,7 @@
       buttons: [{ label: next ? "Play track " + (next + 1) : "Play", act: function () { startTrack(next); } }, { label: "Tracks", act: trackList },
         { label: "Touch pads: " + (save.padsOn ? "on" : "off (swipe only)"), small: true, act: function () { save.padsOn = !save.padsOn; ui.persist(); toTitle(); } }], app: true,
       help: ["Swipe left/right to change lane, up (or tap) to jump, down to slide.", "Or use the pads, or arrow keys and Space.", "Smash crates by jumping on them or sliding into them. Hard-hat crates save you from one knock."],
-      fine: "A Forest Forge game" });
+      fine: "A Forest Forge game", solid: false });
   }
   ui.onAdsRemoved = function () { if (mode === "title") toTitle(); };
   game.qa = { start: startTrack, state: function () { return { pz: pz, v: v, lane: lane, jy: jy, skipD: skipD, lives: lives, crates: crates, total: totalCrates, mode: mode, dying: dying }; }, rows: function () { return rows; }, jump: doJump, slide: doSlide, left: doLeft, right: doRight };

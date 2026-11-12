@@ -9,7 +9,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#1a5aaa;--water:#1650a0;--amber:#fff8e0;--amber-hi:#ffe66a;--amber-soft:#e8ffe0;--amber-line:#3aaa40;--ember:#e83838;--btn:#1a4a88;--lamp:#fff6a8;--glow-line:rgba(80,200,70,.35);--glow-fill:rgba(80,200,70,.08)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #3a8ad0 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#1a5aaa,#0e3878);border-bottom-color:rgba(58,170,64,.4)}.ff{border-left-color:rgba(58,170,64,.28);border-right-color:rgba(58,170,64,.28)}.ff-icon-btn:active{background:#2a6ac0;box-shadow:0 0 16px rgba(255,220,80,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(255,220,80,.5)}`);
+  })(`:root{--bg:#1a5aaa;--water:#1650a0;--amber:#fff8e0;--amber-hi:#ffe66a;--amber-soft:#e8ffe0;--amber-line:#3aaa40;--ember:#e83838;--btn:#1a4a88;--lamp:#fff6a8;--glow-line:rgba(80,200,70,.35);--glow-fill:rgba(80,200,70,.08)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #3a8ad0 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#1a5aaa,#0e3878);border-bottom-color:rgba(58,170,64,.4)}.ff{border-left-color:rgba(58,170,64,.28);border-right-color:rgba(58,170,64,.28)}.ff-icon-btn:active{background:#2a6ac0;box-shadow:0 0 16px rgba(255,220,80,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(255,220,80,.5)}.ff-shade{background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.52))!important}.ff-modal{text-shadow:0 2px 10px rgba(0,0,0,.7);animation:ffIn .35s ease}.ff-display{letter-spacing:.18em;filter:drop-shadow(0 0 16px var(--ember))}.ff-lede,.ff-stat-line,.ff-fine{text-shadow:0 1px 6px rgba(0,0,0,.7)}.ff-btns{background:rgba(0,0,0,.42);border:1px solid var(--glow-line);border-radius:16px;padding:14px 16px 16px;box-shadow:0 14px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);backdrop-filter:blur(7px)}.ff-btn{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 18px var(--glow-fill);letter-spacing:.06em}.ff-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.35)}.ff-hud{box-shadow:0 10px 24px rgba(0,0,0,.28)}.ff-toast{backdrop-filter:blur(6px)}@keyframes ffIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}`);
   var clamp = FF.clamp, TS = PF.TS;
   var ui = FF.create({
     id: "nettle-run", title: "Nettle Run", course: "The hills", wide: true, view: { w: 640, h: 360, flex: true },
@@ -275,7 +275,9 @@
     flints.forEach(function (f) { g.fillStyle = "#d8d8e0"; g.fillRect(Math.round(f.x - cam.x), Math.round(f.y - cam.y), 4, 4); g.fillStyle = "#6a6a70"; g.fillRect(Math.round(f.x - cam.x + (Math.floor(f.spin) % 2) * 2), Math.round(f.y - cam.y + 1), 2, 2); });
     if (hero && mode !== "title" && (hero.inv <= 0 || Math.floor(tt * 14) % 2)) drawHero(tt);
     parts.draw(g, cam);
+    if (window.FFGfx) FFGfx.motes(g, cam, W, H, tt, th.stars ? "rgba(200,220,255,0.5)" : "rgba(255,240,140,0.55)", th.stars ? 10 : 16);
     if (mode !== "title" && hero) drawHud(tt);
+    if (window.FFGfx) FFGfx.vignette(g, W, H, th.stars ? 0.4 : 0.28);
     c.drawImage(lo, 0, 0, W * PX, H * PX);
     if (mode === "play" && !ui.menuOpen && bannerT > 0) ui.text(banner, ui.VW / 2, ui.VH * 0.22, 20, "#ffe3a0", "center", "#ff9a2a");
   }
@@ -293,9 +295,9 @@
   }
   function drawHud(tt) {
     // stamina bar: little apples
-    g.fillStyle = "rgba(5,5,5,0.55)"; g.fillRect(4, 4, 86, 9);
+    g.fillStyle = "rgba(5,5,5,0.62)"; g.fillRect(3, 3, 88, 11); g.strokeStyle = "rgba(255,230,120,0.35)"; g.strokeRect(3, 3, 88, 11);
     var n = 16, k = Math.ceil(food * n);
-    for (var i = 0; i < n; i++) { g.fillStyle = i < k ? (food < 0.25 && Math.floor(tt * 6) % 2 ? "#fff" : i < 4 ? "#e83a2a" : i < 9 ? "#f0a030" : "#7ad04a") : "#2a1a08"; g.fillRect(6 + i * 5, 6, 4, 5); }
+    for (var i = 0; i < n; i++) { g.fillStyle = i < k ? (food < 0.25 && Math.floor(tt * 6) % 2 ? "#fff" : i < 4 ? "#e83a2a" : i < 9 ? "#f0a030" : "#7ad04a") : "#2a1a08"; g.fillRect(6 + i * 5, 6, 4, 5); if (i < k) { g.fillStyle = "rgba(255,255,255,0.3)"; g.fillRect(6 + i * 5, 6, 4, 1); } }
     if (hasFlint) g.drawImage(ITEM.f, 94, 5);
     if (cart) g.drawImage(ITEM.c, 102, 6);
   }
@@ -332,7 +334,7 @@
       stats: "<span>HIGH SCORE " + (save.hi ? FF.n(save.hi) : "-") + "</span><span>STAGES OPEN " + save.open + "/" + STAGES.length + "</span>",
       buttons: [{ label: next ? "Play stage " + (next + 1) : "Play", act: function () { play(next); } }, { label: "Stages", act: stageList }], app: true,
       help: ["◀ ▶ run, Jump (hold for higher), Flint throws once you've found the pouch.", "The apple bar at the top drains: eat fruit to keep going. Rocks trip you and cost stamina.", "Ride the hill-cart: faster, higher, and it takes one knock for you."],
-      fine: "A Forest Forge game" });
+      fine: "A Forest Forge game", solid: false });
   }
   var game = {
     toTitle: toTitle, onResize: sizeLo, update: update, render: render,

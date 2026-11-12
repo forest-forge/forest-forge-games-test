@@ -9,7 +9,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#030614;--water:#05081c;--amber:#d8f0ff;--amber-hi:#a8f0ff;--amber-soft:#e8e0ff;--amber-line:#3ad0f0;--ember:#d45cff;--btn:#10183a;--lamp:#f0f8ff;--glow-line:rgba(80,220,255,.4);--glow-fill:rgba(80,220,255,.1)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #142060 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#10183a,#050814);border-bottom-color:rgba(58,208,240,.35)}.ff{border-left-color:rgba(58,208,240,.28);border-right-color:rgba(58,208,240,.28)}.ff-icon-btn:active{background:#1a2870;box-shadow:0 0 16px rgba(80,220,255,.5)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(80,220,255,.55)}`);
+  })(`:root{--bg:#030614;--water:#05081c;--amber:#d8f0ff;--amber-hi:#a8f0ff;--amber-soft:#e8e0ff;--amber-line:#3ad0f0;--ember:#d45cff;--btn:#10183a;--lamp:#f0f8ff;--glow-line:rgba(80,220,255,.4);--glow-fill:rgba(80,220,255,.1)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #142060 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#10183a,#050814);border-bottom-color:rgba(58,208,240,.35)}.ff{border-left-color:rgba(58,208,240,.28);border-right-color:rgba(58,208,240,.28)}.ff-icon-btn:active{background:#1a2870;box-shadow:0 0 16px rgba(80,220,255,.5)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(80,220,255,.55)}.ff-shade{background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.52))!important}.ff-modal{text-shadow:0 2px 10px rgba(0,0,0,.7);animation:ffIn .35s ease}.ff-display{letter-spacing:.18em;filter:drop-shadow(0 0 16px var(--ember))}.ff-lede,.ff-stat-line,.ff-fine{text-shadow:0 1px 6px rgba(0,0,0,.7)}.ff-btns{background:rgba(0,0,0,.42);border:1px solid var(--glow-line);border-radius:16px;padding:14px 16px 16px;box-shadow:0 14px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);backdrop-filter:blur(7px)}.ff-btn{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 18px var(--glow-fill);letter-spacing:.06em}.ff-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.35)}.ff-hud{box-shadow:0 10px 24px rgba(0,0,0,.28)}.ff-toast{backdrop-filter:blur(6px)}@keyframes ffIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}`);
   var clamp = FF.clamp, lerp = FF.lerp, TAU = Math.PI * 2;
   var ui = FF.create({
     id: "well-ring", title: "Well Ring", course: "The well", view: { w: 360, h: 640, flex: true },
@@ -35,7 +35,19 @@
            bmp(["..aaa..", ".abbba.", "abbbbba", "abbcbba", ".abbba.", ".a...a."], { a: "#3ad0ff", b: "#b0f0ff", c: "#ffffff" })],
     lantern: [bmp(["..aa..", ".abba.", "abccba", "abccba", ".abba.", "..dd.."], { a: "#8a5a1a", b: "#ffb040", c: "#fff0b0", d: "#5a3a10" })]
   };
-  var POD = bmp(["....aa....", "...abba...", "..abccba..", ".aabccbaa.", "aaddddddaa", "a.d.ee.d.a", "...eeee...", "....ee...."], { a: "#3a8ad8", b: "#8ae8ff", c: "#f0ffff", d: "#1a3060", e: "#d45cff" });
+  var POD = bmp([
+    "......aa......",
+    ".....abba.....",
+    "....abccba....",
+    "...aabccbaa...",
+    "..aaabccbaaa..",
+    ".aaaddddddaaa.",
+    "aa.d.eeee.d.aa",
+    "a...eeeeee...a",
+    "....eeeeee....",
+    ".....eeee.....",
+    "......ee......"
+  ], { a: "#2a6ab8", b: "#8ae8ff", c: "#f0ffff", d: "#1a3060", e: "#d45cff" });
 
   // ---------- sound ----------
   var S = {
@@ -230,46 +242,76 @@
   function render(c, t) {
     if (!W) sizeLo();
     R(0, 0, W, H, "#030614");
-    // the well: brick rings falling away towards the glow
-    var gr = g.createRadialGradient(CX, CY, 0, CX, CY, RR * 0.35); gr.addColorStop(0, "#8af0ff"); gr.addColorStop(0.22, "#1a3a90"); gr.addColorStop(1, "rgba(3,6,20,0)");
+    // stars around the shaft
+    for (var s = 0; s < 40; s++) {
+      g.globalAlpha = 0.35 + 0.65 * Math.abs(Math.sin(t * 2 + s));
+      R((s * 47 + 11) % W, (s * 31 + 5) % H, s % 6 ? 1 : 2, 1, s % 4 ? "#8aa0d0" : "#e8f0ff");
+    }
+    g.globalAlpha = 1;
+    // depth glow + caustic pulse
+    var pulse = 0.85 + 0.15 * Math.sin(t * 2.2);
+    var gr = g.createRadialGradient(CX, CY, 0, CX, CY, RR * 0.5);
+    gr.addColorStop(0, "rgba(160,255,255," + (0.95 * pulse) + ")"); gr.addColorStop(0.18, "rgba(40,80,200,0.85)"); gr.addColorStop(0.55, "rgba(20,20,80,0.4)"); gr.addColorStop(1, "rgba(3,6,20,0)");
     g.fillStyle = gr; g.fillRect(0, 0, W, H);
     for (var i = 0; i < rings.length; i++) {
       var r = rings[i].r; if (r < 0.04) continue;
       var rad = r * RR * 1.0, k = clamp(r, 0, 1) * (r > 1 ? clamp(1.6 - r, 0, 0.6) / 0.6 : 1);
-      var hue = i % 4; var rr = hue === 0 ? 80 + 80 * k : hue === 1 ? 180 + 50 * k : hue === 2 ? 40 + 40 * k : 220 + 20 * k, gg = hue === 0 ? 200 + 40 * k : hue === 1 ? 80 + 40 * k : hue === 2 ? 220 + 20 * k : 80 + 40 * k, bb = hue === 0 ? 255 : hue === 1 ? 255 : hue === 2 ? 140 : 200; g.strokeStyle = "rgba(" + Math.round(rr) + "," + Math.round(gg) + "," + Math.round(bb) + "," + (0.2 + 0.55 * k) + ")";
-      g.lineWidth = Math.max(1, r * 3); g.beginPath(); g.arc(CX, CY, rad, 0, TAU); g.stroke();
-      // brick joints
-      var n = 12, off = i * 0.37;
-      for (var j = 0; j < n; j++) { var a = off + j / n * TAU, p1 = { x: CX + Math.cos(a) * rad, y: CY + Math.sin(a) * rad }; R(p1.x, p1.y, Math.max(1, r * 2), Math.max(1, r * 2), "rgba(180,240,255,0.7)"); }
+      var hue = i % 4; var rr = hue === 0 ? 80 + 80 * k : hue === 1 ? 180 + 50 * k : hue === 2 ? 40 + 40 * k : 220 + 20 * k, gg = hue === 0 ? 200 + 40 * k : hue === 1 ? 80 + 40 * k : hue === 2 ? 220 + 20 * k : 80 + 40 * k, bb = hue === 0 ? 255 : hue === 1 ? 255 : hue === 2 ? 140 : 200;
+      g.strokeStyle = "rgba(" + Math.round(rr) + "," + Math.round(gg) + "," + Math.round(bb) + "," + (0.22 + 0.6 * k) + ")";
+      g.lineWidth = Math.max(1.5, r * 3.4); g.beginPath(); g.arc(CX, CY, rad, 0, TAU); g.stroke();
+      var n = 14, off = i * 0.37 + t * 0.05;
+      for (var j = 0; j < n; j++) { var a = off + j / n * TAU, p1 = { x: CX + Math.cos(a) * rad, y: CY + Math.sin(a) * rad }; R(p1.x, p1.y, Math.max(1, r * 2), Math.max(1, r * 2), "rgba(180,240,255,0.75)"); }
+    }
+    // mossy brick rim around the well
+    g.save();
+    g.beginPath(); g.rect(-1, -1, W + 2, H + 2); g.arc(CX, CY, RR + 1, 0, TAU, true); g.clip("evenodd");
+    g.fillStyle = "#12182c"; g.fillRect(0, 0, W, H);
+    for (var br = 0; br < 28; br++) {
+      var ba = br / 28 * TAU, bx = CX + Math.cos(ba) * (RR + 8), by = CY + Math.sin(ba) * (RR + 8);
+      g.fillStyle = br % 3 ? "#2a3458" : "#1a2440";
+      g.fillRect(bx - 6, by - 5, 12, 10);
+      g.fillStyle = "rgba(80,200,120,0.18)"; g.fillRect(bx - 3, by - 6, 5, 3);
+    }
+    g.restore();
+    // lanterns on the rim
+    for (var ln = 0; ln < 6; ln++) {
+      var la = ln / 6 * TAU + t * 0.02, lp = polar(la, 1.08);
+      g.fillStyle = "rgba(255,220,120,0.18)"; g.beginPath(); g.arc(lp.x, lp.y, 8, 0, TAU); g.fill();
+      R(lp.x - 1, lp.y - 3, 2, 5, "#2a2a30"); R(lp.x - 2, lp.y - 5, 4, 3, "#ffe08a");
     }
     // player ring track
-    g.strokeStyle = "rgba(80,220,255,0.5)"; g.lineWidth = 1; g.beginPath(); g.arc(CX, CY, RR, 0, TAU); g.stroke();
+    g.strokeStyle = "rgba(80,220,255,0.7)"; g.lineWidth = 2; g.beginPath(); g.arc(CX, CY, RR, 0, TAU); g.stroke();
+    g.strokeStyle = "rgba(200,255,255,0.25)"; g.lineWidth = 1; g.beginPath(); g.arc(CX, CY, RR + 3, 0, TAU); g.stroke();
     // foes
     var fr = Math.floor(t * 6) % 2;
     foes.forEach(function (f) {
       var p = polar(f.a, f.r), s = scaleAt(f.r) * (f.kind === "imp" ? 1.2 : 1), art = ART[f.kind][f.lantern ? 0 : fr];
       var w = art.width * s, h = art.height * s;
+      g.globalAlpha = 0.22; g.fillStyle = "#a8f0ff"; g.beginPath(); g.arc(p.x, p.y, Math.max(3, w * 0.55), 0, TAU); g.fill(); g.globalAlpha = 1;
       g.drawImage(art, Math.round(p.x - w / 2), Math.round(p.y - h / 2), Math.round(w), Math.round(h));
-      if (f.lantern) { g.globalAlpha = 0.25; g.fillStyle = "#ffb040"; g.beginPath(); g.arc(p.x, p.y, 5 * s, 0, TAU); g.fill(); g.globalAlpha = 1; }
+      if (f.lantern) { g.globalAlpha = 0.35; g.fillStyle = "#ffb040"; g.beginPath(); g.arc(p.x, p.y, 6 * s, 0, TAU); g.fill(); g.globalAlpha = 1; }
     });
     // items
     items.forEach(function (it) { var p = polar(it.a, it.r), s = scaleAt(it.r); R(p.x - 3 * s, p.y - 3 * s, 6 * s, 6 * s, it.kind === "twin" ? "#4ae0a0" : "#ff6a3a"); R(p.x - 1.5 * s, p.y - 1.5 * s, 3 * s, 3 * s, "#fff"); });
     // shots
-    shots.forEach(function (s) { var p = polar(s.a, s.r), sz = Math.max(1, 2.5 * scaleAt(s.r)); R(p.x - sz / 2, p.y - sz / 2, sz, sz, "#fff4c0"); var q = polar(s.a, s.r + 0.04); R(q.x - sz / 3, q.y - sz / 3, sz * 0.66, sz * 0.66, "#ff9a2a"); });
+    shots.forEach(function (s) { var p = polar(s.a, s.r), sz = Math.max(1, 2.5 * scaleAt(s.r)); var q = polar(s.a, s.r + 0.07); g.strokeStyle = "rgba(255,244,192,0.45)"; g.lineWidth = Math.max(1, sz * 0.5); g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(q.x, q.y); g.stroke(); R(p.x - sz / 2, p.y - sz / 2, sz, sz, "#fff4c0"); R(q.x - sz / 3, q.y - sz / 3, sz * 0.66, sz * 0.66, "#ff9a2a"); });
     // pellets
     pel.forEach(function (p) { var q = polar(p.a, p.r), sz = Math.max(1, 2.5 * scaleAt(p.r)); R(q.x - sz / 2, q.y - sz / 2, sz, sz, Math.floor(t * 20) % 2 ? "#ff4a6a" : "#ffe0e0"); });
     // pod
     if (deadT <= 0 && (inv <= 0 || Math.floor(t * 12) % 2) && mode !== "title") {
       var me = polar(pa, 1);
+      g.globalAlpha = 0.28; g.fillStyle = "#8af0ff"; g.beginPath(); g.arc(me.x, me.y, 10, 0, TAU); g.fill(); g.globalAlpha = 1;
       g.save(); g.translate(Math.round(me.x), Math.round(me.y)); g.rotate(pa + Math.PI / 2);
-      g.drawImage(POD, -8, -6, 16, 13); if (twin > 0) { R(-9, -2, 2, 4, "#4ae0a0"); R(7, -2, 2, 4, "#4ae0a0"); }
+      g.drawImage(POD, -10, -8, 20, 16); if (twin > 0) { R(-11, -2, 3, 5, "#4ae0a0"); R(8, -2, 3, 5, "#4ae0a0"); }
       g.restore();
-      // lamp beam into the well
-      g.globalAlpha = 0.07; g.fillStyle = "#8af0ff"; g.beginPath(); g.moveTo(me.x, me.y); var b1 = polar(pa - 0.12, 0.35), b2 = polar(pa + 0.12, 0.35); g.lineTo(b1.x, b1.y); g.lineTo(b2.x, b2.y); g.fill(); g.globalAlpha = 1;
+      g.globalAlpha = 0.12; g.fillStyle = "#8af0ff"; g.beginPath(); g.moveTo(me.x, me.y); var b1 = polar(pa - 0.16, 0.28), b2 = polar(pa + 0.16, 0.28); g.lineTo(b1.x, b1.y); g.lineTo(b2.x, b2.y); g.fill(); g.globalAlpha = 1;
     }
-    if (mode === "title") { var tp = polar(t * 0.8, 1); g.save(); g.translate(tp.x, tp.y); g.rotate(t * 0.8 + Math.PI / 2); g.drawImage(POD, -8, -6, 16, 13); g.restore(); }
-    fx.forEach(function (p) { R(p.x, p.y, 1.5, 1.5, p.c); });
+    if (mode === "title") { var tp = polar(t * 0.8, 1); g.globalAlpha = 0.28; g.fillStyle = "#8af0ff"; g.beginPath(); g.arc(tp.x, tp.y, 10, 0, TAU); g.fill(); g.globalAlpha = 1; g.save(); g.translate(tp.x, tp.y); g.rotate(t * 0.8 + Math.PI / 2); g.drawImage(POD, -10, -8, 20, 16); g.restore(); }
+    fx.forEach(function (p) { R(p.x, p.y, 2, 2, p.c); g.globalAlpha = 0.35; R(p.x - 1, p.y - 1, 4, 4, p.c); g.globalAlpha = 1; });
     if (flare > 0) { g.globalAlpha = flare * 2; R(0, 0, W, H, "#fff8e0"); g.globalAlpha = 1; }
+    var vg = g.createRadialGradient(CX, CY, RR * 0.3, CX, CY, RR * 1.35);
+    vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(3,6,20,0.45)");
+    g.fillStyle = vg; g.fillRect(0, 0, W, H);
     c.drawImage(lo, 0, 0, W * PX, H * PX);
     if (mode === "play" && !ui.menuOpen) {
       if (bannerT > 0) ui.text(banner, ui.VW / 2, CY * PX - RR * PX - 18 > 20 ? CY * PX - RR * PX - 14 : 30, 17, "#ffe3a0", "center", "#ff9a2a");
@@ -305,7 +347,7 @@
         { label: "Moving: " + (save.ctl === "drag" ? "touch the ring" : "pads"), small: true, act: function () { save.ctl = save.ctl === "drag" ? "pads" : "drag"; ui.persist(); toTitle(); } },
         { label: "Firing: " + (save.fire === "auto" ? "automatic" : "hold to fire"), small: true, act: function () { save.fire = save.fire === "auto" ? "hold" : "auto"; ui.persist(); toTitle(); } }], app: true,
       help: ["Touch or drag anywhere: the pod runs round the ring to that side.", "Shots fly down into the well. Divers come right up to the ring, so keep moving.", "Every fourth landing: catch all 24 lanterns for 10,000. Green = twin lamps, red = flare."],
-      fine: "A Forest Forge game" });
+      fine: "A Forest Forge game", solid: false });
   }
   ui.onAdsRemoved = function () { if (mode === "title") toTitle(); };
   game.qa = { start: newGame, state: function () { return { mode: mode, wave: wave, depth: depth, lives: lives, score: score, foes: foes.length, pa: pa, deadT: deadT }; }, foes: function () { return foes; }, aimAt: function (a) { target = a; }, god: function () { inv = 1e9; } };

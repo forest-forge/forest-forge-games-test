@@ -10,7 +10,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#1a1030;--water:#140c28;--amber:#f0e4b0;--amber-hi:#ffe27a;--amber-soft:#d8f4f0;--amber-line:#7a4ad0;--ember:#2ab8a8;--btn:#2a1850;--lamp:#ffe9a0;--glow-line:rgba(160,120,255,.4);--glow-fill:rgba(42,184,168,.1)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #3a2080 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#2a1850,#140c28);border-bottom-color:rgba(122,74,208,.4)}.ff{border-left-color:rgba(122,74,208,.3);border-right-color:rgba(122,74,208,.3)}.ff-icon-btn:active{background:#3a2890;box-shadow:0 0 16px rgba(255,210,100,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(255,210,100,.5)}`);
+  })(`:root{--bg:#1a1030;--water:#140c28;--amber:#f0e4b0;--amber-hi:#ffe27a;--amber-soft:#d8f4f0;--amber-line:#7a4ad0;--ember:#2ab8a8;--btn:#2a1850;--lamp:#ffe9a0;--glow-line:rgba(160,120,255,.4);--glow-fill:rgba(42,184,168,.1)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #3a2080 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#2a1850,#140c28);border-bottom-color:rgba(122,74,208,.4)}.ff{border-left-color:rgba(122,74,208,.3);border-right-color:rgba(122,74,208,.3)}.ff-icon-btn:active{background:#3a2890;box-shadow:0 0 16px rgba(255,210,100,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(255,210,100,.5)}.ff-shade{background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.52))!important}.ff-modal{text-shadow:0 2px 10px rgba(0,0,0,.7);animation:ffIn .35s ease}.ff-display{letter-spacing:.18em;filter:drop-shadow(0 0 16px var(--ember))}.ff-lede,.ff-stat-line,.ff-fine{text-shadow:0 1px 6px rgba(0,0,0,.7)}.ff-btns{background:rgba(0,0,0,.42);border:1px solid var(--glow-line);border-radius:16px;padding:14px 16px 16px;box-shadow:0 14px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);backdrop-filter:blur(7px)}.ff-btn{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 18px var(--glow-fill);letter-spacing:.06em}.ff-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.35)}.ff-hud{box-shadow:0 10px 24px rgba(0,0,0,.28)}.ff-toast{backdrop-filter:blur(6px)}@keyframes ffIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}`);
   var clamp = FF.clamp, TS = PF.TS;
   var ui = FF.create({
     id: "kilnbound", title: "Kilnbound", course: "Ashcombe", wide: true, view: { w: 640, h: 360, flex: true },
@@ -488,7 +488,9 @@
     shots.forEach(function (s) { g.fillStyle = s.c; g.fillRect(Math.round(s.x - cam.x), Math.round(s.y - cam.y), 6, 6); g.fillStyle = "#fff"; g.fillRect(Math.round(s.x - cam.x) + 2, Math.round(s.y - cam.y) + 2, 2, 2); });
     if (hero && mode !== "title" && (hero.inv <= 0 || Math.floor(tt * 14) % 2)) drawHero(tt);
     parts.draw(g, cam);
+    if (window.FFGfx) FFGfx.motes(g, cam, W, H, tt, area === "kiln" || area === "heart" ? "rgba(255,160,60,0.65)" : "rgba(180,160,255,0.55)", 14);
     if (mode !== "title" && hero) drawHud(tt);
+    if (window.FFGfx) FFGfx.vignette(g, W, H, 0.4);
     c.drawImage(lo, 0, 0, W * PX, H * PX);
     if (mode === "play" && !ui.menuOpen) {
       if (bannerT > 0) ui.text(banner, ui.VW / 2, ui.VH * 0.22, 20, "#ffe3a0", "center", "#ff9a2a");
@@ -496,12 +498,26 @@
     }
   }
   function drawTown(tt) {
-    // night market stalls and cottages behind the street
     for (var i = 0; i < 9; i++) {
       var x = Math.round(i * 96 + 30 - cam.x * 0.85), y = Math.round(14 * TS - cam.y * 0.85 - cam.y * 0.15);
-      if (x < -60 || x > W + 10) continue;
-      g.fillStyle = "#2a1e2a"; g.fillRect(x, y - 44, 44, 44); g.fillStyle = "#3a2a3a"; g.beginPath(); g.moveTo(x - 4, y - 44); g.lineTo(x + 22, y - 62); g.lineTo(x + 48, y - 44); g.fill();
+      if (x < -70 || x > W + 16) continue;
+      g.fillStyle = "rgba(0,0,0,0.28)"; g.fillRect(x + 4, y - 6, 40, 6);
+      g.fillStyle = i % 2 ? "#241828" : "#2a1e2a"; g.fillRect(x, y - 44, 44, 44);
+      g.fillStyle = "#4a2a48"; g.beginPath(); g.moveTo(x - 5, y - 44); g.lineTo(x + 22, y - 64); g.lineTo(x + 49, y - 44); g.fill();
+      g.fillStyle = "#2a1430"; g.beginPath(); g.moveTo(x - 2, y - 44); g.lineTo(x + 22, y - 60); g.lineTo(x + 46, y - 44); g.fill();
+      var glow = 0.55 + 0.45 * Math.abs(Math.sin(tt * 2 + i));
+      g.fillStyle = "rgba(255,192,96," + (0.15 * glow) + ")"; g.fillRect(x + 5, y - 36, 13, 12); g.fillRect(x + 25, y - 36, 13, 12);
       g.fillStyle = (i * 7 + Math.floor(tt)) % 5 ? "#ffc060" : "#e89a40"; g.fillRect(x + 8, y - 34, 7, 8); g.fillRect(x + 28, y - 34, 7, 8);
+      g.fillStyle = "rgba(255,255,200,0.35)"; g.fillRect(x + 9, y - 33, 3, 2);
+      // awning / stall in front of some houses
+      if (i % 2 === 0) {
+        g.fillStyle = i % 4 ? "#7a2a3a" : "#2a6a7a"; g.fillRect(x + 4, y - 18, 36, 5);
+        for (var st = 0; st < 5; st++) { g.fillStyle = st % 2 ? "#e8d8a0" : "#c83a3a"; g.fillRect(x + 4 + st * 7, y - 18, 7, 5); }
+        g.fillStyle = "#3a2a1a"; g.fillRect(x + 6, y - 13, 2, 13); g.fillRect(x + 36, y - 13, 2, 13);
+      }
+      // chimney smoke
+      g.fillStyle = "#3a2a38"; g.fillRect(x + 34, y - 70, 4, 8);
+      g.globalAlpha = 0.25; g.fillStyle = "#c8c0d8"; g.beginPath(); g.arc(x + 36 + Math.sin(tt + i) * 2, y - 76 - (tt * 8 + i * 5) % 10, 3, 0, 7); g.fill(); g.globalAlpha = 1;
     }
   }
   function drawDoor(d, tt) {
@@ -556,7 +572,7 @@
   }
   function drawHud(tt) {
     var n = save.maxH;
-    g.fillStyle = "rgba(5,5,5,0.55)"; g.fillRect(3, 3, n * 7 + 4, 9);
+    g.fillStyle = "rgba(5,5,5,0.62)"; g.fillRect(2, 2, n * 7 + 6, 11); g.strokeStyle = "rgba(200,160,255,0.35)"; g.strokeRect(2, 2, n * 7 + 6, 11);
     for (var i = 0; i < n; i++) { var v = hp - i * 2; g.drawImage(HEART_E, 5 + i * 7, 5); if (v >= 2) g.drawImage(HEART, 5 + i * 7, 5); else if (v === 1) g.drawImage(HEART_H, 5 + i * 7, 5); }
     if (boss && boss.active) {
       var bw = Math.min(160, W - 40), bx = Math.round((W - bw) / 2);
@@ -585,7 +601,7 @@
       stats: "<span>FORMS " + save.forms.length + "/4</span><span>KEEPERS " + Object.keys(save.boss).length + "/4</span>" + (save.cleared ? "<span>CLEARED</span>" : ""),
       buttons: btns, app: true,
       help: ["◀ ▶ move, Jump (hold for higher), Act attacks, digs, or uses shrines and the market.", "Clay wades lava and breaks brick. Crow flaps twice and glides while you hold Jump. Eel swims. Badger digs soft earth.", "Change form and rest at shrines. Spend coins at the night market in Ashcombe."],
-      fine: "A Forest Forge game" });
+      fine: "A Forest Forge game", solid: false });
   }
   var game = {
     toTitle: toTitle, onResize: sizeLo, update: function (dt) { if (mode === "play") update(dt); }, render: render,

@@ -9,7 +9,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#06243c;--water:#07324c;--amber:#e8f4ff;--amber-hi:#fff4b8;--amber-soft:#d4ecff;--amber-line:#2c86d0;--ember:#e23c3c;--btn:#0a3a68;--lamp:#fff6c8;--glow-line:rgba(70,170,255,.35);--glow-fill:rgba(70,170,255,.08)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #0a4c80 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#0a3868,#061e34);border-bottom-color:rgba(44,134,208,.35)}.ff{border-left-color:rgba(44,134,208,.28);border-right-color:rgba(44,134,208,.28)}.ff-icon-btn:active{background:#155a9a;box-shadow:0 0 16px rgba(70,170,255,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(70,170,255,.5)}`);
+  })(`:root{--bg:#06243c;--water:#07324c;--amber:#e8f4ff;--amber-hi:#fff4b8;--amber-soft:#d4ecff;--amber-line:#2c86d0;--ember:#e23c3c;--btn:#0a3a68;--lamp:#fff6c8;--glow-line:rgba(70,170,255,.35);--glow-fill:rgba(70,170,255,.08)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #0a4c80 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#0a3868,#061e34);border-bottom-color:rgba(44,134,208,.35)}.ff{border-left-color:rgba(44,134,208,.28);border-right-color:rgba(44,134,208,.28)}.ff-icon-btn:active{background:#155a9a;box-shadow:0 0 16px rgba(70,170,255,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(70,170,255,.5)}.ff-shade{background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.52))!important}.ff-modal{text-shadow:0 2px 10px rgba(0,0,0,.7);animation:ffIn .35s ease}.ff-display{letter-spacing:.18em;filter:drop-shadow(0 0 16px var(--ember))}.ff-lede,.ff-stat-line,.ff-fine{text-shadow:0 1px 6px rgba(0,0,0,.7)}.ff-btns{background:rgba(0,0,0,.42);border:1px solid var(--glow-line);border-radius:16px;padding:14px 16px 16px;box-shadow:0 14px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);backdrop-filter:blur(7px)}.ff-btn{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 18px var(--glow-fill);letter-spacing:.06em}.ff-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.35)}.ff-hud{box-shadow:0 10px 24px rgba(0,0,0,.28)}.ff-toast{backdrop-filter:blur(6px)}@keyframes ffIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}`);
   var clamp = FF.clamp, lerp = FF.lerp;
   var ui = FF.create({
     id: "wharf-games", title: "Wharf Games", course: "Sports day", view: { w: 360, h: 640, flex: true },
@@ -49,12 +49,17 @@
     var s = flip ? -1 : 1, L = p.lean * s;
     var sx = x + Math.sin(L) * 8, sy = y - Math.cos(L) * 8;
     var f = function (a) { return a * s; };
+    g.fillStyle = "rgba(0,0,0,0.28)"; g.beginPath(); g.ellipse(x, y + 12, 7, 2.2, 0, 0, 7); g.fill();
     var bf = limb(x, y, f(p.tb), f(p.sb), 6, 6, pal.legD, 2); R(bf[0] - 1 + s, bf[1] - 1, 3, 2, pal.boot);
     limb(sx, sy + 1, f(p.ab), f(p.fb), 4, 4, pal.skinD, 2);
-    line(x, y, sx, sy, pal.top, 4);
-    line(x - s, y, sx - s, sy + 1, pal.topD, 1);
+    line(x, y, sx, sy, pal.top, 5);
+    line(x - s, y, sx - s, sy + 1, pal.topD, 2);
+    line(x + s * 0.4, y - 1, sx + s * 0.4, sy, "rgba(255,255,255,0.22)", 1);
     var hx = sx + Math.sin(L) * 3, hy = sy - Math.cos(L) * 3;
-    R(hx - 2, hy - 4, 5, 5, pal.skin); R(hx - 2 - s, hy - 5, 5, 2, pal.hair); R(flip ? hx + 2 : hx - 3, hy - 4, 2, 4, pal.hair);
+    R(hx - 3, hy - 5, 7, 7, pal.skinD);
+    R(hx - 2, hy - 4, 5, 5, pal.skin);
+    R(hx - 1, hy - 3, 2, 2, "rgba(255,255,255,0.3)");
+    R(hx - 2 - s, hy - 6, 5, 3, pal.hair); R(flip ? hx + 2 : hx - 3, hy - 4, 2, 4, pal.hair);
     R(hx + s * 2, hy - 2, 1, 1, "#1a1010");
     var ff = limb(x, y, f(p.tf), f(p.sf), 6, 6, pal.leg, 2); R(ff[0] - 1 + s, ff[1] - 1, 3, 2, pal.boot);
     var hf = limb(sx, sy + 1, f(p.af), f(p.ff), 4, 4, pal.skin, 2);
@@ -73,41 +78,118 @@
   function runBob(ph, speed) { return -Math.abs(Math.sin(ph)) * Math.min(2, speed / 4); }
 
   // ---------- harbour scenery ----------
-  var cranes = [], sheds = [];
-  (function () { var r = FF.rng(7); for (var i = 0; i < 12; i++) cranes.push({ x: i * 140 + r() * 60, h: 40 + r() * 30, b: 30 + r() * 20 }); for (var j = 0; j < 20; j++) sheds.push({ x: j * 70 + r() * 30, w: 40 + r() * 30, h: 14 + r() * 18, c: ["#2a6ec8", "#e2c43a", "#d43a32", "#2a9a4a"][j % 4] }); })();
-  function sky(top, bot) {
-    var gr = g.createLinearGradient(0, 0, 0, bot);
-    gr.addColorStop(0, "#3a86d8"); gr.addColorStop(0.55, "#7ec8f2"); gr.addColorStop(1, "#d8f0ff");
+  var cranes = [], sheds = [], boats = [], clouds = [], gulls = [];
+  (function () {
+    var r = FF.rng(7);
+    for (var i = 0; i < 12; i++) cranes.push({ x: i * 140 + r() * 60, h: 40 + r() * 30, b: 30 + r() * 20, hook: r() });
+    for (var j = 0; j < 20; j++) sheds.push({ x: j * 70 + r() * 30, w: 40 + r() * 30, h: 14 + r() * 18, c: ["#2a6ec8", "#e2c43a", "#d43a32", "#2a9a4a"][j % 4] });
+    for (var k = 0; k < 8; k++) boats.push({ x: k * 180 + r() * 80, w: 22 + r() * 16, h: 8 + r() * 5, hull: ["#d43a32", "#2a6ec8", "#e2c43a", "#1a3a58"][k % 4], cabin: ["#f4f0e0", "#2a3a48", "#c4582a"][k % 3], mast: r() > 0.45 });
+    for (var c = 0; c < 7; c++) clouds.push({ x: c * 90 + r() * 40, y: 8 + r() * 22, w: 28 + r() * 24, h: 8 + r() * 6, s: 0.25 + r() * 0.2 });
+    for (var g2 = 0; g2 < 5; g2++) gulls.push({ x: r() * 400, y: 16 + r() * 28, s: 0.6 + r() * 0.8, ph: r() * 6 });
+  })();
+  function softCirc(x, y, rad, c) { g.fillStyle = c; g.beginPath(); g.arc(x, y, rad, 0, 7); g.fill(); }
+  function sky(top, bot, t) {
+    t = t || 0;
+    var gr = g.createLinearGradient(0, top, 0, bot);
+    gr.addColorStop(0, "#1a5aaa"); gr.addColorStop(0.35, "#3a86d8"); gr.addColorStop(0.68, "#7ec8f2"); gr.addColorStop(1, "#d8f0ff");
     g.fillStyle = gr; g.fillRect(0, top, W, bot - top);
-    R(W * 0.72, bot - 26, 14, 14, "#fff6c0"); R(W * 0.72 - 2, bot - 22, 18, 6, "#fff6c0");
+    var sx = W * 0.74, sy = bot - 28;
+    var glow = g.createRadialGradient(sx, sy, 2, sx, sy, 30);
+    glow.addColorStop(0, "rgba(255,246,192,0.95)"); glow.addColorStop(0.4, "rgba(255,220,120,0.4)"); glow.addColorStop(1, "rgba(255,200,80,0)");
+    g.fillStyle = glow; g.fillRect(sx - 30, sy - 30, 60, 60);
+    softCirc(sx, sy, 8, "#fff6c0"); softCirc(sx - 1, sy - 1, 4, "#fffef0");
+    for (var i = 0; i < clouds.length; i++) {
+      var cl = clouds[i], cx = ((cl.x - t * 6 * cl.s) % (W + 80) + W + 80) % (W + 80) - 40;
+      g.globalAlpha = 0.82; g.fillStyle = "#ffffff";
+      softCirc(cx, top + cl.y, cl.h * 0.7, "#fff"); softCirc(cx + cl.w * 0.35, top + cl.y - 2, cl.h * 0.85, "#fff");
+      softCirc(cx + cl.w * 0.7, top + cl.y + 1, cl.h * 0.6, "#eef4ff"); g.globalAlpha = 1;
+    }
+  }
+  function boatAt(x, y, b) {
+    g.fillStyle = b.hull; g.beginPath(); g.moveTo(x, y); g.lineTo(x + b.w, y); g.lineTo(x + b.w - 3, y + b.h); g.lineTo(x + 4, y + b.h); g.closePath(); g.fill();
+    R(x + 2, y + 1, b.w - 6, 1, "rgba(255,255,255,0.35)");
+    if (b.mast) {
+      R(x + b.w * 0.45, y - b.h * 1.6, 1, b.h * 1.6, "#2a2018");
+      g.fillStyle = "#f4f0e0"; g.beginPath(); g.moveTo(x + b.w * 0.45 + 1, y - b.h * 1.55); g.lineTo(x + b.w * 0.45 + 1, y - 2); g.lineTo(x + b.w * 0.85, y - 4); g.closePath(); g.fill();
+    } else {
+      R(x + b.w * 0.25, y - b.h * 0.7, b.w * 0.4, b.h * 0.7, b.cabin);
+      R(x + b.w * 0.32, y - b.h * 0.55, 3, 3, "#fff6c0");
+    }
+    g.globalAlpha = 0.25; R(x + 2, y + b.h + 1, b.w - 4, 2, b.hull); g.globalAlpha = 1;
+  }
+  function water(top, bot, t, camX) {
+    camX = camX || 0;
+    var wgr = g.createLinearGradient(0, top, 0, bot);
+    wgr.addColorStop(0, "#3ab0c8"); wgr.addColorStop(0.4, "#1a88b0"); wgr.addColorStop(1, "#0a5a78");
+    g.fillStyle = wgr; g.fillRect(0, top, W, bot - top);
+    g.globalAlpha = 0.22; R(0, top, W, 4, "#d8f0ff"); g.globalAlpha = 1;
+    var i, x;
+    for (i = 0; i < (bot - top) / 3; i++) {
+      var y = top + 1 + i * 3, off = ((t * 8 + i * 13 - camX * (0.4 + i * 0.05)) % 24 + 24) % 24;
+      for (x = -24; x < W; x += 24) R(x + off, y, 8 + (i % 3) * 3, 1, i < 2 ? "#e89a52" : (i % 2 ? "#3ab0c8" : "#7ed0e0"));
+    }
+    for (i = 0; i < 8; i++) if (Math.sin(t * 5 + i * 2.1) > 0.35) R(((i * 47 + t * 10 - camX * 0.3) % W + W) % W, top + 4 + (i * 9) % Math.max(4, bot - top - 6), 2, 1, "#e8ffff");
   }
   function harbour(camX, horizon, quayY, t) {
-    sky(0, horizon);
+    sky(0, horizon, t);
     var i, x;
+    g.fillStyle = "#2a5a80";
+    for (x = 0; x < W; x += 3) {
+      var hx = x + camX * 0.04, hh = 10 + 8 * Math.sin(hx * 0.03) + 4 * Math.sin(hx * 0.07 + 1);
+      R(x, horizon - hh, 3, hh, "#2a6088");
+    }
     for (i = 0; i < cranes.length; i++) {
       var c = cranes[i]; x = ((c.x - camX * 0.15) % 1680 + 1680) % 1680 - 120;
       if (x < -60 || x > W + 60) continue;
-      R(x, horizon - c.h, 3, c.h, "#3a5268"); R(x - c.b * 0.3, horizon - c.h, c.b, 2, "#3a5268"); line(x + 1, horizon - c.h - 8, x + c.b * 0.7, horizon - c.h, "#3a5268", 1);
+      R(x, horizon - c.h, 3, c.h, "#3a5268"); R(x - 1, horizon - c.h, 5, 3, "#4a6a80");
+      R(x - c.b * 0.3, horizon - c.h, c.b, 2, "#4a6a80");
+      line(x + 1, horizon - c.h, x + c.b * 0.7, horizon - c.h + 8 + c.hook * 10, "#2a3a48", 1);
+      R(x + c.b * 0.7 - 2, horizon - c.h + 8 + c.hook * 10, 4, 3, "#c4582a");
+      R(x - c.b * 0.3, horizon - c.h - 1, 6, 4, "#2a3a48");
     }
     for (i = 0; i < sheds.length; i++) {
       var s = sheds[i]; x = ((s.x - camX * 0.35) % 1400 + 1400) % 1400 - 80;
       if (x < -80 || x > W + 10) continue;
-      R(x, horizon - s.h, s.w, s.h, s.c); R(x, horizon - s.h - 2, s.w, 2, "#1a3048");
+      R(x, horizon - s.h, s.w, s.h, s.c);
+      g.fillStyle = "#1a3048"; g.beginPath(); g.moveTo(x - 2, horizon - s.h); g.lineTo(x + s.w / 2, horizon - s.h - 5); g.lineTo(x + s.w + 2, horizon - s.h); g.fill();
+      R(x, horizon - s.h, s.w, 1, "rgba(255,255,255,0.25)");
+      for (var wx = 4; wx < s.w - 4; wx += 8) R(x + wx, horizon - s.h + 4, 3, 3, "#fff6c0");
+      R(x + s.w * 0.4, horizon - 7, 5, 7, "#1a2030");
     }
-    // water
-    R(0, horizon, W, quayY - horizon, "#1a88b0");
-    for (i = 0; i < (quayY - horizon) / 3; i++) {
-      var y = horizon + 1 + i * 3, off = ((t * 8 + i * 13 - camX * (0.4 + i * 0.05)) % 24 + 24) % 24;
-      for (x = -24; x < W; x += 24) R(x + off, y, 8 + (i % 3) * 3, 1, i < 2 ? "#e89a52" : "#3ab0c8");
+    for (i = 0; i < boats.length; i++) {
+      var b = boats[i]; x = ((b.x - camX * 0.22) % 1440 + 1440) % 1440 - 80;
+      if (x < -40 || x > W + 10) continue;
+      boatAt(x, horizon + 4 + Math.sin(t * 1.4 + i) * 1.2, b);
     }
-    // quay
-    R(0, quayY, W, H - quayY, "#d2c4a4");
-    R(0, quayY, W, 3, "#e8dcc0");
+    water(horizon, quayY, t, camX);
+    R(0, quayY - 2, W, 2, "rgba(220,240,255,0.45)");
+    for (x = ((-camX * 0.8) % 10 + 10) % 10 - 10; x < W; x += 10) R(x, quayY - 3, 4, 2, "rgba(255,255,255,0.35)");
+    var qgr = g.createLinearGradient(0, quayY, 0, H);
+    qgr.addColorStop(0, "#e8dcc0"); qgr.addColorStop(0.08, "#d2c4a4"); qgr.addColorStop(1, "#b8a07a");
+    g.fillStyle = qgr; g.fillRect(0, quayY, W, H - quayY);
+    R(0, quayY, W, 2, "#f0e8d0");
     var st = ((-camX) % 16 + 16) % 16;
-    for (x = st - 16; x < W; x += 16) { R(x, quayY + 3, 1, H - quayY, "#b8a888"); }
-    for (i = 0; i < 6; i++) R(0, quayY + 10 + i * 12, W, 1, "#b8a888");
+    for (x = st - 16; x < W; x += 16) R(x, quayY + 3, 1, H - quayY, "#a89070");
+    for (i = 0; i < 8; i++) R(0, quayY + 10 + i * 12, W, 1, "#a89070");
+    g.globalAlpha = 0.15; g.fillStyle = "#6a88a0";
+    for (i = 0; i < 5; i++) R(((i * 53 - camX) % (W + 40) + W + 40) % (W + 40) - 20, quayY + 16 + (i * 11) % 40, 18, 3, "#6a88a0");
+    g.globalAlpha = 1;
+    for (i = 0; i < gulls.length; i++) {
+      var gu = gulls[i], gx = ((gu.x + t * 18 * gu.s - camX * 0.2) % (W + 40) + W + 40) % (W + 40) - 20;
+      var gy = gu.y + Math.sin(t * 2 + gu.ph) * 4, flap = Math.sin(t * 8 + gu.ph) > 0;
+      g.fillStyle = "#f4f0e8";
+      R(gx - 4, gy + (flap ? 0 : 1), 3, 1, "#f4f0e8"); R(gx + 2, gy + (flap ? 0 : 1), 3, 1, "#f4f0e8"); R(gx, gy, 2, 2, "#fff");
+    }
   }
-  function bollard(x, y) { R(x - 3, y - 7, 6, 7, "#2a2a2e"); R(x - 4, y - 8, 8, 2, "#3a3a40"); }
+  function bollard(x, y) {
+    R(x - 3, y - 7, 6, 7, "#2a2a2e"); R(x - 2, y - 6, 2, 5, "rgba(255,255,255,0.18)");
+    R(x - 4, y - 8, 8, 2, "#4a4a50"); R(x - 3, y - 8, 2, 1, "rgba(255,255,255,0.3)"); R(x - 4, y, 8, 2, "#1a1a1e");
+  }
+  function polish() {
+    var vg = g.createRadialGradient(W / 2, H * 0.48, H * 0.2, W / 2, H * 0.5, H * 0.85);
+    vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(6,20,40,0.32)");
+    g.fillStyle = vg; g.fillRect(0, 0, W, H);
+  }
 
   // ---------- sound ----------
   var S = {
@@ -276,9 +358,8 @@
     draw: function (t) {
       var ppm = 4, cam = T.st === "fly" || T.st === "land" ? Math.max(0, T.cx * ppm - W * 0.5) : 0;
       var hz = H * 0.28, qy = H * 0.46;
-      sky(0, hz);
-      R(0, hz, W, H - hz, "#1a88b0");
-      for (var i = 0; i < 30; i++) { var y = hz + 2 + i * 4, off = ((t * 10 + i * 17 - cam * 0.6) % 30 + 30) % 30; for (var x = -30; x < W; x += 30) R(x + off, y, 9, 1, "#3ab0c8"); }
+      sky(0, hz, t);
+      water(hz, H, t, cam);
       // quay at left, barge from 6 m
       R(-cam, qy, 8 * ppm, H - qy, "#d2c4a4"); R(-cam, qy, 8 * ppm, 3, "#e8dcc0");
       var bx = 8 * ppm - cam; R(bx, qy + 6, 54 * ppm, 10, "#3a2a20"); R(bx, qy + 4, 54 * ppm, 3, "#6a5038"); R(bx + 54 * ppm, qy + 6, 6, 8, "#2a1e18");
@@ -292,7 +373,7 @@
       var crX, crY;
       if (spinning) { crX = fx + Math.cos(T.spin) * 14; crY = fy - 6 + Math.sin(T.spin) * 5; line(hand[0], hand[1], crX, crY, "#c8a46a", 1); }
       else { crX = (T.cx + 2) * ppm - cam; crY = qy + 2 - T.cy * ppm; }
-      R(crX - 3, crY - 3, 6, 6, "#9a6a3a"); R(crX - 3, crY - 3, 6, 1, "#c89a5a"); R(crX - 1, crY - 3, 1, 6, "#6a4422");
+      R(crX - 4, crY - 3, 8, 7, "#6a4422"); R(crX - 3, crY - 4, 6, 6, "#9a6a3a"); R(crX - 3, crY - 4, 6, 1, "#c89a5a"); R(crX - 1, crY - 4, 1, 6, "#6a4422"); R(crX - 2, crY - 3, 2, 1, "rgba(255,255,255,0.25)");
       if (T.st === "aim") { var a = T.ang * Math.PI / 180; line(fx + 4, fy - 8, fx + 4 + Math.cos(a) * 20, fy - 8 - Math.sin(a) * 20, "#ffe36a", 1); }
     },
     hud: function () {
@@ -345,8 +426,7 @@
       } else if (B.st === "land") { B.wait -= dt; if (B.wait <= 0) { if (B.n >= 5) finish(B.score); else { B.st = "swing"; B.t = Math.random() * 3; } } }
     },
     draw: function (t) {
-      var hz = H * 0.36; sky(0, hz); R(0, hz, W, H - hz, "#1a88b0");
-      for (var i = 0; i < 40; i++) { var y = hz + 2 + i * 4, off = ((t * 8 + i * 11) % 28 + 28) % 28; for (var x = -28; x < W; x += 28) R(x + off, y, 8, 1, "#3ab0c8"); }
+      var hz = H * 0.36; sky(0, hz, t); water(hz, H, t, 0);
       var top = H * 0.2, deckY = H * 0.58 + B.deck;
       // ship
       R(W * 0.08, deckY, W * 0.84, 18, "#4a2a24"); R(W * 0.08, deckY, W * 0.84, 3, "#7a5a40"); R(W * 0.06, deckY + 18, W * 0.88, 6, "#2a1a16");
@@ -611,7 +691,7 @@
     ui.menu({ title: "WHARF GAMES", body: "Renna Vale's waterside sports day", stats: "<span>BEST TOTAL " + (save.cup ? FF.n(save.cup) : "-") + "</span>",
       buttons: [{ label: "Play", act: newGames }, { label: "Practice", act: practiceMenu }, { label: "Records", small: true, act: records }], app: true,
       help: ["Run: tap the two Run pads one after the other (or ← →).", "Action: the right pad (or Space). It changes for each event.", "Six events. Make the qualifying mark or lose a try."],
-      fine: "A Forest Forge game" });
+      fine: "A Forest Forge game", solid: false });
   }
   ui.onAdsRemoved = function () { if (mode === "title") toTitle(); };
 
@@ -642,6 +722,7 @@
       else titleScene(t);
       if (flash > 0) R(0, 0, W, H, "rgba(255,240,200," + flash * 2 + ")");
       floaters.forEach(function (f) { g.fillStyle = f.c; g.font = "bold 8px monospace"; g.textAlign = "center"; g.fillText(f.t, f.x, f.y); g.textAlign = "left"; });
+      polish();
       c.drawImage(lo, 0, 0, W * PX, H * PX);
       if (ev && !ui.menuOpen) {
         evTitle(); ev.hud();
