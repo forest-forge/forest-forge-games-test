@@ -1,0 +1,93 @@
+/* Forest Forge arcade house style (same look as Rock N Split, Scaffold Scramble
+   and Knockwall): night black, amber lantern glow, Georgia serif, outlined
+   amber buttons, plain dark full-screen menus. Shared by the 2026 games. */
+:root {
+  --bg: #050505;
+  --water: #050607;
+  --amber: #f3c779;
+  --amber-hi: #ffcf7a;
+  --amber-soft: #ffd38a;
+  --amber-line: #c98a35;
+  --ember: #ff9a2a;
+  --btn: #2a1a08;
+  --lamp: #fff3c0;
+  --glow-line: rgba(255, 200, 120, 0.32);
+  --glow-fill: rgba(255, 200, 120, 0.06);
+  --font: Georgia, "Times New Roman", serif;
+  --app-h: 100dvh;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--amber); font-family: var(--font); overflow: hidden; overscroll-behavior: none; touch-action: none; }
+button { cursor: pointer; font-family: inherit; }
+button:focus-visible { outline: 2px solid var(--amber-hi); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.ff-host { height: var(--app-h); display: flex; justify-content: center; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, #1a1006 0%, transparent 60%), var(--bg); touch-action: none; }
+.ff [hidden] { display: none !important; }
+.ff { width: min(100%, 480px, calc(var(--app-h) * 0.62)); height: var(--app-h); display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--water); color: var(--amber); font-family: var(--font); font-size: 16px; line-height: 1.4; border-left: 1px solid rgba(201,138,53,.18); border-right: 1px solid rgba(201,138,53,.18); position: relative; overflow: hidden; }
+.ff.wide { width: 100%; max-width: 1280px; }
+@media (orientation: portrait) { .ff.wide { width: min(100%, 560px); } }
+.ff-hud { flex: 0 0 auto; padding: calc(5px + var(--sat)) max(10px, var(--sar)) 5px max(12px, var(--sal)); display: flex; align-items: center; gap: 12px; background: linear-gradient(#0a0806, #050505); border-bottom: 1px solid rgba(201,138,53,.22); min-width: 0; }
+.ff-hud-title { flex: 1 1 auto; min-width: 0; }
+.ff-kicker { margin: 0; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--amber-line); }
+.ff-course { margin: 0; font-size: 17px; line-height: 1.1; color: var(--amber-hi); text-shadow: 0 0 12px rgba(255,154,42,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ff-stats { display: flex; gap: 12px; flex: 0 0 auto; }
+.ff-stat { display: flex; flex-direction: column; min-width: 40px; text-align: right; }
+.ff-stat b { font-weight: normal; font-size: 18px; line-height: 1.05; color: var(--amber-soft); text-shadow: 0 0 10px rgba(255,154,42,.55); font-variant-numeric: tabular-nums; }
+.ff-stat span { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--amber-line); }
+.ff-actions { display: flex; gap: 8px; flex: 0 0 auto; }
+.ff-icon-btn { width: 42px; height: 42px; border-radius: 8px; border: 1px solid var(--amber-line); background: var(--btn); color: var(--amber-soft); display: grid; place-items: center; padding: 0; }
+.ff-icon-btn svg { width: 20px; height: 20px; display: block; }
+.ff-icon-btn:active { background: #3a2410; box-shadow: 0 0 16px rgba(255,170,70,.5); }
+.ff-stage { position: relative; flex: 1 1 auto; min-height: 0; background: #000; touch-action: none; overflow: hidden; }
+.ff-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.ff-pads { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; padding: 0 max(10px, var(--sar)) calc(12px + var(--sab)) max(10px, var(--sal)); pointer-events: none; z-index: 2; }
+.ff-pad-group { display: flex; gap: 10px; align-items: flex-end; }
+.ff-pad { pointer-events: auto; width: 66px; height: 66px; border-radius: 16px; border: 2px solid var(--glow-line); background: var(--glow-fill); color: rgba(255,211,138,.7); display: grid; place-items: center; padding: 0; touch-action: none; font: 13px/1.1 var(--font); letter-spacing: .06em; text-transform: uppercase; }
+.ff-pad.big { width: 84px; height: 84px; border-radius: 50%; }
+.ff-pad.wide { width: 120px; }
+.ff-pad svg { width: 28px; height: 28px; }
+.ff-pad.on, .ff-pad:active { background: rgba(255,200,120,.32); border-color: rgba(255,200,120,.85); color: var(--lamp); box-shadow: 0 0 18px rgba(255,170,70,.8); }
+.ff.glove .ff-pad { width: 84px; height: 84px; }
+.ff.glove .ff-pad.big { width: 104px; height: 104px; }
+.ff-menu-open .ff-pads { display: none; }
+.ff-toast { position: absolute; left: 50%; top: 12%; transform: translateX(-50%); margin: 0; padding: 6px 14px; border-radius: 999px; background: rgba(5,5,5,.72); border: 1px solid var(--glow-line); color: var(--amber-soft); font-size: 14px; pointer-events: none; white-space: nowrap; max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis; z-index: 2; transition: opacity .25s; }
+.ff-shade { position: absolute; inset: 0; background: rgba(5,5,5,.72); z-index: 3; }
+.ff-shade.is-solid { background: radial-gradient(ellipse at 50% 45%, #140c04 0%, transparent 65%), var(--water); }
+.ff-modal { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px 16px; text-align: center; overflow: auto; }
+.ff-modal > * { max-width: min(100%, 380px); }
+.ff-modal p { margin: 0; }
+.ff-display { font-size: clamp(26px, 8.5vw, 40px); letter-spacing: .14em; padding-left: .14em; line-height: 1.15; color: var(--amber-hi); text-shadow: 0 0 18px var(--ember); }
+.ff-lede { font-size: 16px; color: var(--amber); margin-bottom: 4px !important; }
+.ff-btns { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 6px; }
+.ff-btn { font: inherit; font-size: 18px; background: var(--btn); color: var(--amber-soft); border: 1px solid var(--amber-line); border-radius: 8px; padding: 10px 22px; min-width: 210px; min-height: 44px; }
+.ff-btn.small { font-size: 15px; min-height: 38px; padding: 6px 18px; opacity: .9; }
+.ff-btn:active { background: #3a2410; box-shadow: 0 0 16px rgba(255,170,70,.5); }
+.ff-btn:disabled { opacity: .4; }
+.ff-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.ff-row .ff-btn { min-width: 0; }
+.ff-stat-line { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; line-height: 1.45; color: var(--amber); opacity: .88; font-variant-numeric: tabular-nums; }
+.ff-stat-line span { display: block; }
+.ff-score-xl { display: block; font-family: var(--font); font-weight: normal; font-size: 46px; line-height: 1.05; color: var(--amber-hi); text-shadow: 0 0 18px var(--ember); }
+.ff-table { border-collapse: collapse; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; color: var(--amber); width: 100%; }
+.ff-table td { padding: 2px 6px; text-align: left; border-bottom: 1px solid rgba(201,138,53,.15); }
+.ff-table td:last-child { text-align: right; }
+.ff-help { margin: 4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.ff-help li { font-size: 12px; line-height: 1.35; opacity: .62; max-width: 330px; }
+.ff-fine { font-size: 11px; opacity: .5; letter-spacing: .08em; margin-top: 6px !important; }
+@media (max-height: 620px) {
+  .ff-modal { gap: 5px; padding: 10px 16px; justify-content: flex-start; }
+  .ff-display { font-size: 26px; }
+  .ff-btns { gap: 6px; }
+  .ff-btn { min-height: 36px; padding: 5px 18px; font-size: 16px; }
+  .ff-btn.small { min-height: 32px; padding: 3px 14px; font-size: 14px; }
+  .ff-help { display: none; }
+  .ff-pad { width: 58px; height: 58px; }
+  .ff-pad.big { width: 72px; height: 72px; }
+}
+.eyebrow { margin: 0 0 8px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--amber-line); }
