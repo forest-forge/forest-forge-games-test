@@ -34,9 +34,9 @@
     { wave: "square", gain: 0.025, pat: "A2 . A3 . A2 . A3 . G2 . G3 . G2 . G3 . F#2 . F#3 . B2 . B3 . E3 . E3 . E2 . . ." }]] };
 
   // ---------- state ----------
-  var mode = "title", ri = 0, rm, s, keysLeft, air, airMax, crumble, guards, lives = 3, score = 0, frame = 0, dying = 0, done = 0, acc = 0, nextLife = 10000, qaIn = null, qaNoGuards = false, qaRoutes = null;
+  var irisT = 0, mode = "title", ri = 0, rm, s, keysLeft, air, airMax, crumble, guards, lives = 3, score = 0, frame = 0, dying = 0, done = 0, acc = 0, nextLife = 10000, qaIn = null, qaNoGuards = false, qaRoutes = null;
   function load(i) {
-    ri = i; var src = P.room(i); rm = { i: i, name: src.name, g: src.g.map(function (r) { return r.slice(); }), exit: src.exit, keys: src.keys };
+    irisT = 1; ri = i; var src = P.room(i); rm = { i: i, name: src.name, g: src.g.map(function (r) { return r.slice(); }), exit: src.exit, keys: src.keys };
     s = { x: 8, y: 120, m: 0 }; if (qaRoutes) { qaIn = qaRoutes[i]; qaNoGuards = false; } keysLeft = src.keys.length; air = airMax = src.air; crumble = {}; frame = 0; dying = 0; done = 0;
     guards = src.guards.map(function (gd) { return gd.vert ? { vert: 1, x: gd.x, y: gd.y0, y0: gd.y0, y1: gd.y1, sp: gd.sp, dir: 1, kind: gd.kind } : { x: gd.x0, y: gd.y, x0: gd.x0, x1: gd.x1, sp: gd.sp, dir: 1, kind: gd.kind }; });
     ui.setCourse((i + 1) + ". " + src.name); hud();
@@ -65,11 +65,14 @@
   // ---------- render ----------
   function render(c, tt) {
     if (!W) sizeLo(); if (!rm) load(0);
-    R(0, 0, W, H, "#000000"); var p = pal(ri), fl = Math.floor(tt * 8);
+    var p = pal(ri), fl = Math.floor(tt * 8);
+    var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, FXP.shade(FXP.mix(p.wall, "#000000", 0.82), 0)); bg.addColorStop(1, FXP.mix(p.floor, "#000000", 0.88)); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    for (var rk = 0; rk < 3; rk++) { g.fillStyle = FXP.mix(p.wall, "#000000", 0.9 - rk * 0.05); g.beginPath(); g.moveTo(0, H); for (var rx = 0; rx <= W; rx += 8) g.lineTo(rx, OY + 40 + rk * 30 + Math.sin(rx * 0.05 + rk * 2) * 8 + FXP.hash(rx, rk) * 6); g.lineTo(W, H); g.fill(); }
+    for (var rs = 0; rs < 18; rs++) { var sx = FXP.hash(rs, 7) * W, sy = FXP.hash(rs, 9) * H; FXP.glow(g, sx, sy, 3, BR[rs % 7], 0.25 + 0.2 * Math.sin(tt * 2 + rs)); }
     for (var ty = 0; ty < ROWS; ty++) for (var tx = 0; tx < COLS; tx++) {
       var ch = rm.g[ty][tx], x = OX + tx * T, y = OY + ty * T;
-      if (ch === "W") { R(x, y, 8, 8, p.wall); R(x, y + 3, 8, 1, "#000"); R(x + (ty % 2 ? 2 : 6), y, 1, 3, "#000"); R(x + (ty % 2 ? 5 : 1), y + 4, 1, 4, "#000"); }
-      else if (ch === "=") { R(x, y, 8, 3, p.floor); R(x + 1, y + 3, 2, 2, p.floor); R(x + 5, y + 3, 2, 1, p.floor); }
+      if (ch === "W") { R(x, y, 8, 8, p.wall); R(x, y, 8, 1, FXP.shade(p.wall, 0.35)); R(x, y + 7, 8, 1, FXP.shade(p.wall, -0.35)); R(x, y + 3, 8, 1, "#000"); R(x + (ty % 2 ? 2 : 6), y, 1, 3, "#000"); R(x + (ty % 2 ? 5 : 1), y + 4, 1, 4, "#000"); }
+      else if (ch === "=") { R(x, y, 8, 3, p.floor); R(x, y, 8, 1, FXP.shade(p.floor, 0.45)); R(x + 1, y + 3, 2, 2, p.floor); R(x + 5, y + 3, 2, 1, p.floor); }
       else if (ch === "~") { var cr = crumble[tx + "," + ty] || 0, hh = Math.max(1, 4 - Math.floor(cr / 11)); R(x, y + (4 - hh), 8, hh, p.floor); for (var q = 0; q < 4; q++) R(x + q * 2 + (cr % 2), y + 4, 1, 1 + (q % 2), p.floor); }
       else if (ch === "<" || ch === ">") { R(x, y, 8, 4, p.conv); var o = ((ch === ">" ? fl : -fl) % 4 + 4) % 4; R(x + o, y + 1, 2, 2, "#000"); R(x + (o + 4) % 8, y + 1, 2, 2, "#000"); }
       else if (ch === "*") drawHaz(x, y, p.haz, ri % 4, fl);
@@ -79,13 +82,19 @@
     var ex = OX + rm.exit[0] * T, ey = OY + rm.exit[1] * T, open = !keysLeft, ec = open ? BR[fl % 7] : "#c8c8c8";
     R(ex, ey, 16, 2, ec); R(ex, ey + 14, 16, 2, ec); for (var b = 0; b < 4; b++) R(ex + b * 5, ey, 1, 16, ec); R(ex + 6, ey - 4, 4, 4, ec); R(ex + 7, ey - 8, 2, 4, "#888");
     if (open) R(ex + 2, ey + 3, 12, 10, "rgba(255,255,160,0.25)");
+    FXP.glow(g, ex + 8, ey + 6, open ? 26 : 12, open ? "#fff0a0" : "#8888aa", open ? 0.45 : 0.15);
+    var g0 = g; g = FXP.layer(W, H);
     guards.forEach(function (gd) { drawGuard(OX + gd.x, OY + gd.y - 16, gd.kind, gd.dir, fl, p); });
     if (!dying || Math.floor(tt * 16) % 2) drawDavy(OX + s.x, OY + s.y - 16, fl, s);
+    g = g0; FXP.flush(g, "#000000");
+    FXP.glow(g, OX + s.x + 4, OY + s.y - 13, 34, "#fff2b0", 0.22);
+    FXP.ambient(g, W, H, { x: 0, y: 0 }, tt, "fall", "rgba(220,220,255,0.55)", 16); FXP.vignette(g, W, H, 0.45);
     // HUD
     var hy = OY + 129; g.font = "bold 8px monospace"; g.textAlign = "left"; var tag = "ROOM " + (ri + 1) + "  " + rm.name.toUpperCase(); var tw = g.measureText(tag).width + 8; R(OX, hy, tw, 10, p.bar); g.fillStyle = "#000"; g.fillText(tag, OX + 4, hy + 8);
     var segs = 16, lit = Math.ceil(segs * air / airMax); g.fillStyle = "#ffffff"; g.textAlign = "right"; g.fillText("AIR", OX + 256 - segs * 6 - 4, hy + 8); for (var sg = 0; sg < segs; sg++) R(OX + 256 - segs * 6 + sg * 6, hy + 1, 5, 8, sg < lit ? (lit <= 4 ? (Math.floor(tt * 6) % 2 ? "#ff3a3a" : "#000") : "#3affff") : "#222");
     hy -= 6;
     for (var l = 0; l < Math.min(8, lives - 1); l++) drawDavy(OX + l * 10, hy + 20, 0, { m: 0 }, true);
+    if (irisT > 0) { FXP.iris(g, W, H, irisT, OX + s.x + 4, OY + s.y - 8); irisT -= 1 / 30; }
     c.drawImage(lo, 0, 0, W * PX, H * PX);
   }
   function drawHaz(x, y, c, k, fl) {
