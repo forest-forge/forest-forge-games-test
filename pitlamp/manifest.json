@@ -1,0 +1,15 @@
+{
+  "name": "Pitlamp",
+  "short_name": "Pitlamp",
+  "description": "Pitlamp: guide Davy the walking safety lamp through 20 single-screen caverns before the air runs out.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
