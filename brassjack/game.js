@@ -85,10 +85,11 @@
     { wave: "drum", pat: "k h s h k k s h k h s h k k s s k h s h k k s h k h s h k s s o" }]] };
 
   // ---------- state ----------
+  var irisT = 0;
   var L, st = 0, mode = "title", cam = PF.Camera(), parts = PF.Parts(), hero, foes = [], items = [], shots = [], eshots = [], drops = [], boss = null, arenaX = 0, locked = false, hp = 28, ammo = {}, wpn = "pea", score = 0, lives = 3, cp = null, won = 0, dead = 0, tm = 0;
   function owned() { return ["pea"].concat(STAGES.slice(0, 4).filter(function (s) { return save.beat[s.id]; }).map(function (s) { return s.wpn; })); }
   function hud() { ui.setStat("score", FF.n(score)); ui.setStat("wpn", WPN[wpn].name); }
-  function load(i, keep) {
+  function load(i, keep) { irisT = 1;
     st = i; var s = STAGES[i], c = compose(s.segs); arenaX = c.arena * TS; L = PF.Level(c.rows, { theme: s.th, seed: i + 9 });
     foes = []; items = []; shots = []; eshots = []; drops = []; boss = null; locked = false; parts.clear(); won = 0; dead = 0; if (!keep) { cp = null; tm = 0; }
     L.ents.forEach(function (e) {
@@ -203,6 +204,7 @@
     PF.drawTiles(g, L, s.th, cam, W, H, tt);
     items.forEach(function (it) { if (it.k === "K") { var x = it.x - cam.x, y = it.y - cam.y; R(x + 7, y - 4, 2, 20, "#ffffff"); R(x + 9, y - 4, 7, 5, it.got ? "#3affff" : "#ff3a4a"); } });
     var ax = arenaX - cam.x; if (!locked && ax > -20 && ax < W + 20) { R(ax, 0, 16, (HT - 3) * TS - cam.y, "#3a3a6a"); for (var dy = 0; dy < (HT - 3) * TS - cam.y; dy += 8) R(ax + 2, dy, 12, 4, "#6a6ad8"); }
+    var g0 = g; g = FXP.layer(W, H);
     foes.forEach(function (f) { if (!f.alive) return; var x = Math.round(f.x - cam.x), y = Math.round(f.y - cam.y); if (x < -20 || x > W + 20) return;
       if (f.k === "m") { R(x + 1, y + 2, 10, 8, "#ff6a2a"); R(x + 3, y, 6, 3, "#ffd23a"); R(x + 4, y + 4, 2, 2, "#111"); R(x + 7, y + 4, 2, 2, "#111"); R(x, y + 10, 4, 2, "#333"); R(x + 8, y + 10, 4, 2, "#333"); }
       else if (f.k === "w") { R(x + 1, y, 10, 10, "#8a8ab0"); R(x + 2, y + 2, 8, 3, "#3affff"); R(x + 2, y + 10, 3, 2, "#333"); R(x + 7, y + 10, 3, 2, "#333"); }
@@ -213,7 +215,10 @@
     eshots.forEach(function (sh) { var x = sh.x - cam.x, y = sh.y - cam.y; if (sh.k === "warn") { if (Math.floor(tt * 12) % 2) R(x, 0, 4, H, "rgba(58,255,255,0.25)"); } else if (sh.k === "steam") { R(x, y, 12, 10, "rgba(255,255,255,0.8)"); R(x + 2, y - 3, 8, 4, "rgba(255,255,255,0.6)"); } else if (sh.k === "bolt") { R(x, y, 8, 12, "#3affff"); R(x + 3, y, 2, 12, "#fff"); } else R(x, y, 6, 6, sh.k === "thorn" ? "#ff2a8a" : sh.k === "hail" ? "#e8f8ff" : "#ff3a4a"); });
     drops.forEach(function (d) { if (d.life < 2 && Math.floor(tt * 10) % 2) return; var x = d.x - cam.x, y = d.y - cam.y; if (d.k === "h") { R(x, y + 2, 8, 6, "#ff3a4a"); R(x + 2, y, 4, 2, "#ffffff"); } else { R(x + 2, y, 4, 8, "#3affff"); R(x + 1, y + 4, 6, 4, "#3affff"); } });
     if (hero && mode === "play" && !dead && (hero.inv <= 0 || Math.floor(tt * 16) % 2)) drawJack(tt);
+    g = g0; FXP.flush(g, "#0a1030");
     parts.draw(g, cam);
+    FXP.ambient(g, W, H, cam, tt, "drift", "rgba(200,240,255,0.8)", 20); FXP.vignette(g, W, H, 0.35);
+    if (irisT > 0) { FXP.iris(g, W, H, irisT, hero ? hero.x - cam.x : W / 2, hero ? hero.y - cam.y : H / 2); irisT -= 1 / 40; }
     if (mode === "play") { bar(4, 4, hp, "#ffe23a"); if (wpn !== "pea") bar(12, 4, ammo[wpn] || 0, WPN[wpn].col); if (boss) bar(W - 10, 4, Math.max(0, boss.hp), "#ff3a4a"); g.fillStyle = "#fff"; g.font = "8px monospace"; g.fillText("x" + lives, 4, 70); }
     c.drawImage(lo, 0, 0, W * PX, H * PX);
   }
