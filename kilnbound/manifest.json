@@ -1,0 +1,15 @@
+{
+  "name": "Kilnbound",
+  "short_name": "Kilnbound",
+  "description": "Kilnbound: cursed into a kiln-walker, Tamsin Vey takes crow, eel and badger forms to break the Kiln Heart.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
