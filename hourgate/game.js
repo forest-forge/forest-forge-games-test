@@ -58,7 +58,8 @@
   // ---------- state ----------
   var mode = "title", hero, guards = [], gates = {}, loose = {}, debris = [], parts = PF.Parts(), clock = LIMIT, score = 0, camR = 0, camC = 0, flash = 0, msg = "", msgT = 0, qaGod = false;
   function newHero(r, c) { return { x: c * CW + CW / 2, y: floorY(r), vx: 0, vy: 0, face: 1, st: "stand", t: 0, hp: 3, max: 3, fallFrom: floorY(r), atk: 0, parry: 0, inv: 0, hang: null, ph: 0, dead: 0 }; }
-  function load(i, keepHp) {
+  var irisT = 0;
+  function load(i, keepHp) { irisT = 1;
     li = i; lv = LEVELS[i]; cells = lv.rows.map(function (r) { return r.split(""); }); LHc = cells.length; LWc = cells[0].length;
     guards = []; gates = {}; loose = {}; debris = []; parts.clear(); var hp = hero ? hero.hp : 3, mx = hero ? hero.max : 3;
     for (var r = 0; r < LHc; r++) for (var c = 0; c < LWc; c++) { var ch = cells[r][c];
@@ -177,16 +178,16 @@
   function render(c, tt) {
     if (!W) sizeLo(); if (!lv) load(0);
     var ox = camC * RC * CW - Math.floor((W - RC * CW) / 2), oy = camR * RR * CH - Math.floor((H - RR * CH) / 2);
-    R(0, 0, W, H, "#06040e");
+    R(0, 0, W, H, "#06040e"); var lights = [];
     for (var r = camR * RR - 1; r <= camR * RR + RR; r++) for (var c2 = camC * RC - 1; c2 <= camC * RC + RC; c2++) {
       var ch = cell(r, c2), x = c2 * CW - ox, y = r * CH - oy, fy = floorY(r) - oy;
       if (r < 0 || r >= LHc || c2 < 0 || c2 >= LWc) continue;
-      if (ch === "#") { R(x, y - 6, CW, CH, lv.wall); for (var b = 0; b < 4; b++) { R(x, y - 6 + b * 14, CW, 1, lv.wallD); R(x + ((b % 2) ? 8 : 22), y - 6 + b * 14, 1, 14, lv.wallD); } continue; }
-      R(x, y - 6, CW, CH, lv.back); for (var bk = 0; bk < 4; bk++) { R(x, y - 6 + bk * 14, CW, 1, lv.backD); R(x + ((bk + r) % 2 ? 6 : 20), y - 6 + bk * 14, 1, 14, lv.backD); }
-      if (lv.torch && (c2 * 7 + r * 3) % 5 === 0 && isFloor(ch)) { var fl = Math.sin(tt * 13 + c2) * 1.5; R(x + 14, y + 16, 4, 8, "#6a4a2a"); R(x + 13, y + 9 + fl, 6, 7, "#ff8a1a"); R(x + 14, y + 11 + fl, 4, 4, "#ffd23a"); g.fillStyle = "rgba(255,150,40,0.08)"; g.fillRect(x - 6, y - 6, CW + 12, CH); }
+      if (ch === "#") { R(x, y - 6, CW, CH, lv.wall); R(x, y - 6, CW, 2, FXP.shade(lv.wall, 0.2)); R(x + CW - 2, y - 6, 2, CH, FXP.shade(lv.wall, -0.25)); for (var b = 0; b < 4; b++) { R(x, y - 6 + b * 14, CW, 1, lv.wallD); R(x + ((b % 2) ? 8 : 22), y - 6 + b * 14, 1, 14, lv.wallD); } continue; }
+      var bgg = g.createLinearGradient(0, y - 6, 0, y - 6 + CH); bgg.addColorStop(0, FXP.shade(lv.back, -0.25)); bgg.addColorStop(1, FXP.shade(lv.back, 0.06)); g.fillStyle = bgg; g.fillRect(x, y - 6, CW, CH); if ((c2 * 5 + r * 11) % 9 === 0) { R(x + 6, y + 8, 20, 22, FXP.shade(lv.back, -0.35)); R(x + 8, y + 10, 16, 18, FXP.shade(lv.back, -0.15)); R(x + 15, y + 10, 2, 18, FXP.shade(lv.back, -0.35)); R(x + 8, y + 18, 16, 2, FXP.shade(lv.back, -0.35)); } for (var bk = 0; bk < 4; bk++) { R(x, y - 6 + bk * 14, CW, 1, lv.backD); R(x + ((bk + r) % 2 ? 6 : 20), y - 6 + bk * 14, 1, 14, lv.backD); }
+      if (lv.torch && (c2 * 7 + r * 3) % 5 === 0 && isFloor(ch)) { var fl = Math.sin(tt * 13 + c2) * 1.5; R(x + 14, y + 16, 4, 8, "#6a4a2a"); R(x + 13, y + 9 + fl, 6, 7, "#ff8a1a"); R(x + 14, y + 11 + fl, 4, 4, "#ffd23a"); lights.push([x + 16, y + 13 + fl]); }
       if (isFloor(ch) && !(loose[r + "," + c2] && loose[r + "," + c2].gone)) {
         var sh = ch === "~" && loose[r + "," + c2] && loose[r + "," + c2].t > 0 ? (Math.random() * 2 - 1) : 0;
-        R(x, fy + sh, CW, 6, lv.wall); R(x, fy + sh, CW, 1, "#fff0c8"); R(x, fy + 5 + sh, CW, 1, lv.wallD);
+        R(x, fy + sh, CW, 6, lv.wall); R(x, fy + sh, CW, 1, "#fff0c8"); R(x, fy + 1 + sh, CW, 1, FXP.shade(lv.wall, 0.25)); R(x, fy + 5 + sh, CW, 1, lv.wallD); R(x, fy + 6 + sh, CW, 3, "rgba(0,0,0,0.25)");
         if (ch === "~") { R(x + 3, fy + 2 + sh, CW - 6, 1, lv.wallD); R(x + 10, fy + 1 + sh, 1, 4, lv.wallD); }
         if (ch === "^") { var up = Math.abs(hero.x - (c2 * CW + 16)) < 48 && rowOf(hero.y) === r; for (var s = 0; s < 4; s++) R(x + 3 + s * 7, fy - (up ? 8 : 3), 2, up ? 8 : 3, "#e8e8f0"); }
         if (ch === "x") { var shut = chopperShut(r, c2); R(x + 4, fy - 46, 3, 46, "#7a5a3a"); R(x + 25, fy - 46, 3, 46, "#7a5a3a"); if (shut) { R(x + 7, fy - 40, 18, 3, "#e8e8f0"); R(x + 7, fy - 26, 18, 3, "#e8e8f0"); } else { R(x + 7, fy - 46, 4, 6, "#e8e8f0"); R(x + 21, fy - 46, 4, 6, "#e8e8f0"); } }
@@ -196,16 +197,21 @@
         if (ch === "E") { var open = exitOpen(); R(x + 4, fy - 46, 24, 46, "#2a1a10"); R(x + 2, fy - 50, 28, 5, "#ffd890"); R(x + 2, fy - 46, 3, 46, "#ffd890"); R(x + 27, fy - 46, 3, 46, "#ffd890"); if (open) { g.fillStyle = "rgba(255,220,140," + (0.25 + 0.15 * Math.sin(tt * 4)) + ")"; g.fillRect(x + 5, fy - 45, 22, 45); } R(x + 11, fy - 44, 10, 10, "#ffd890"); R(x + 15, fy - 42, 1, 5, "#2a1a10"); R(x + 15, fy - 38, 4, 1, "#2a1a10"); }
       }
     }
+    g.globalCompositeOperation = "lighter"; lights.forEach(function (l) { FXP.glow(g, l[0], l[1], 40 + Math.sin(tt * 9 + l[0]) * 3, "#ff9a3a", 0.22); }); g.globalCompositeOperation = "source-over";
     debris.forEach(function (d) { R(d.x - ox + 2, d.y - oy - (d.done ? 3 : 0), CW - 4, 3, lv.wallD); });
+    var g0 = g; g = FXP.layer(W, H);
     guards.forEach(function (gd) { if (Math.floor(gd.r / RR) === camR && Math.floor(colOf(gd.x) / RC) === camC) drawGuard(gd, gd.x - ox, gd.y - oy, tt); });
     if (!(hero.dead && Math.floor(tt * 10) % 2)) drawEdda(hero.x - ox, hero.y - oy, tt);
+    g = g0; FXP.flush(g, "#0a0610");
     parts.draw(g, { x: ox, y: oy });
+    FXP.ambient(g, W, H, { x: ox, y: oy }, tt, lv.torch ? "rise" : "drift", lv.torch ? "rgba(255,190,90,0.8)" : "rgba(220,230,255,0.6)", 18); FXP.vignette(g, W, H, 0.5);
     if (flash > 0) R(0, 0, W, H, "rgba(255,40,40," + flash + ")");
     // HUD strip: hearts and level name
     for (var i = 0; i < hero.max; i++) { var hx = 4 + i * 9; R(hx, H - 10, 7, 6, i < hero.hp ? "#ff3a6a" : "#3a2a3a"); R(hx + 1, H - 11, 2, 1, i < hero.hp ? "#ff3a6a" : "#3a2a3a"); R(hx + 4, H - 11, 2, 1, i < hero.hp ? "#ff3a6a" : "#3a2a3a"); }
     var foe = guards.filter(function (gd) { return !gd.dead && gd.r === rowOf(hero.y) && Math.abs(gd.x - hero.x) < 110; })[0];
     if (foe) for (var j = 0; j < foe.max; j++) R(W - 10 - j * 8, H - 10, 6, 6, j < foe.hp ? "#7ac8ff" : "#2a2a3a");
     if (msgT > 0) { g.font = "bold 9px serif"; g.textAlign = "center"; g.fillStyle = "rgba(0,0,0,0.5)"; var tw = g.measureText(msg).width; g.fillRect(W / 2 - tw / 2 - 6, 6, tw + 12, 14); g.fillStyle = "#ffe0a0"; g.fillText(msg, W / 2, 16); }
+    if (irisT > 0) { FXP.iris(g, W, H, irisT, hero.x - ox, hero.y - oy - 20); irisT -= 1 / 30; }
     c.drawImage(lo, 0, 0, W * PX, H * PX);
   }
   function gatesPressed() { for (var k in gates) if (gates[k].timer > 0) return true; return false; }
