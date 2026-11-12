@@ -21,7 +21,7 @@
     hub: { name: "Thistle Green", w: 40, h: 26, fill: " ",
       th: { sky: ["#3a1a8a", "#c85ad8"], star: "#ffe68a", grass: "#2ad86a", grass2: "#1fb85a", fleck: "#ffd23a", hi: "#7ae86a", hi2: "#4ac85a", side: "#5a2aa8", side2: "#3a1a7a", path: "#ffcf4a", path2: "#e8a82a", water: "#3ac8ff" },
       land: [[5, 4, 24, 17, "."], [13, 4, 8, 3, "^"], [10, 9, 14, 1, "="], [10, 15, 14, 1, "="], [10, 9, 1, 7, "="], [23, 9, 1, 7, "="], [33, 10, 5, 5, "."], [7, 6, 2, 1, "T"], [26, 6, 2, 1, "T"], [7, 18, 1, 1, "T"], [27, 18, 1, 1, "T"]],
-      ents: [["S", 17, 12], ["P", 6, 12, "moor"], ["P", 28, 12, "mere"], ["P", 17, 5, "spires"], ["G", 35, 12], ["G", 34, 13], ["G", 36, 11]] },
+      ents: [["S", 17, 12], ["P", 6, 12, "moor"], ["P", 28, 12, "mere"], ["P", 17, 5, "spires"], ["P", 17, 19, "keep"], ["G", 35, 12], ["G", 34, 13], ["G", 36, 11]] },
     moor: { name: "Amethyst Moor", w: 48, h: 30, fill: " ", need: 0,
       th: { sky: ["#1a0a4a", "#8a3ad8"], star: "#ffffff", grass: "#a85ae8", grass2: "#8a3ad8", fleck: "#ffd23a", hi: "#d88aff", hi2: "#b86ae8", side: "#3a1a7a", side2: "#22104a", path: "#ffd23a", path2: "#d8a82a", water: "#5ae8ff" },
       land: [[2, 2, 10, 8, "."], [16, 2, 11, 8, "."], [22, 3, 4, 4, "^"], [36, 2, 10, 8, "."], [40, 10, 2, 6, "="], [34, 16, 12, 10, "."], [20, 18, 9, 8, "."], [3, 14, 11, 12, "."], [4, 15, 5, 4, "^"], [6, 10, 2, 4, "="], [9, 3, 1, 1, "T"], [44, 3, 1, 1, "T"], [35, 17, 1, 1, "T"]],
@@ -33,9 +33,13 @@
     spires: { name: "Saffron Spires", w: 50, h: 32, fill: " ", need: 6,
       th: { sky: ["#ff5a8a", "#ffc85a"], star: "#ffffff", grass: "#ff8a3a", grass2: "#f0702a", fleck: "#fff05a", hi: "#ffb85a", hi2: "#ff9a3a", side: "#c82a6a", side2: "#8a1a4a", path: "#ffffff", path2: "#ffd8e8", water: "#ff5ad8" },
       land: [[2, 2, 8, 7, "."], [13, 2, 5, 5, "."], [14, 3, 3, 3, "^"], [21, 4, 6, 6, "."], [30, 2, 8, 8, "."], [30, 2, 3, 3, "^"], [29, 15, 10, 6, "."], [29, 15, 3, 3, "^"], [10, 15, 10, 8, "."], [14, 23, 2, 3, "="], [8, 26, 16, 5, "."], [37, 3, 1, 1, "T"], [19, 21, 1, 1, "T"]],
-      ents: [["S", 5, 5], ["H", 3, 3], ["G", 15, 4], ["k", 23, 7], ["c", 35, 5], ["w", 33, 7], ["c", 34, 18], ["k", 36, 19], ["s", 31, 19], ["c", 14, 18], ["w", 12, 20], ["c", 20, 28], ["b", 10, 28], ["b", 11, 29], ["s", 16, 28], ["k", 18, 29], ["G", 22, 27], ["H", 9, 27]] }
+      ents: [["S", 5, 5], ["H", 3, 3], ["G", 15, 4], ["k", 23, 7], ["c", 35, 5], ["w", 33, 7], ["c", 34, 18], ["k", 36, 19], ["s", 31, 19], ["c", 14, 18], ["w", 12, 20], ["c", 20, 28], ["b", 10, 28], ["b", 11, 29], ["s", 16, 28], ["k", 18, 29], ["G", 22, 27], ["H", 9, 27]] },
+    keep: { name: "Bramble Keep", w: 30, h: 22, fill: " ", need: 9,
+      th: { sky: ["#2a0a3a", "#d83a6a"], star: "#ffd8f0", grass: "#5ad86a", grass2: "#3ab84a", fleck: "#ff5ad8", hi: "#e8c8ff", hi2: "#c8a8e8", side: "#6a2a8a", side2: "#3a1050", path: "#ffd23a", path2: "#e8a82a", water: "#ff5ad8" },
+      land: [[3, 3, 24, 16, "."], [8, 7, 2, 2, "^"], [20, 7, 2, 2, "^"], [8, 13, 2, 2, "^"], [20, 13, 2, 2, "^"], [12, 10, 6, 1, "="], [4, 4, 1, 1, "T"], [25, 17, 1, 1, "T"]],
+      ents: [["S", 5, 10], ["H", 4, 17], ["B", 15, 6], ["G", 25, 4], ["G", 15, 17]] }
   };
-  var ORDER = ["moor", "mere", "spires"], TOTAL = 12;
+  var ORDER = ["moor", "mere", "spires", "keep"], TOTAL = 12;
   function build(id) {
     var d = REALMS[id], t = [], x, y; for (y = 0; y < d.h; y++) { t.push([]); for (x = 0; x < d.w; x++) t[y].push(d.fill); }
     d.land.forEach(function (l) { for (var yy = l[1]; yy < l[1] + l[3]; yy++) for (var xx = l[0]; xx < l[0] + l[2]; xx++) t[yy][xx] = l[4]; });
@@ -49,6 +53,7 @@
       if (o.k === "b" && got[o.id]) return;
       if (o.k === "b") M.gemsTotal += 6;
       if (o.k === "w") o.z = 14;
+      if (o.k === "B") { if (save.boss) return; o.hp = 5; o.st = "stalk"; o.sT = 1.2; o.fx = 1; o.fy = 0; o.inv = 0; M.ents.push(o); return; }
       o.hp = o.k === "k" ? 1 : 1; M.ents.push(o); });
     for (y = 1; y < d.h - 1; y++) for (x = 1; x < d.w - 1; x++) if (t[y][x] === "." && (x * 3 + y * 5) % 7 === 0 && !taken[x + "," + y] && !taken[(x - 1) + "," + y] && !taken[(x + 1) + "," + y]) {
       var gid = "g" + x + "_" + y; M.gemsTotal += 1; n++; if (!got[gid]) M.ents.push({ k: "g", v: 1, x: x * TS + 8, y: y * TS + 8, id: gid, alive: true, t: hash(x, y) * 6, z: 0 }); }
@@ -60,7 +65,7 @@
   function realmGems(id) { var m = 0, o = save.got[id] || {}; for (var k in o) m += o[k]; return m; }
   function gemsAll() { var s = 0; ["hub"].concat(ORDER).forEach(function (r) { s += realmGems(r); }); return s; }
   function freedAll() { var s = 0; for (var k in save.freed) s++; return s; }
-  function scoreNow() { return gemsAll() * 10 + freedAll() * 500; }
+  function scoreNow() { return gemsAll() * 10 + freedAll() * 500 + (save.boss ? 2000 : 0); }
 
   // ---------- sound ----------
   var S = {
@@ -98,10 +103,10 @@
   };
 
   // ---------- state ----------
-  var M, hero, mode = "title", cam = { x: 0, y: 0 }, parts = [], floats = [], stick = null, msg = "", msgT = 0, realm = "hub";
+  var bossBanner = 0, shakeT = 0, irisT = 0, M, hero, mode = "title", cam = { x: 0, y: 0 }, parts = [], floats = [], stick = null, msg = "", msgT = 0, realm = "hub";
   function newHero(x, y) { return { x: x, y: y, z: 0, vz: 0, fx: 1, fy: 0, ch: 0, glide: 0, inv: 0, hp: 3, bonk: 0, safe: { x: x, y: y }, safeT: 0, air: 0, walk: 0 }; }
   function enter(id, from) {
-    realm = id; M = build(id); var sp = M.start; if (id === "hub" && from) { var p = M.ents.filter(function (e) { return e.k === "P" && e.arg === from; })[0]; if (p) sp = { x: p.x + (p.x < 200 ? 26 : p.x > 400 ? -26 : 0), y: p.y + (p.x > 200 && p.x < 400 ? 26 : 0) }; }
+    realm = id; irisT = 1; M = build(id); var sp = M.start; if (id === "hub" && from) { var p = M.ents.filter(function (e) { return e.k === "P" && e.arg === from; })[0]; if (p) sp = { x: p.x + (p.x < 200 ? 26 : p.x > 400 ? -26 : 0), y: p.y + (p.x > 200 && p.x < 400 ? 26 : 0) }; }
     hero = newHero(sp.x, sp.y); hero.z = gh(sp.x, sp.y); parts = []; floats = []; ui.setCourse(M.d.name); hud(); snap(); A.playSong(id === "hub" ? SONGS.hub : SONGS.realm);
     say(id === "hub" ? "Thistle Green" : M.d.name + "  -  " + realmGems(id) + "/" + M.gemsTotal + " gems");
   }
@@ -161,6 +166,7 @@
       if (e.k === "g" || e.k === "G") { if (d < 11 && Math.abs(h.z - gh(e.x, e.y)) < 20) grab(e); return; }
       if (e.k === "P" || e.k === "H") { if (d < 12 && h.z < gh(e.x, e.y) + 8) usePortal(e); return; }
       if (e.k === "c") { if (!e.open && d < 13 && h.ch) freeCage(e); return; }
+      if (e.k === "B") { bossStep(e, dt, dx, dy, d); return; }
       if (e.k === "b") { if (d < 12 && h.ch) { e.alive = false; S.pop(); burst(e.x, e.y, 6, "#c88a3a", 10, 50); for (var i = 0; i < 3; i++) M.ents.push({ k: "G", v: 2, x: e.x + (i - 1) * 9, y: e.y + 6, id: e.id + "_" + i, alive: true, t: 0, z: 0 }); (save.got[realm] = save.got[realm] || {})[e.id] = 0; ui.persist(); } else if (d < 9) { h.x -= dx > 0 ? -1 : 1; } return; }
       // foes
       var sp2 = e.k === "s" ? 32 : e.k === "k" ? 22 : 40, tx = e.hx + Math.cos(e.t * 0.7) * 20, ty = e.hy + Math.sin(e.t * 0.9) * 14;
@@ -181,6 +187,37 @@
     var tcx = clamp(h.x - W / 2, -40, M.w * TS - W + 40), tcy = clamp(h.y - h.z * 0.5 - H / 2, -40, M.h * TS - H + 40);
     cam.x += (tcx - cam.x) * Math.min(1, dt * 6); cam.y += (tcy - cam.y) * Math.min(1, dt * 6);
   }
+  // ---------- boss: the Thornback Baron, a huge bramble beetle that rushes and stuns itself on stones ----------
+  function bossStep(e, dt, dx, dy, d) {
+    var h = hero; e.sT -= dt; e.inv = Math.max(0, e.inv - dt); if (!e.seen && d < 150) { e.seen = 1; say("The Thornback Baron!"); bossBanner = 2.4; }
+    if (!e.seen) return;
+    if (e.st === "stalk") { var m = d || 1; var nx = e.x - dx / m * 34 * dt, ny = e.y - dy / m * 34 * dt; if (gh(nx, ny) === 0) { e.x = nx; e.y = ny; } e.fx = -dx / m; e.fy = -dy / m; if (e.sT <= 0) { e.st = "wind"; e.sT = 0.7; S.bonk(); } }
+    else if (e.st === "wind") { e.shake = Math.sin(e.sT * 60) * 2; var m2 = d || 1; e.fx = -dx / m2; e.fy = -dy / m2; if (e.sT <= 0) { e.st = "rush"; e.sT = 2.2; S.charge(); e.shake = 0; } }
+    else if (e.st === "rush") { var sp = 150 + (5 - e.hp) * 12, ax = e.x + e.fx * sp * dt, ay = e.y + e.fy * sp * dt, fx = ax + e.fx * 12, fy = ay + e.fy * 12;
+      if (gh(fx, fy) !== 0 || gh(ax, ay) !== 0) { e.st = "dizzy"; e.sT = 2.4; S.clang(); burst(e.x + e.fx * 12, e.y + e.fy * 12, 8, "#ffffff", 12, 70); shakeT = 0.3; }
+      else { e.x = ax; e.y = ay; if (Math.random() < 0.5) parts.push({ x: e.x, y: e.y + 4, z: 2, vx: -e.fx * 30, vy: -e.fy * 30, vz: 30, life: 0.4, col: "#c8a8e8" }); if (e.sT <= 0) { e.st = "stalk"; e.sT = 1.0; } } }
+    else if (e.st === "dizzy") { if (e.sT <= 0) { e.st = "stalk"; e.sT = 0.9; } }
+    if (d < 17 && Math.abs(h.z - gh(e.x, e.y)) < 16) {
+      if (e.st === "dizzy" && e.inv <= 0 && (h.ch || (h.vz < 0 && h.z > 6))) { e.hp--; e.inv = 0.6; S.pop(); burst(e.x, e.y, 10, "#ff5ad8", 16, 80); shakeT = 0.25; h.ch = 0; h.vz = 170; h.kx = -dx / (d || 1) * 120; h.ky = -dy / (d || 1) * 120; e.st = "stalk"; e.sT = 1.0;
+        if (e.hp <= 0) { e.alive = false; save.boss = 1; S.free(); burst(e.x, e.y, 10, "#ffd23a", 30, 110); for (var i = 0; i < 5; i++) M.ents.push({ k: "G", v: 5, x: e.x + Math.cos(i * 1.256) * 18, y: e.y + Math.sin(i * 1.256) * 14, id: "boss" + i, alive: true, t: 0, z: 0 }); say("The Baron is beaten! Bramble Keep is free."); bump(); } }
+      else if (e.st !== "dizzy") hurt(-dx, -dy);
+    }
+  }
+  function drawBoss(e, tt) {
+    var x = Math.round(e.x - cam.x + (e.shake || 0)), y = Math.round(e.y - cam.y), dz = e.st === "dizzy";
+    FXP.shadow(g, x, y + 4, 34);
+    if (e.inv > 0 && Math.floor(tt * 20) % 2) return;
+    var shell = "#5a1a7a", rim = "#b85ae8", thorn = "#ffd23a", F = e.fx >= 0 ? 1 : -1, leg = Math.floor(tt * (e.st === "rush" ? 16 : 6)) % 2;
+    for (var i = -1; i <= 1; i++) { R(x + i * 9 - 2, y - 2 + (leg ^ (i & 1)) * 2, 4, 6, "#2a0a3a"); }
+    g.fillStyle = shell; g.beginPath(); g.ellipse(x, y - 12, 18, 13, 0, 0, 7); g.fill();
+    g.fillStyle = rim; g.beginPath(); g.ellipse(x - 3, y - 17, 11, 6, 0, 0, 7); g.fill();
+    R(x - 1, y - 25, 2, 24, "#3a0a50");
+    for (var k = 0; k < 5; k++) { var tx = x - 14 + k * 7; g.fillStyle = thorn; g.beginPath(); g.moveTo(tx - 2, y - 20 + Math.abs(k - 2) * 3); g.lineTo(tx, y - 28 + Math.abs(k - 2) * 3); g.lineTo(tx + 2, y - 20 + Math.abs(k - 2) * 3); g.fill(); }
+    var hx = x + F * 17; g.fillStyle = "#3a0a50"; g.beginPath(); g.arc(hx, y - 8, 7, 0, 7); g.fill();
+    R(hx + F * 4 - 1, y - 18, 2, 8, "#e8e0ff"); R(hx + F * 4 - 1 + F * 2, y - 20, 2, 3, "#e8e0ff");
+    if (dz) { for (var s2 = 0; s2 < 3; s2++) { var a = tt * 5 + s2 * 2.1; R(hx + Math.cos(a) * 9 - 1, y - 22 + Math.sin(a) * 3, 3, 3, "#ffe23a"); } R(hx - 3, y - 10, 2, 2, "#ffffff"); R(hx + 1, y - 10, 2, 2, "#ffffff"); }
+    else { R(hx - 3, y - 10, 2, 2, e.st === "wind" ? "#ff3a3a" : "#ffd23a"); R(hx + 1, y - 10, 2, 2, e.st === "wind" ? "#ff3a3a" : "#ffd23a"); }
+  }
   function kill(e) { e.alive = false; S.pop(); burst(e.x, e.y, e.z + 4, e.k === "k" ? "#3affd8" : "#ff5ad8", 10, 60); M.ents.push({ k: "G", v: 1, x: e.x, y: e.y, id: "f" + Math.random(), alive: true, t: 0, z: 0, temp: 1 }); }
   function stomp(e) { var h = hero; if (e.k === "c") { freeCage(e); h.vz = 150; return; } if (e.k === "k") { S.clang(); h.vz = 170; say("Too tough to stomp. Charge it!"); return; } kill(e); h.vz = 170; }
   function usePortal(e) {
@@ -193,9 +230,11 @@
   // ---------- render ----------
   function render(c, tt) {
     if (!W) sizeLo(); if (!M) { M = build("hub"); hero = newHero(M.start.x, M.start.y); snap(); }
-    var th = M.d.th, cx = Math.round(cam.x), cy = Math.round(cam.y);
+    var th = M.d.th, sh = shakeT > 0 ? (Math.random() - 0.5) * 4 : 0, cx = Math.round(cam.x + sh), cy = Math.round(cam.y + sh); shakeT -= 1 / 60;
     var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, th.sky[0]); gr.addColorStop(1, th.sky[1]); g.fillStyle = gr; g.fillRect(0, 0, W, H);
     for (var i = 0; i < 40; i++) { var sx = ((hash(i, 3) * 900 - cx * 0.3) % W + W) % W, sy = ((hash(i, 9) * 600 - cy * 0.3) % H + H) % H; if (M.d.fill === "~") { R(sx, sy, 6, 1, "rgba(255,255,255,0.35)"); } else R(sx, sy, 1 + (i % 3 === 0), 1 + (i % 3 === 0), (Math.floor(tt * 2 + i) % 5) ? th.star : "rgba(255,255,255,0.3)"); }
+    FXP.glow(g, W * 0.78 - cx * 0.05, H * 0.2 - cy * 0.05, 90, th.star, 0.35);
+    for (var ci = 0; ci < 4; ci++) { var ccx = ((ci * 173 - cx * 0.15 + tt * 4) % (W + 120) + W + 120) % (W + 120) - 60; FXP.cloud(g, ccx, 24 + ci * 22 - cy * 0.1, 7 + (ci % 2) * 3, "rgba(255,255,255,0.22)", "rgba(0,0,0,0.06)"); }
     var x0 = Math.max(0, Math.floor(cx / TS) - 1), x1 = Math.min(M.w - 1, Math.floor((cx + W) / TS) + 1), y0 = Math.max(0, Math.floor(cy / TS) - 1), y1 = Math.min(M.h - 1, Math.floor((cy + H) / TS) + 2);
     var water = M.d.fill === "~";
     for (var ty = y0; ty <= y1; ty++) for (var tx = x0; tx <= x1; tx++) {
@@ -203,9 +242,9 @@
       if (ch === "~") { R(px, py, TS, TS, th.water); if ((tx + ty + Math.floor(tt * 2)) % 3 === 0) R(px + 3 + (Math.floor(tt * 3) % 4), py + 6, 6, 1, "rgba(255,255,255,0.5)"); continue; }
       if (ch === " ") continue;
       var hz = ch === "^" ? 10 : 0, below = tile(M, tx, ty + 1), bh = hgt(below), drop = bh < -500 ? (water ? 4 : 12) : Math.max(0, hz - bh);
-      if (drop > 0) { R(px, py + TS - hz, TS, drop, th.side); R(px, py + TS - hz + drop - 3, TS, 3, th.side2); }
+      if (drop > 0) { R(px, py + TS - hz, TS, drop, th.side); R(px, py + TS - hz, TS, 1, FXP.shade(th.side, 0.25)); R(px, py + TS - hz + drop - 3, TS, 3, th.side2); if ((tx + ty) % 2) R(px + 5, py + TS - hz + 3, 2, Math.max(1, drop - 6), FXP.shade(th.side, -0.18)); }
       var top = ch === "^" ? th.hi : ch === "=" ? th.path : th.grass;
-      R(px, py - hz, TS, TS, top);
+      R(px, py - hz, TS, TS, top); if (tile(M, tx, ty - 1) === " " || tile(M, tx, ty - 1) === "~") R(px, py - hz, TS, 2, FXP.shade(top, 0.3)); if (hgt(tile(M, tx - 1, ty)) < -500) R(px, py - hz, 1, TS, FXP.shade(top, -0.3)); if (hgt(tile(M, tx + 1, ty)) < -500) R(px + TS - 1, py - hz, 1, TS, FXP.shade(top, -0.3));
       if (ch === "." || ch === "T") { var hv = hash(tx, ty); if (hv < 0.35) { R(px + 3 + hv * 20 % 9, py + 4 + hv * 50 % 8, 2, 2, th.grass2); } if (hv > 0.85) { R(px + 6, py + 6, 3, 3, th.fleck); R(px + 7, py + 7, 1, 1, "#ffffff"); } }
       if (ch === "^") { R(px, py - hz, TS, 2, "rgba(255,255,255,0.35)"); if (hash(tx, ty) > 0.6) R(px + 4, py - hz + 7, 5, 2, th.hi2); }
       if (ch === "=") { var pv = hash(ty, tx); R(px + 2 + pv * 9, py + 3 + pv * 30 % 9, 3, 2, th.path2); R(px + 9 - pv * 5, py + 10 - pv * 4, 2, 2, th.path2); }
@@ -215,9 +254,16 @@
     var list = M.ents.filter(function (e) { return e.alive && e.x - cx > -30 && e.x - cx < W + 30 && e.y - cy > -40 && e.y - cy < H + 40; });
     if (mode !== "title") list.push({ hero: 1, y: hero.y });
     list.sort(function (a, b) { return a.y - b.y; });
-    list.forEach(function (e) { if (e.hero) drawHero(tt); else drawEnt(e, tt); });
+    var g0 = g; g = FXP.layer(W, H);
+    list.forEach(function (e) { if (e.hero) drawHero(tt); else if (e.k === "B") drawBoss(e, tt); else drawEnt(e, tt); });
+    g = g0; FXP.flush(g, "#1a0a2a");
     parts.forEach(function (p) { R(p.x - cx - 1, p.y - cy - p.z - 1, 2, 2, p.col); });
     floats.forEach(function (f) { var x = f.x - cx, y = f.y - cy - f.t * 22; drawCritter(f.kind, x - 5, y - 4, tt, true); g.fillStyle = "#ffffff"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText(f.txt, x, y - 8); });
+    FXP.ambient(g, W, H, cam, tt, M.d.fill === "~" ? "rise" : "drift", M.id === "spires" ? "rgba(255,240,150,0.8)" : "rgba(255,220,255,0.75)", 22); FXP.vignette(g, W, H, 0.35);
+    var bo = mode === "play" && M.ents.filter(function (e) { return e.k === "B" && e.alive && e.seen; })[0];
+    if (bo) { R(W / 2 - 61, H - 17, 122, 9, "rgba(20,0,40,0.7)"); R(W / 2 - 60, H - 16, 120 * bo.hp / 5, 7, "#ff5ad8"); R(W / 2 - 60, H - 16, 120 * bo.hp / 5, 2, "#ffb8f0"); }
+    if (bossBanner > 0) { FXP.banner(g, "THE THORNBACK BARON", W / 2, H * 0.38, 14, "#ffd23a", "#3a0a50"); bossBanner -= 1 / 60; }
+    if (irisT > 0) { FXP.iris(g, W, H, irisT, hero ? hero.x - cam.x : W / 2, hero ? hero.y - cam.y - hero.z : H / 2); irisT -= 1 / 30; }
     if (stick && stick.on) { R(stick.ox / PX - 12, stick.oy / PX - 12, 24, 24, "rgba(255,255,255,0.15)"); R(stick.x / PX - 5, stick.y / PX - 5, 10, 10, "rgba(255,255,255,0.45)"); }
     if (mode === "play") { for (var k = 0; k < 3; k++) { var hx = 6 + k * 12; R(hx, 6, 9, 8, k < hero.hp ? "#ffd23a" : "rgba(0,0,0,0.3)"); R(hx + 2, 4, 5, 2, k < hero.hp ? "#ffd23a" : "rgba(0,0,0,0.3)"); R(hx + 2, 8, 2, 2, k < hero.hp ? "#ff5ad8" : "rgba(0,0,0,0)"); }
       if (msgT > 0) { g.font = "bold 9px sans-serif"; g.textAlign = "center"; g.fillStyle = "rgba(20,0,40,0.55)"; var tw = g.measureText(msg).width; g.fillRect(W / 2 - tw / 2 - 6, 20, tw + 12, 14); g.fillStyle = "#fff6c8"; g.fillText(msg, W / 2, 30); } }
@@ -228,7 +274,7 @@
     if (e.k === "g" || e.k === "G") { bob = Math.sin(tt * 4 + e.t) * 2; R(x - 3, y + 2, 6, 2, "rgba(0,0,0,0.2)");
       if (e.k === "g") { R(x - 2, y - 6 + bob, 4, 6, "#ffe23a"); R(x - 3, y - 4 + bob, 6, 2, "#ffe23a"); R(x - 1, y - 6 + bob, 1, 2, "#ffffff"); }
       else { R(x - 3, y - 9 + bob, 6, 9, "#ff3ad8"); R(x - 4, y - 6 + bob, 8, 3, "#ff3ad8"); R(x - 2, y - 8 + bob, 2, 3, "#ffc8f0"); R(x + 1, y - 3 + bob, 2, 2, "#a81a8a"); } return; }
-    if (e.k === "P" || e.k === "H") { var open = e.k === "H" || freedAll() >= REALMS[e.arg].need, cols = e.k === "H" ? ["#ffd23a", "#ff9a2a"] : { moor: ["#b86aff", "#ff5ad8"], mere: ["#3affff", "#ffd23a"], spires: ["#ff8a3a", "#ff3a8a"] }[e.arg];
+    if (e.k === "P" || e.k === "H") { var open = e.k === "H" || freedAll() >= REALMS[e.arg].need, cols = e.k === "H" ? ["#ffd23a", "#ff9a2a"] : { moor: ["#b86aff", "#ff5ad8"], mere: ["#3affff", "#ffd23a"], spires: ["#ff8a3a", "#ff3a8a"], keep: ["#d83a6a", "#ffd23a"] }[e.arg];
       R(x - 12, y - 26, 4, 28, "#e8e0ff"); R(x + 8, y - 26, 4, 28, "#e8e0ff"); R(x - 12, y - 30, 24, 5, "#ffffff"); R(x - 8, y - 25, 16, 26, open ? cols[Math.floor(tt * 6) % 2] : "#3a2a5a");
       if (open) for (var i = 0; i < 4; i++) R(x - 6 + ((i * 5 + tt * 20) % 12), y - 22 + i * 6, 3, 2, "rgba(255,255,255,0.7)");
       g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillStyle = "#ffffff"; g.fillText(e.k === "H" ? "Home" : REALMS[e.arg].name + (open ? "" : " (" + REALMS[e.arg].need + ")"), x, y - 33); return; }
@@ -272,18 +318,18 @@
   function ending() { ui.stop(); mode = "end"; bump(); ui.runEnded(); A.playSong(SONGS.hub);
     ui.menu({ kicker: "Thistle Green", title: "The fen is free", body: "All twelve critters are home and Thistle Green throws a party. Fen counts " + gemsAll() + " gems and has a nap.", stats: '<b class="ff-score-xl">' + FF.n(scoreNow()) + "</b><span>HIGH SCORE " + FF.n(save.hi) + "</span>", buttons: [{ label: "Keep exploring", act: function () { mode = "play"; ui.go(); } }, { label: "Menu", small: true, act: toTitle }] }); }
   function play() { mode = "play"; enter("hub"); ui.go(); }
-  function reset() { save.got = {}; save.freed = {}; ui.persist(); toTitle(); }
+  function reset() { save.got = {}; save.freed = {}; save.boss = 0; ui.persist(); toTitle(); }
   function toTitle() { ui.stop(); mode = "title"; if (!M || realm !== "hub") { M = build("hub"); realm = "hub"; hero = newHero(M.start.x, M.start.y); } snap(); A.playSong(SONGS.hub); ui.setCourse("Thistle Green"); hud();
     ui.menu({ title: "FENWYRM", body: "Glide the gaps, charge the brambles, free the critters.", stats: "<span>HIGH SCORE " + (save.hi ? FF.n(save.hi) : "-") + "</span><span>FREED " + freedAll() + "/" + TOTAL + "</span>",
       buttons: [{ label: freedAll() || gemsAll() ? "Continue" : "Play", act: play }, { label: "New adventure", small: true, act: function () { ui.menu({ title: "Start again?", body: "This clears your gems and freed critters. Your high score stays.", buttons: [{ label: "Start again", act: reset }, { label: "Back", small: true, act: toTitle }] }); } }], app: true,
-      help: ["Drag on the left of the screen (or arrow keys) to walk. Jump, then hold Jump to glide over gaps. Glide from high ground to go further.", "Hold Charge to run with your horns down: it breaks baskets, bramble cages and shiny beetles. Land on small foes to squash them.", "Free 3 critters to open Goldmere and 6 to open Saffron Spires. Your gems and critters are saved."],
+      help: ["Drag on the left of the screen (or arrow keys) to walk. Jump, then hold Jump to glide over gaps. Glide from high ground to go further.", "Hold Charge to run with your horns down: it breaks baskets, bramble cages and shiny beetles. Land on small foes to squash them.", "Free 3 critters to open Goldmere, 6 to open Saffron Spires and 9 to face the Thornback Baron in Bramble Keep: dodge his rush, let him crash into a stone, then charge him while he is dizzy. Your gems and critters are saved."],
       fine: "An original Forest Forge game." }); }
   var game = { toTitle: toTitle, onResize: sizeLo, update: function (dt) { if (mode === "play") update(dt); },
     render: render, idle: function (dt) { if (mode === "title" && M) { cam.x += Math.sin(ui.time * 0.2) * dt * 20; } },
     onBack: function () { if (mode === "play") { toTitle(); return true; } return false; },
     onPointer: function (type, x, y, id) { if (type === "pointerdown" && x < ui.VW * 0.5) stick = { on: true, id: id, ox: x, oy: y, x: x, y: y }; else if (type === "pointermove" && stick && stick.id === id) { stick.x = x; stick.y = y; } else if (type === "pointerup" && stick && stick.id === id) stick = null; } };
   ui.onAdsRemoved = function () { if (mode === "title") toTitle(); };
-  game.qa = { enter: function (id) { mode = "play"; enter(id); ui.go(); }, state: function () { return { mode: mode, realm: realm, x: hero.x, y: hero.y, z: hero.z, hp: hero.hp, ch: hero.ch, glide: hero.glide, freed: freedAll(), gems: gemsAll(), score: scoreNow(), falls: game.falls || 0, foes: M.ents.filter(function (e) { return e.alive && "skw".indexOf(e.k) >= 0; }).length }; },
-    warp: function (tx, ty) { hero.x = tx * TS + 8; hero.y = ty * TS + 8; hero.z = gh(hero.x, hero.y); hero.vz = 0; hero.safe = { x: hero.x, y: hero.y }; snap(); }, face: function (fx, fy) { hero.fx = fx; hero.fy = fy; }, heal: function () { hero.hp = 3; hero.inv = 99; }, ents: function () { return M.ents; }, M: function () { return M; }, reset: function () { save.got = {}; save.freed = {}; } };
+  game.qa = { enter: function (id) { mode = "play"; enter(id); ui.go(); }, state: function () { return { mode: mode, realm: realm, x: hero.x, y: hero.y, z: hero.z, hp: hero.hp, ch: hero.ch, glide: hero.glide, freed: freedAll(), gems: gemsAll(), score: scoreNow(), falls: game.falls || 0, boss: (function () { var b = M.ents.filter(function (e) { return e.k === "B"; })[0]; return b ? { hp: b.hp, st: b.st, alive: b.alive, x: b.x, y: b.y } : null; })(), bossDone: !!save.boss, foes: M.ents.filter(function (e) { return e.alive && "skw".indexOf(e.k) >= 0; }).length }; },
+    warp: function (tx, ty) { hero.x = tx * TS + 8; hero.y = ty * TS + 8; hero.z = gh(hero.x, hero.y); hero.vz = 0; hero.safe = { x: hero.x, y: hero.y }; snap(); }, face: function (fx, fy) { hero.fx = fx; hero.fy = fy; }, heal: function () { hero.hp = 3; hero.inv = 99; }, ents: function () { return M.ents; }, M: function () { return M; }, reset: function () { save.got = {}; save.freed = {}; save.boss = 0; }, freeN: function (n) { for (var i = 0; i < n; i++) save.freed["qa" + i] = 1; } };
   ui.start(game);
 })();
