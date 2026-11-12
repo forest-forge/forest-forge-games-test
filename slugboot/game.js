@@ -1,5 +1,5 @@
 /* Slugboot (Forest Forge). A wellington boot that woke up cross. Armed with a garden hose
- * and a bootlace whip, Slugboot squelches through three daft stages to three daft bosses.
+ * and a bootlace whip, Slugboot squelches through four daft stages to four daft bosses.
  * Built on platform.js. Original game: all art drawn in code, all sound generated. */
 (function () {
   "use strict";
@@ -41,7 +41,9 @@
     { id: "tub", name: "Sewer Regatta", boss: "Admiral Bathbottom", th: { sky: ["#1a0a3a", "#5a1a8a"], far: "#3a1a6a", near: "#2a0e5a", dirt: "#3ad81a", dirtD: "#1aa80a", top: "#e8ff1a", topD: "#b8d80a", plank: "#ff3ad8", spike: "#e8ff1a", stars: 1 },
       segs: "g:10:3 c:0:2 g:6 swing:10 g:6:4 m:0:2 j:2:2 g:6:3 pit:3 g:6 b:3:2 plat:12:3 g:6:3 K:0:4 c:0:2 g:6:5 swing:15 g:6:3 m:0:3 h:0:5 spk:4 g:8 b:3:2 pit:3 g:6:4 c:0:2 g:6 door" },
     { id: "hoover", name: "Front Room Frenzy", boss: "Nan's Hoover", th: { sky: ["#ffe21a", "#fff6a8"], far: "#ff9ae8", near: "#c83ad8", dirt: "#8a1ac8", dirtD: "#6a0aa8", top: "#3aff6a", topD: "#1ad84a", plank: "#3aff6a", spike: "#ff2a6a" },
-      segs: "g:10:3 m:0:2 g:6 b:3:2 pit:3 g:6:5 c:0:2 swing:10 g:6:3 j:2:2 spk:4 g:6 m:0:3 plat:12:3 g:6:3 K:0:4 b:3:2 g:6:6 c:0:2 swing:15 g:6:3 h:0:5 m:0:2 pit:3 g:6 j:2:2 spk:4 g:8 door" }
+      segs: "g:10:3 m:0:2 g:6 b:3:2 pit:3 g:6:5 c:0:2 swing:10 g:6:3 j:2:2 spk:4 g:6 m:0:3 plat:12:3 g:6:3 K:0:4 b:3:2 g:6:6 c:0:2 swing:15 g:6:3 h:0:5 m:0:2 pit:3 g:6 j:2:2 spk:4 g:8 door" },
+    { id: "floss", name: "Seafront Squall", boss: "Captain Candyfloss", th: { sky: ["#1ac8ff", "#bff4ff"], far: "#ff8ad8", near: "#3a8aff", dirt: "#ffcf5a", dirtD: "#e8a82a", top: "#ffffff", topD: "#d8e8ff", plank: "#ff3a8a", spike: "#ff3a8a" },
+      segs: "g:10:3 c:0:2 g:6 swing:10 g:6:3 m:0:3 pit:3 g:6:4 j:2:3 b:3:2 plat:12:3 g:6:3 spk:4 g:6 K:0:4 c:0:2 g:6:5 swing:15 g:6 m:0:2 pit:3 g:6:3 h:0:5 j:2:2 plat:8:3 g:6:4 b:3:3 spk:4 g:8 door" }
   ];
 
   // ---------- sound ----------
@@ -91,6 +93,7 @@
   // ---------- bosses ----------
   function makeBoss() { var s = STAGES[st], it = items.filter(function (i) { return i.k === "X"; })[0];
     if (s.id === "tub") return { id: "tub", name: s.boss, x: it.x - 30, y: (HT - 9) * TS, w: 34, h: 20, vx: 60, vy: 0, hp: 30, t: 0, act: 1.5, inv: 0, face: -1, fly: 1, phase: 0 };
+    if (s.id === "floss") return { id: "floss", name: s.boss, x: it.x - 40, y: (HT - 10) * TS, w: 36, h: 24, vx: 70, vy: 0, hp: 36, t: 0, act: 1.6, inv: 0, face: -1, fly: 1, phase: 0 };
     if (s.id === "hoover") return { id: "hoover", name: s.boss, x: it.x - 10, y: it.y - 16, w: 26, h: 32, vx: 0, vy: 0, hp: 34, t: 0, act: 2, inv: 0, face: -1, phase: 0 };
     return { id: "marrow", name: s.boss, x: it.x - 14, y: it.y - 4, w: 30, h: 20, vx: 0, vy: 0, hp: 26, t: 0, act: 1.2, inv: 0, face: -1, phase: 0, open: 0 }; }
   function eshoot(x, y, vx, vy, k, grav) { eshots.push({ x: x, y: y, w: 8, h: 8, vx: vx, vy: vy, k: k, grav: grav || 0, life: 6, bounce: k === "duck" ? 3 : 0 }); }
@@ -100,6 +103,10 @@
       if (b.open > 0) { b.open -= dt; b.vx *= 0.9; if (b.open <= 0) b.act = 0.6; }
       else if (b.act <= 0) { b.phase++; if (b.phase % 3 === 0) { b.open = 2.2; b.vx = 0; for (var i = 0; i < 3; i++) eshoot(b.x + b.w / 2, b.y + 4, (i - 1) * 60 + (dx > 0 ? 40 : -40), -220, "seed", 500); S.honk(); } else { b.vx = (dx > 0 ? 1 : -1) * 170 / rage; b.vy = -160; b.act = 1.4 * rage; } }
       b.vy = Math.min(420, b.vy + 900 * dt); var r = PF.move(L, b, dt); if (r.wallL || r.wallR) { b.vx = -b.vx * 0.8; S.bonk(); }
+    } else if (b.id === "floss") {
+      b.x += b.vx * dt; var fa = arenaX + TS * 2, fb = arenaX + 18 * TS - b.w; if (b.x < fa) { b.x = fa; b.vx = Math.abs(b.vx); } if (b.x > fb) { b.x = fb; b.vx = -Math.abs(b.vx); }
+      b.y = (HT - 10) * TS + Math.sin(b.t * 1.3) * 18 + (Math.sin(b.t * 0.5) > 0.7 ? 34 : 0);
+      if (b.act <= 0) { b.phase++; if (b.phase % 3 === 0) { b.vx = (dx > 0 ? 1 : -1) * 150; } else { b.vx = (b.vx > 0 ? 1 : -1) * 70; for (var f = 0; f < 3; f++) eshoot(b.x + b.w / 2, b.y + b.h, (f - 1) * 55 + dx * 0.15, -60, "seed", 380); } S.honk(); b.act = 1.5 * rage; }
     } else if (b.id === "tub") {
       b.x += b.vx * dt; var ax = arenaX + TS * 2, bx2 = arenaX + 18 * TS - b.w; if (b.x < ax) { b.x = ax; b.vx = Math.abs(b.vx); } if (b.x > bx2) { b.x = bx2; b.vx = -Math.abs(b.vx); }
       var low = Math.sin(b.t * 0.9) > 0.6; b.y += ((low ? (HT - 6) * TS : (HT - 9) * TS) - b.y) * Math.min(1, dt * 2);
@@ -175,6 +182,7 @@
     var s = STAGES[st]; PF.drawBack(g, s.th, cam, W, H, tt);
     for (var k = 0; k < 7; k++) { var bx = ((k * 70 - cam.x * 0.35) % (W + 70) + W + 70) % (W + 70) - 35, by = H * 0.78 - cam.y * 0.2;
       if (s.id === "marrow") { R(bx, by - 30, 26, 30, "#ff3ad8"); R(bx - 3, by - 34, 32, 5, "#ffe21a"); R(bx + 9, by - 22, 8, 12, "#6a1ac8"); R(bx + 30, by - 12, 14, 12, "#3ad81a"); R(bx + 33, by - 16, 8, 4, "#b8ff1a"); }
+      else if (s.id === "floss") { var hc = ["#ff3a8a", "#3a8aff", "#ffe21a", "#3ad86a"][k % 4]; R(bx, by - 24, 22, 24, hc); for (var st2 = 0; st2 < 3; st2++) R(bx + 2 + st2 * 7, by - 24, 3, 24, "#ffffff"); g.fillStyle = FXP.shade(hc, -0.25); g.beginPath(); g.moveTo(bx - 3, by - 24); g.lineTo(bx + 11, by - 34); g.lineTo(bx + 25, by - 24); g.fill(); R(bx + 8, by - 14, 6, 14, "#7a3a1a"); R(bx + 30, by - 6, 16, 2, "#ffffff"); }
       else if (s.id === "tub") { R(bx, by - 46, 10, 46, "#3a1a6a"); R(bx - 6, by - 50, 22, 6, "#5a2a8a"); R(bx + 22, by - 20, 30, 6, "#3ad81a"); R(bx + 24, by - 24, 4, 4, "#e8ff1a"); }
       else { R(bx, by - 50, 24, 50, "#ff9ae8"); R(bx + 4, by - 44, 16, 14, "#ffffff"); R(bx + 10, by - 44, 2, 14, "#c83ad8"); R(bx + 4, by - 38, 16, 2, "#c83ad8"); R(bx + 28, by - 18, 14, 18, "#3aff6a"); } }
     PF.drawTiles(g, L, s.th, cam, W, H, tt);
@@ -218,6 +226,8 @@
     if (b.id === "marrow") { R(x, y + 2, b.w, b.h - 2, fl ? "#fff" : "#3ad81a"); for (var i = 0; i < 4; i++) R(x + 3 + i * 7, y + 3, 2, b.h - 4, "#b8ff1a"); R(x + b.w - 4, y + 6, 6, 4, "#7a5a1a"); R(x + 4, y + 4, 22, 2, "#1a8a0a");
       if (b.open > 0) { R(x + 7, y + 7, 6, 6, "#ffffff"); R(x + 17, y + 7, 6, 6, "#ffffff"); R(x + 9, y + 9, 2, 2, "#111"); R(x + 19, y + 9, 2, 2, "#111"); R(x + 10, y + 14, 10, 4, "#6a0a2a"); } else { R(x + 7, y + 9, 6, 2, "#1a6a0a"); R(x + 17, y + 9, 6, 2, "#1a6a0a"); }
       R(x + 10, y - 4, 10, 6, "#ffe21a"); R(x + 13, y - 2, 4, 2, "#ff2a3a"); }
+    else if (b.id === "floss") { R(x + b.w / 2 - 1, y + b.h - 2, 3, 14, "#e8d8b8"); var pc = fl ? "#ffffff" : "#ff9ad8"; g.fillStyle = FXP.shade(pc, -0.2); [[8, 14, 9], [18, 10, 11], [28, 14, 9], [18, 18, 10]].forEach(function (c) { g.beginPath(); g.arc(x + c[0], y + c[1] + 2, c[2], 0, 7); g.fill(); }); g.fillStyle = pc; [[8, 13, 8], [18, 9, 10], [28, 13, 8], [18, 16, 9]].forEach(function (c) { g.beginPath(); g.arc(x + c[0], y + c[1], c[2], 0, 7); g.fill(); }); R(x + 10, y + 4, 6, 2, "#ffffff");
+      R(x + 11, y + 10, 4, 4, "#ffffff"); R(x + 21, y + 10, 4, 4, "#ffffff"); R(x + 12 + (hero.x > b.x ? 1 : 0), y + 11, 2, 2, "#111"); R(x + 22 + (hero.x > b.x ? 1 : 0), y + 11, 2, 2, "#111"); R(x + 8, y + 7, 7, 2, "#6a1a4a"); R(x + 21, y + 7, 7, 2, "#6a1a4a"); R(x + 14, y + 18, 8, 3, "#6a1a4a"); R(x + 12, y - 4, 12, 4, "#1a1a6a"); R(x + 10, y, 16, 2, "#1a1a6a"); R(x + 17, y - 3, 2, 2, "#ffe21a"); }
     else if (b.id === "tub") { R(x, y + 6, b.w, 12, fl ? "#fff" : "#ffffff"); R(x + 2, y + 18, 4, 4, "#ffe21a"); R(x + b.w - 6, y + 18, 4, 4, "#ffe21a"); R(x - 2, y + 6, b.w + 4, 3, "#c8c8d8"); R(x + 12, y - 8, 10, 12, "#ff2a3a"); R(x + 13, y - 2, 8, 6, "#ffe0b0"); R(x + 13, y + 2, 8, 4, "#ffffff"); R(x + 10, y - 10, 14, 4, "#1a1a6a"); R(x + 16, y - 13, 3, 3, "#ffe21a"); R(x + 15, y - 1, 1, 1, "#111"); R(x + 19, y - 1, 1, 1, "#111"); for (var b2 = 0; b2 < 3; b2++) R(x + 4 + b2 * 9, y + 3 + Math.sin(tt * 6 + b2) * 2, 4, 4, "rgba(200,240,255,0.8)"); }
     else { var F = b.face > 0; function r(dx, dy, w, hh, col) { R(F ? x + dx : x + b.w - dx - w, y + dy, w, hh, col); }
       r(4, 0, 14, 26, fl ? "#fff" : "#c83ad8"); r(2, 22, 22, 10, "#8a1ac8"); r(0, 28, 6, 4, "#2a2a3a"); r(20, 28, 6, 4, "#2a2a3a"); r(6, 2, 10, 4, "#ff9ae8"); r(16, 4, 4, 20, "#e8e8f0"); r(18, 22, 10, 6, "#e8e8f0"); r(-6, 6, 10, 14, "#ffe21a"); r(-5, 8, 8, 1, "#c8b81a"); r(7, 9, 3, 3, "#ffffff"); r(12, 9, 3, 3, "#ffffff"); r(8, 10, 1, 1, "#111"); r(13, 10, 1, 1, "#111");
@@ -226,14 +236,14 @@
 
   // ---------- flow ----------
   function stageClear() { ui.stop(); mode = "clear"; var last = st + 1 >= STAGES.length; if (last) ui.runEnded(); if (st + 2 > save.open) save.open = Math.min(STAGES.length, st + 2); if (score > save.hi) save.hi = score; ui.persist();
-    var quip = ["The Prize Marrow is disqualified from the village show.", "Admiral Bathbottom pulls the plug and sails off down the drain.", "Nan's Hoover gives one last wheeze and coughs up a lost earring."][st];
+    var quip = ["The Prize Marrow is disqualified from the village show.", "Admiral Bathbottom pulls the plug and sails off down the drain.", "Nan's Hoover gives one last wheeze and coughs up a lost earring.", "Captain Candyfloss melts in the drizzle and the pier lights come back on."][st];
     ui.menu({ kicker: STAGES[st].name, title: last ? "Boot-iful!" : "Squelched it", body: quip, stats: '<b class="ff-score-xl">' + FF.n(score) + "</b><span>TIME " + FF.fmtTime(tm) + "</span>",
       buttons: last ? [{ label: "Menu", act: toTitle }] : [{ label: "Next stage", act: function () { mode = "play"; load(st + 1); ui.go(); A.playSong(SONG); } }, { label: "Menu", small: true, act: toTitle }] }); }
   function gameOver() { ui.stop(); mode = "over"; A.stopSong(); ui.runEnded(); var hi = score > save.hi; if (hi) save.hi = score; ui.persist();
     ui.menu({ title: "Boots off", body: "Slugboot has squelched his last squelch. For now.", stats: '<b class="ff-score-xl">' + FF.n(score) + "</b><span>" + (hi ? "NEW HIGH SCORE" : "HIGH SCORE " + FF.n(save.hi)) + "</span>", buttons: [{ label: "Try " + STAGES[st].name + " again", act: function () { play(st); } }, { label: "Menu", small: true, act: toTitle }] }); }
   function play(i) { mode = "play"; lives = 3; score = 0; load(i); ui.go(); A.playSong(SONG); }
   function toTitle() { ui.stop(); mode = "title"; load(0); A.playSong(SONG);
-    ui.menu({ title: "SLUGBOOT", body: "One cross welly. A garden hose. A bootlace whip. Three very silly bosses.", stats: "<span>HIGH SCORE " + (save.hi ? FF.n(save.hi) : "-") + "</span><span>STAGES " + save.open + "/3</span>",
+    ui.menu({ title: "SLUGBOOT", body: "One cross welly. A garden hose. A bootlace whip. Four very silly bosses.", stats: "<span>HIGH SCORE " + (save.hi ? FF.n(save.hi) : "-") + "</span><span>STAGES " + save.open + "/3</span>",
       buttons: [{ label: "Play", act: function () { play(Math.min(save.open, STAGES.length) - 1); } }], row: STAGES.map(function (s, i) { return { label: String(i + 1), disabled: i >= save.open, act: function () { play(i); } }; }), app: true,
       help: ["◀ ▶ squelch, Jump (hold for higher). Hose squirts water (it arcs upward if you fire mid-air). Whip cracks your bootlace.", "Crack the whip near a hook and you swing from it; Jump lets go. Land on small pests to squash them.", "Bosses: the Marrow is soft when it opens its eyes; hit the Hoover from behind; the Admiral comes low now and then."],
       fine: "An original Forest Forge game." }); }
