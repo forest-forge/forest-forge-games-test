@@ -4,6 +4,12 @@
  * Drawn in code into a low-res buffer; sound and music generated (shell.js). */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#12305a;--water:#1a3a68;--amber:#ffe8dc;--amber-hi:#ffd0c0;--amber-soft:#fff0e8;--amber-line:#e87848;--ember:#e04040;--btn:#1a3a70;--lamp:#ffe8c0;--glow-line:rgba(255,140,90,.35);--glow-fill:rgba(255,140,90,.08)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #2a5088 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#1a3a70,#0c2040);border-bottom-color:rgba(232,120,72,.4)}.ff{border-left-color:rgba(232,120,72,.28);border-right-color:rgba(232,120,72,.28)}.ff-icon-btn:active{background:#2a5088;box-shadow:0 0 16px rgba(255,140,90,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(255,140,90,.5)}`);
   var clamp = FF.clamp, lerp = FF.lerp;
   var ui = FF.create({
     id: "dawn-mail", title: "Dawn Mail", course: "The post run", wide: true, view: { w: 640, h: 360, flex: true },
@@ -25,8 +31,8 @@
   // ---------- sprites (pixel art drawn once in code) ----------
   function sprite(w, h, fn) { var c = document.createElement("canvas"); c.width = w; c.height = h; var x = c.getContext("2d"); fn(x, function (a, b, cw, ch, col) { x.fillStyle = col; x.fillRect(a, b, cw, ch); }); return c; }
   var SP = {
-    pine: sprite(20, 40, function (x, r) { r(9, 30, 3, 10, "#3a2414"); for (var i = 0; i < 5; i++) r(9 - i * 2 - 1, 4 + i * 6, 4 + i * 4 + 2, 6, i % 2 ? "#1e4a2a" : "#245a32"); r(9, 0, 2, 5, "#2a6a3a"); }),
-    oak: sprite(30, 34, function (x, r) { r(13, 20, 4, 14, "#4a2e18"); r(3, 6, 24, 14, "#2e5a2a"); r(6, 2, 18, 6, "#3a6a32"); r(0, 10, 8, 8, "#2a5226"); r(22, 10, 8, 8, "#2a5226"); r(8, 8, 6, 4, "#4a7a3a"); }),
+    pine: sprite(20, 40, function (x, r) { r(9, 30, 3, 10, "#3a2414"); for (var i = 0; i < 5; i++) r(9 - i * 2 - 1, 4 + i * 6, 4 + i * 4 + 2, 6, i % 2 ? "#1a8a3a" : "#28a048"); r(9, 0, 2, 5, "#3aba50"); }),
+    oak: sprite(30, 34, function (x, r) { r(13, 20, 4, 14, "#4a2e18"); r(3, 6, 24, 14, "#2a8a38"); r(6, 2, 18, 6, "#3aaa44"); r(0, 10, 8, 8, "#228a32"); r(22, 10, 8, 8, "#228a32"); r(8, 8, 6, 4, "#58c050"); }),
     rock: sprite(24, 14, function (x, r) { r(2, 4, 20, 10, "#5a5650"); r(5, 1, 12, 5, "#6e6a62"); r(7, 2, 5, 2, "#8a867c"); }),
     hut: sprite(16, 20, function (x, r) { r(1, 6, 14, 14, "#e84a3a"); r(1, 6, 14, 2, "#fff"); r(0, 2, 16, 5, "#f4f0e0"); r(6, 12, 4, 8, "#5a2a1a"); }),
     hutB: sprite(16, 20, function (x, r) { r(1, 6, 14, 14, "#3a7ae0"); r(1, 6, 14, 2, "#fff"); r(0, 2, 16, 5, "#f4f0e0"); r(6, 12, 4, 8, "#1a2a5a"); }),
@@ -48,7 +54,7 @@
   function carSprite(lean) {
     return sprite(56, 30, function (x, r) {
       var o = lean * 2;
-      r(4, 14, 48, 10, "#b8242a"); r(2, 18, 52, 6, "#9a1a20"); r(6 + o, 8, 44, 8, "#d83038"); r(10 + o, 4, 36, 6, "#e8d8b0");
+      r(4, 14, 48, 10, "#d02028"); r(2, 18, 52, 6, "#b01820"); r(6 + o, 8, 44, 8, "#e83840"); r(10 + o, 4, 36, 6, "#e8d8b0");
       r(20 + o, 0, 14, 6, "#1a1210"); r(30 + o, 1, 10, 3, "#f0a020"); r(38 + o * 2, 2, 8, 2, "#f0a020");
       r(6, 20, 8, 3, "#ff4a2a"); r(42, 20, 8, 3, "#ff4a2a"); r(24, 20, 8, 3, "#f0e8d0");
       r(2, 22, 10, 8, "#111"); r(44, 22, 10, 8, "#111"); r(4, 24, 6, 2, "#3a3a3a"); r(46, 24, 6, 2, "#3a3a3a");
@@ -59,10 +65,10 @@
   // ---------- stages ----------
   // Each stage: palette, roadside sprites, traffic, layout seed. Pyramid of forks.
   var STAGES = {
-    harbour: { name: "Harbour Road", grass: ["#2a3a2a", "#263424"], rumble: ["#c8c8c8", "#a02a2a"], road: ["#3a3a40", "#36363c"], lane: "#d8d8d0", side: ["lamp", "house", "lamp", "hut"], traffic: ["van", "bus", "cart"], hills: "#1a2230", next: ["coast", "forest"], label: ["COAST", "FOREST"] },
-    coast: { name: "Coast Road", grass: ["#c8b080", "#bca474"], rumble: ["#f4f4f4", "#3a6ab0"], road: ["#4a4a4e", "#46464a"], lane: "#f4f0e0", side: ["hut", "hutB", "rock", "sign"], traffic: ["van", "cart"], hills: "#2a4a6a", sea: 1, next: ["cliff", "pass"], label: ["CLIFF TOP", "HIGH PASS"] },
-    forest: { name: "Forest Road", grass: ["#1e4a24", "#1a4220"], rumble: ["#e8e0c8", "#5a3a1a"], road: ["#3e3a36", "#3a3632"], lane: "#e8e0c8", side: ["pine", "pine", "oak", "pine"], traffic: ["tractor", "cart", "van"], hills: "#14301a", next: ["pass", "mill"], label: ["HIGH PASS", "MILL VALLEY"] },
-    cliff: { name: "Cliff Top", grass: ["#5a7a3a", "#527034"], rumble: ["#f4f4f4", "#c02a2a"], road: ["#4a4844", "#454340"], lane: "#fff", side: ["rock", "sign", "sheep", "rock"], traffic: ["van", "bus"], hills: "#3a5a7a", sea: 1, next: ["light", "saltby"], label: ["LIGHTHOUSE", "SALTBY"] },
+    harbour: { name: "Harbour Road", grass: ["#2a8a3a", "#247c34"], rumble: ["#c8c8c8", "#a02a2a"], road: ["#3a3a40", "#36363c"], lane: "#d8d8d0", side: ["lamp", "house", "lamp", "hut"], traffic: ["van", "bus", "cart"], hills: "#1a4a6a", next: ["coast", "forest"], label: ["COAST", "FOREST"] },
+    coast: { name: "Coast Road", grass: ["#e0c490", "#d4b67c"], rumble: ["#f4f4f4", "#3a6ab0"], road: ["#4a4a4e", "#46464a"], lane: "#f4f0e0", side: ["hut", "hutB", "rock", "sign"], traffic: ["van", "cart"], hills: "#2a6a8a", sea: 1, next: ["cliff", "pass"], label: ["CLIFF TOP", "HIGH PASS"] },
+    forest: { name: "Forest Road", grass: ["#1a8a3a", "#167c32"], rumble: ["#e8e0c8", "#5a3a1a"], road: ["#3e3a36", "#3a3632"], lane: "#e8e0c8", side: ["pine", "pine", "oak", "pine"], traffic: ["tractor", "cart", "van"], hills: "#146028", next: ["pass", "mill"], label: ["HIGH PASS", "MILL VALLEY"] },
+    cliff: { name: "Cliff Top", grass: ["#4aaa40", "#409636"], rumble: ["#f4f4f4", "#c02a2a"], road: ["#4a4844", "#454340"], lane: "#fff", side: ["rock", "sign", "sheep", "rock"], traffic: ["van", "bus"], hills: "#3a78a8", sea: 1, next: ["light", "saltby"], label: ["LIGHTHOUSE", "SALTBY"] },
     pass: { name: "High Pass", grass: ["#8a8a80", "#7e7e74"], rumble: ["#f4f4f4", "#e83a2a"], road: ["#3a3a3c", "#363638"], lane: "#ffd040", side: ["pole", "rock", "sheep", "pole"], traffic: ["tractor", "van"], hills: "#5a6070", snow: 1, next: ["saltby", "moorhead"], label: ["SALTBY", "MOORHEAD"] },
     mill: { name: "Mill Valley", grass: ["#4a7a2a", "#447024"], rumble: ["#f0e8d0", "#8a5a2a"], road: ["#4a4038", "#453c34"], lane: "#f0e8d0", side: ["oak", "mill", "sheep", "oak"], traffic: ["cart", "tractor"], hills: "#2a4a2a", next: ["moorhead", "kings"], label: ["MOORHEAD", "KINGSFERRY"] },
     light: { name: "Lighthouse Point", grass: ["#c8b080", "#bca474"], rumble: ["#fff", "#c02a2a"], road: ["#4a4a4e", "#46464a"], lane: "#fff", side: ["rock", "hut", "light", "rock"], traffic: ["van"], hills: "#2a4a6a", sea: 1, end: "Lighthouse Point" },
@@ -308,20 +314,20 @@
   }
   function sky(t) {
     var k = dawnK(), st = stage || STAGES.harbour;
-    var top = mix("#070a1c", "#3a5a8a", k), mid = mix("#1a1838", "#e89060", k), bot = mix("#3a2440", "#ffd8a0", k);
+    var top = mix("#08122a", "#4aa0e8", k), mid = mix("#1a1440", "#ff7a6a", k), bot = mix("#3a1838", "#ffc8d8", k);
     var gr = g.createLinearGradient(0, 0, 0, H * 0.62); gr.addColorStop(0, top); gr.addColorStop(0.7, mid); gr.addColorStop(1, bot);
     g.fillStyle = gr; g.fillRect(0, 0, W, H);
     if (k < 0.7) { g.globalAlpha = 1 - k / 0.7; for (var i = 0; i < 60; i++) R(((i * 97 + skyOff * W * 3) % W + W) % W, (i * 37) % (H * 0.45), 1, 1, i % 4 ? "#8a90b0" : "#fff"); g.globalAlpha = 1; }
     // the sun coming up
     var sy = lerp(H * 0.62, H * 0.18, k), sx = W * 0.62 + ((skyOff * W * 2) % W);
-    if (k > 0.05) { g.globalAlpha = Math.min(1, k * 3); g.fillStyle = mix("#ff6a2a", "#fff0b0", k); g.beginPath(); g.arc(((sx % W) + W) % W, sy, 12 + k * 4, 0, 7); g.fill(); g.globalAlpha = 1; }
+    if (k > 0.05) { g.globalAlpha = Math.min(1, k * 3); g.fillStyle = mix("#ff7040", "#ffe9a0", k); g.beginPath(); g.arc(((sx % W) + W) % W, sy, 12 + k * 4, 0, 7); g.fill(); g.globalAlpha = 1; }
     // hills
     var hc = st.hills;
     for (var x = 0; x < W; x += 2) {
       var hx = x + hillOff * W * 4, h1 = 18 + 10 * Math.sin(hx * 0.02) + 6 * Math.sin(hx * 0.051 + 1);
       R(x, H * 0.5 - h1 + 6, 2, h1 + 40, mix(hc, mix("#000000", "#ffffff", 0.3), k * 0.35));
     }
-    if (st.sea) R(0, H * 0.5 + 2, W, 8, mix("#0a1a30", "#4a8ab0", k));
+    if (st.sea) R(0, H * 0.5 + 2, W, 8, mix("#0a1a30", "#3cb8c8", k));
   }
   function render(c, t) {
     if (!W) sizeLo();
@@ -352,7 +358,7 @@
       }
       if (s.check || s.finish) { var hw = s.p1c.sw * 1.2; for (var q = 0; q < 10; q++) R(s.p1c.sx - hw + q * hw / 5, s.p1c.sy - 2, hw / 5, 3, q % 2 ? "#111" : "#f4f4f4"); }
       // fog towards the horizon
-      if (s.fogN > 0.55) { g.globalAlpha = (s.fogN - 0.55) * 1.6; R(0, s.p2c.sy, W, s.p1c.sy - s.p2c.sy + 1, mix("#2a2a44", "#d8b090", dawnK())); g.globalAlpha = 1; }
+      if (s.fogN > 0.55) { g.globalAlpha = (s.fogN - 0.55) * 1.6; R(0, s.p2c.sy, W, s.p1c.sy - s.p2c.sy + 1, mix("#1a2040", "#ffd0c0", dawnK())); g.globalAlpha = 1; }
       maxy = s.p2c.sy;
       vis.push(s);
     }

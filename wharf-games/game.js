@@ -4,6 +4,12 @@
  * music is generated with Web Audio (see shell.js). */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#06243c;--water:#07324c;--amber:#e8f4ff;--amber-hi:#fff4b8;--amber-soft:#d4ecff;--amber-line:#2c86d0;--ember:#e23c3c;--btn:#0a3a68;--lamp:#fff6c8;--glow-line:rgba(70,170,255,.35);--glow-fill:rgba(70,170,255,.08)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #0a4c80 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#0a3868,#061e34);border-bottom-color:rgba(44,134,208,.35)}.ff{border-left-color:rgba(44,134,208,.28);border-right-color:rgba(44,134,208,.28)}.ff-icon-btn:active{background:#155a9a;box-shadow:0 0 16px rgba(70,170,255,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(70,170,255,.5)}`);
   var clamp = FF.clamp, lerp = FF.lerp;
   var ui = FF.create({
     id: "wharf-games", title: "Wharf Games", course: "Sports day", view: { w: 360, h: 640, flex: true },
@@ -68,12 +74,12 @@
 
   // ---------- harbour scenery ----------
   var cranes = [], sheds = [];
-  (function () { var r = FF.rng(7); for (var i = 0; i < 12; i++) cranes.push({ x: i * 140 + r() * 60, h: 40 + r() * 30, b: 30 + r() * 20 }); for (var j = 0; j < 20; j++) sheds.push({ x: j * 70 + r() * 30, w: 40 + r() * 30, h: 14 + r() * 18, c: ["#3a2a22", "#2a3036", "#40281c", "#2c2a34"][j % 4] }); })();
+  (function () { var r = FF.rng(7); for (var i = 0; i < 12; i++) cranes.push({ x: i * 140 + r() * 60, h: 40 + r() * 30, b: 30 + r() * 20 }); for (var j = 0; j < 20; j++) sheds.push({ x: j * 70 + r() * 30, w: 40 + r() * 30, h: 14 + r() * 18, c: ["#2a6ec8", "#e2c43a", "#d43a32", "#2a9a4a"][j % 4] }); })();
   function sky(top, bot) {
     var gr = g.createLinearGradient(0, 0, 0, bot);
-    gr.addColorStop(0, "#1b2a44"); gr.addColorStop(0.55, "#a8553a"); gr.addColorStop(1, "#f3b25e");
+    gr.addColorStop(0, "#3a86d8"); gr.addColorStop(0.55, "#7ec8f2"); gr.addColorStop(1, "#d8f0ff");
     g.fillStyle = gr; g.fillRect(0, top, W, bot - top);
-    R(W * 0.72, bot - 26, 14, 14, "#ffe3a0"); R(W * 0.72 - 2, bot - 22, 18, 6, "#ffe3a0");
+    R(W * 0.72, bot - 26, 14, 14, "#fff6c0"); R(W * 0.72 - 2, bot - 22, 18, 6, "#fff6c0");
   }
   function harbour(camX, horizon, quayY, t) {
     sky(0, horizon);
@@ -81,25 +87,25 @@
     for (i = 0; i < cranes.length; i++) {
       var c = cranes[i]; x = ((c.x - camX * 0.15) % 1680 + 1680) % 1680 - 120;
       if (x < -60 || x > W + 60) continue;
-      R(x, horizon - c.h, 3, c.h, "#2b1e1c"); R(x - c.b * 0.3, horizon - c.h, c.b, 2, "#2b1e1c"); line(x + 1, horizon - c.h - 8, x + c.b * 0.7, horizon - c.h, "#2b1e1c", 1);
+      R(x, horizon - c.h, 3, c.h, "#3a5268"); R(x - c.b * 0.3, horizon - c.h, c.b, 2, "#3a5268"); line(x + 1, horizon - c.h - 8, x + c.b * 0.7, horizon - c.h, "#3a5268", 1);
     }
     for (i = 0; i < sheds.length; i++) {
       var s = sheds[i]; x = ((s.x - camX * 0.35) % 1400 + 1400) % 1400 - 80;
       if (x < -80 || x > W + 10) continue;
-      R(x, horizon - s.h, s.w, s.h, s.c); R(x, horizon - s.h - 2, s.w, 2, "#1a1210");
+      R(x, horizon - s.h, s.w, s.h, s.c); R(x, horizon - s.h - 2, s.w, 2, "#1a3048");
     }
     // water
-    R(0, horizon, W, quayY - horizon, "#143a4a");
+    R(0, horizon, W, quayY - horizon, "#1a88b0");
     for (i = 0; i < (quayY - horizon) / 3; i++) {
       var y = horizon + 1 + i * 3, off = ((t * 8 + i * 13 - camX * (0.4 + i * 0.05)) % 24 + 24) % 24;
-      for (x = -24; x < W; x += 24) R(x + off, y, 8 + (i % 3) * 3, 1, i < 2 ? "#e89a52" : "#2a6878");
+      for (x = -24; x < W; x += 24) R(x + off, y, 8 + (i % 3) * 3, 1, i < 2 ? "#e89a52" : "#3ab0c8");
     }
     // quay
-    R(0, quayY, W, H - quayY, "#5a4c40");
-    R(0, quayY, W, 3, "#8a7460");
+    R(0, quayY, W, H - quayY, "#d2c4a4");
+    R(0, quayY, W, 3, "#e8dcc0");
     var st = ((-camX) % 16 + 16) % 16;
-    for (x = st - 16; x < W; x += 16) { R(x, quayY + 3, 1, H - quayY, "#4a3e34"); }
-    for (i = 0; i < 6; i++) R(0, quayY + 10 + i * 12, W, 1, "#4a3e34");
+    for (x = st - 16; x < W; x += 16) { R(x, quayY + 3, 1, H - quayY, "#b8a888"); }
+    for (i = 0; i < 6; i++) R(0, quayY + 10 + i * 12, W, 1, "#b8a888");
   }
   function bollard(x, y) { R(x - 3, y - 7, 6, 7, "#2a2a2e"); R(x - 4, y - 8, 8, 2, "#3a3a40"); }
 
@@ -271,10 +277,10 @@
       var ppm = 4, cam = T.st === "fly" || T.st === "land" ? Math.max(0, T.cx * ppm - W * 0.5) : 0;
       var hz = H * 0.28, qy = H * 0.46;
       sky(0, hz);
-      R(0, hz, W, H - hz, "#143a4a");
-      for (var i = 0; i < 30; i++) { var y = hz + 2 + i * 4, off = ((t * 10 + i * 17 - cam * 0.6) % 30 + 30) % 30; for (var x = -30; x < W; x += 30) R(x + off, y, 9, 1, "#2a6878"); }
+      R(0, hz, W, H - hz, "#1a88b0");
+      for (var i = 0; i < 30; i++) { var y = hz + 2 + i * 4, off = ((t * 10 + i * 17 - cam * 0.6) % 30 + 30) % 30; for (var x = -30; x < W; x += 30) R(x + off, y, 9, 1, "#3ab0c8"); }
       // quay at left, barge from 6 m
-      R(-cam, qy, 8 * ppm, H - qy, "#5a4c40"); R(-cam, qy, 8 * ppm, 3, "#8a7460");
+      R(-cam, qy, 8 * ppm, H - qy, "#d2c4a4"); R(-cam, qy, 8 * ppm, 3, "#e8dcc0");
       var bx = 8 * ppm - cam; R(bx, qy + 6, 54 * ppm, 10, "#3a2a20"); R(bx, qy + 4, 54 * ppm, 3, "#6a5038"); R(bx + 54 * ppm, qy + 6, 6, 8, "#2a1e18");
       for (var m = 10; m <= 60; m += 5) { var mx = (m + 2) * ppm - cam; R(mx, qy + 2, 1, 4, "#f3e0b0"); if (m % 10 === 0) { g.fillStyle = "#f3e0b0"; g.font = "6px monospace"; g.fillText(m + "", mx - 4, qy + 24); } }
       var qm = (toss.qual(round) + 2) * ppm - cam; R(qm, qy - 4, 1, 10, "#e86a3a");
@@ -339,12 +345,12 @@
       } else if (B.st === "land") { B.wait -= dt; if (B.wait <= 0) { if (B.n >= 5) finish(B.score); else { B.st = "swing"; B.t = Math.random() * 3; } } }
     },
     draw: function (t) {
-      var hz = H * 0.36; sky(0, hz); R(0, hz, W, H - hz, "#143a4a");
-      for (var i = 0; i < 40; i++) { var y = hz + 2 + i * 4, off = ((t * 8 + i * 11) % 28 + 28) % 28; for (var x = -28; x < W; x += 28) R(x + off, y, 8, 1, "#2a6878"); }
+      var hz = H * 0.36; sky(0, hz); R(0, hz, W, H - hz, "#1a88b0");
+      for (var i = 0; i < 40; i++) { var y = hz + 2 + i * 4, off = ((t * 8 + i * 11) % 28 + 28) % 28; for (var x = -28; x < W; x += 28) R(x + off, y, 8, 1, "#3ab0c8"); }
       var top = H * 0.2, deckY = H * 0.58 + B.deck;
       // ship
       R(W * 0.08, deckY, W * 0.84, 18, "#4a2a24"); R(W * 0.08, deckY, W * 0.84, 3, "#7a5a40"); R(W * 0.06, deckY + 18, W * 0.88, 6, "#2a1a16");
-      R(W * 0.78, deckY - 20, 18, 20, "#d8d0c0"); R(W * 0.8, deckY - 16, 4, 4, "#2a6878"); R(W * 0.86, deckY - 16, 4, 4, "#2a6878");
+      R(W * 0.78, deckY - 20, 18, 20, "#d8d0c0"); R(W * 0.8, deckY - 16, 4, 4, "#3ab0c8"); R(W * 0.86, deckY - 16, 4, 4, "#3ab0c8");
       var tx = W / 2 + Math.sin(ui.time * 0.7) * 14 * (B.n % 2 ? 1 : -1) * 0.6;
       line(tx - 6, deckY - 3, tx + 6, deckY + 3, "#ffe36a", 2); line(tx - 6, deckY + 3, tx + 6, deckY - 3, "#ffe36a", 2);
       // crane
@@ -417,8 +423,8 @@
       if (t > K.end + 0.4) finish(K.score);
     },
     draw: function (t) {
-      R(0, 0, W, H, "#1a1410");
-      for (var y = 0; y < H; y += 20) R(0, y, W, 1, "#241c16");
+      R(0, 0, W, H, "#121a28");
+      for (var y = 0; y < H; y += 20) R(0, y, W, 1, "#1a2438");
       var lineY = H * 0.62, lanes = [W * 0.32, W * 0.68];
       R(W * 0.12, lineY - 6, W * 0.76, 14, "#5a5a62"); R(W * 0.12, lineY - 6, W * 0.76, 2, "#8a8a94");
       for (var x = W * 0.14; x < W * 0.86; x += 10) R(x, lineY - 1, 3, 3, "#3a3a40");

@@ -4,6 +4,12 @@
  * All art drawn in code, all sound generated (shell.js). */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#1a5aaa;--water:#1650a0;--amber:#fff8e0;--amber-hi:#ffe66a;--amber-soft:#e8ffe0;--amber-line:#3aaa40;--ember:#e83838;--btn:#1a4a88;--lamp:#fff6a8;--glow-line:rgba(80,200,70,.35);--glow-fill:rgba(80,200,70,.08)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #3a8ad0 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#1a5aaa,#0e3878);border-bottom-color:rgba(58,170,64,.4)}.ff{border-left-color:rgba(58,170,64,.28);border-right-color:rgba(58,170,64,.28)}.ff-icon-btn:active{background:#2a6ac0;box-shadow:0 0 16px rgba(255,220,80,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(255,220,80,.5)}`);
   var clamp = FF.clamp, TS = PF.TS;
   var ui = FF.create({
     id: "nettle-run", title: "Nettle Run", course: "The hills", wide: true, view: { w: 640, h: 360, flex: true },
@@ -65,11 +71,11 @@
     { name: "Moon Common", th: "night", segs: ["start", "flint", "bats", "gauntlet", "fruitrow", "check", "high", "water2", "mixed", "cart", "bats", "plats", "gauntlet", "hill", "goal"] }
   ];
   var THEMES = {
-    meadow: { sky: ["#5a8ad0", "#cfe6f0"], sun: "#fff4c0", far: "#8ab0c8", near: "#6a9a5a", trees: "#3a6a3a", dirt: "#8a5a32", dirtD: "#6a4424", top: "#5ab03a", topD: "#3a8a2a", deco: ["#f05a8a", "#f0e05a", "#fff"], plank: "#b07a40", water: "#2a6aa8", waterHi: "#8ad0f0", spike: "#2e7a2e", rock: "#7a7268" },
-    woods: { sky: ["#3a5a4a", "#a8c8a0"], far: "#3a5a3a", near: "#2a4a2a", trees: "#1a3a1a", dirt: "#6a4a2a", dirtD: "#4a321c", top: "#3a8a2a", topD: "#2a6a1e", deco: ["#e8d070", "#c8e0a0"], plank: "#8a5a2a", water: "#1a4a5a", waterHi: "#6aa0a0", spike: "#2a6a2a", rock: "#5a5a50" },
-    marsh: { sky: ["#6a8a9a", "#e0e0c8"], sun: "#fff8d8", far: "#8a9a8a", near: "#7a8a5a", dirt: "#6a5a3a", dirtD: "#4a4028", top: "#8a9a3a", topD: "#6a7a2a", deco: ["#e8e0a0"], plank: "#9a7a4a", water: "#2a5a6a", waterHi: "#a8d0c8", spike: "#4a7a3a", rock: "#6a6a5a" },
-    hills: { sky: ["#4a3a6a", "#f0a868"], sun: "#ffd890", far: "#6a4a6a", near: "#7a4a5a", trees: "#3a2a3a", dirt: "#7a5040", dirtD: "#5a3a30", top: "#a85aa0", topD: "#7a3a7a", deco: ["#f0c0f0", "#fff"], plank: "#9a6a3a", water: "#3a4a8a", waterHi: "#a8a8e0", spike: "#4a6a3a", rock: "#7a6a68" },
-    night: { sky: ["#05081a", "#2a2a4a"], stars: 1, far: "#1a1a30", near: "#14182a", trees: "#0a0e18", dirt: "#3a2e2a", dirtD: "#2a201e", top: "#2a5a3a", topD: "#1a3a2a", deco: ["#a0c8ff"], plank: "#6a4a2a", water: "#1a2a4a", waterHi: "#5a7ab0", spike: "#2a4a2a", rock: "#4a4a50" }
+    meadow: { sky: ["#4aa4f0", "#c8f0ff"], sun: "#ffe66a", far: "#8ad0a0", near: "#4aba50", trees: "#2a9a38", dirt: "#d2a060", dirtD: "#b88848", top: "#3ad048", topD: "#28a838", deco: ["#e83838", "#ffe66a", "#fff"], plank: "#e0a848", water: "#2a8ad0", waterHi: "#8ae0ff", spike: "#2e9a2e", rock: "#7a7268" },
+    woods: { sky: ["#3a90d0", "#b8e8c8"], sun: "#fff4a0", far: "#2a8a48", near: "#1e7a38", trees: "#147a28", dirt: "#c49858", dirtD: "#a87c40", top: "#2aba3a", topD: "#1e8a2a", deco: ["#e83838", "#ffe66a"], plank: "#d49840", water: "#1a6a90", waterHi: "#6ad0e0", spike: "#2a8a2a", rock: "#5a5a50" },
+    marsh: { sky: ["#6ab4e8", "#e8fff0"], sun: "#fff8a8", far: "#7aba80", near: "#5aaa50", dirt: "#c8b068", dirtD: "#a89450", top: "#8ad040", topD: "#68b028", deco: ["#e83838", "#ffe66a"], plank: "#e0b050", water: "#2a8a9a", waterHi: "#a8f0e0", spike: "#4aaa3a", rock: "#6a6a5a" },
+    hills: { sky: ["#5aa8f0", "#ffe08a"], sun: "#ffe66a", far: "#6aba70", near: "#4aa848", trees: "#2a8a38", dirt: "#d2a060", dirtD: "#b88848", top: "#3ad048", topD: "#28a838", deco: ["#e83838", "#ffe66a", "#fff"], plank: "#e0a848", water: "#3a7ad0", waterHi: "#a8d0ff", spike: "#4aaa3a", rock: "#7a6a68" },
+    night: { sky: ["#081830", "#1a3a68"], stars: 1, far: "#143050", near: "#102848", trees: "#0a2030", dirt: "#4a3a28", dirtD: "#3a2c1e", top: "#2a8a40", topD: "#1a6a2e", deco: ["#ffe66a", "#e83838"], plank: "#c49038", water: "#1a3a70", waterHi: "#5a90d0", spike: "#2a7a32", rock: "#4a4a50" }
   };
   function buildStage(si) {
     var st = STAGES[si], rows = []; for (var r = 0; r < 12; r++) rows.push("");

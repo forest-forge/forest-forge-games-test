@@ -5,6 +5,12 @@
  * All art drawn in code, all sound generated (shell.js). */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#1a1030;--water:#140c28;--amber:#f0e4b0;--amber-hi:#ffe27a;--amber-soft:#d8f4f0;--amber-line:#7a4ad0;--ember:#2ab8a8;--btn:#2a1850;--lamp:#ffe9a0;--glow-line:rgba(160,120,255,.4);--glow-fill:rgba(42,184,168,.1)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #3a2080 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#2a1850,#140c28);border-bottom-color:rgba(122,74,208,.4)}.ff{border-left-color:rgba(122,74,208,.3);border-right-color:rgba(122,74,208,.3)}.ff-icon-btn:active{background:#3a2890;box-shadow:0 0 16px rgba(255,210,100,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(255,210,100,.5)}`);
   var clamp = FF.clamp, TS = PF.TS;
   var ui = FF.create({
     id: "kilnbound", title: "Kilnbound", course: "Ashcombe", wide: true, view: { w: 640, h: 360, flex: true },
@@ -36,12 +42,12 @@
     return { w: w, h: h, r: function (x0, y0, x1, y1, c) { for (var y = Math.max(0, y0); y <= Math.min(h - 1, y1); y++) for (var x = Math.max(0, x0); x <= Math.min(w - 1, x1); x++) gr[y][x] = c; }, p: function (x, y, c) { if (x >= 0 && x < w && y >= 0 && y < h) gr[y][x] = c; }, rows: function () { return gr.map(function (r) { return r.join(""); }); } };
   }
   var THEMES = {
-    town: { sky: ["#0a0a24", "#3a2a4a"], stars: 1, far: "#1a1630", near: "#241a30", dirt: "#4a3a32", dirtD: "#3a2a24", top: "#4a6a3a", topD: "#2e4a26", deco: ["#ffb040", "#f0e0a0"], plank: "#7a5a3a", water: "#1a2a5a", waterHi: "#6a8ad0", soft: "#6a4a2a", spike: "#3a5a2a", rock: "#5a5258" },
-    kiln: { sky: ["#1a0a08", "#5a1a0a"], far: "#3a140a", near: "#2a0e08", dirt: "#5a3020", dirtD: "#3a1a10", top: "#8a4a2a", topD: "#5a2a14", plank: "#6a3a1a", brick: "#7a4a3a", soft: "#6a4a2a", spike: "#5a3a1a", backY: 2, back: "#220c06" },
-    cliffs: { sky: ["#3a4a8a", "#f0a070"], sun: "#ffe0a0", far: "#5a4a7a", near: "#6a5a6a", dirt: "#7a6a5a", dirtD: "#5a4a40", top: "#8aa04a", topD: "#5a7a3a", deco: ["#ffffff", "#f0e0a0"], plank: "#8a6a40", soft: "#7a5a3a" },
-    mere: { sky: ["#0a3a4a", "#06141e"], far: "#0e3040", near: "#0a2430", dirt: "#2a4a4a", dirtD: "#1a3a3a", top: "#3a6a5a", topD: "#2a5a4a", water: "rgba(20,90,130,0.45)", waterHi: "rgba(160,220,240,0.5)", plank: "#5a5a4a", soft: "#3a4a3a" },
-    sett: { sky: ["#1a2a3a", "#4a5a3a"], stars: 1, far: "#2a3a2a", near: "#1a2a1a", trees: "#0e1a0e", dirt: "#4a4a4e", dirtD: "#34343a", top: "#3a6a2a", topD: "#2a4a1a", soft: "#6a4a2a", spike: "#4a6a2a", backY: 5, back: "#1c130c" },
-    heart: { sky: ["#200606", "#701a08"], far: "#3a0e06", near: "#2a0a04", dirt: "#4a2418", dirtD: "#2e140c", top: "#7a3a1e", topD: "#4a2010", plank: "#6a3a1a", brick: "#7a4a3a", backY: 1, back: "#1e0804" }
+    town: { sky: ["#1a1048", "#6a40c0"], stars: 1, far: "#2a1860", near: "#3a2080", dirt: "#4a3a62", dirtD: "#3a2a50", top: "#2ab8a8", topD: "#1a8a80", deco: ["#ffe27a", "#f0e4b0"], plank: "#c4a050", water: "#1a3a7a", waterHi: "#7ab0ff", soft: "#5a3a70", spike: "#2ab8a8", rock: "#6a5a80" },
+    kiln: { sky: ["#201038", "#8a3060"], far: "#4a1860", near: "#3a1048", dirt: "#5a3060", dirtD: "#3a1848", top: "#c49040", topD: "#8a6828", plank: "#c4a050", brick: "#7a4a90", soft: "#5a3a70", spike: "#2ab8a8", backY: 2, back: "#2a0c30" },
+    cliffs: { sky: ["#3a70d0", "#8ad8f0"], sun: "#ffe27a", far: "#5a48a0", near: "#3a80a0", dirt: "#6a6a80", dirtD: "#4a4a68", top: "#2ab8a8", topD: "#1a8a80", deco: ["#ffe27a", "#ffffff"], plank: "#c4a050", soft: "#5a3a70" },
+    mere: { sky: ["#0a3048", "#1a6878"], far: "#0e4860", near: "#0a3850", dirt: "#1a5a62", dirtD: "#0e444c", top: "#2ab8a8", topD: "#1a8a80", water: "rgba(20,160,180,0.45)", waterHi: "rgba(160,255,240,0.55)", plank: "#c4a050", soft: "#2a4a50" },
+    sett: { sky: ["#1a1440", "#3a2870"], stars: 1, far: "#2a2060", near: "#1a1848", trees: "#1a3860", dirt: "#3a3a5a", dirtD: "#2a2a48", top: "#2ab8a8", topD: "#1a8a80", soft: "#5a3a70", spike: "#2ab8a8", backY: 5, back: "#180c28" },
+    heart: { sky: ["#280848", "#8040b0"], far: "#4a1868", near: "#3a1050", dirt: "#5a2460", dirtD: "#3a1448", top: "#e0b040", topD: "#b08828", plank: "#c4a050", brick: "#7a4a90", backY: 1, back: "#200830" }
   };
   // door chars: [target area, target door char, needs boss of this area]; chars without an entry are arrival points only
   var DOORS = {

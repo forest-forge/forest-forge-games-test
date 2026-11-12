@@ -3,6 +3,12 @@
  * into a low-res buffer; all sound and music generated with Web Audio (shell.js). */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#082214;--water:#0a2818;--amber:#f3ead0;--amber-hi:#ffe7a0;--amber-soft:#e8f6d8;--amber-line:#2a9a48;--ember:#e86220;--btn:#12381c;--lamp:#fff0b0;--glow-line:rgba(80,200,90,.32);--glow-fill:rgba(80,200,90,.08)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #145828 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#145828,#081c10);border-bottom-color:rgba(42,154,72,.35)}.ff{border-left-color:rgba(42,154,72,.28);border-right-color:rgba(42,154,72,.28)}.ff-icon-btn:active{background:#1c6a30;box-shadow:0 0 16px rgba(80,200,90,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(80,200,90,.5)}`);
   var clamp = FF.clamp, lerp = FF.lerp;
   var ui = FF.create({
     id: "downcut", title: "Downcut", course: "Haul road", view: { w: 360, h: 640, flex: true },
@@ -22,14 +28,14 @@
 
   // ---------- tracks ----------
   var THEMES = [
-    { name: "Chalk Pit", sky: ["#5a7aa0", "#e8c89a"], cliff: "#b8b0a0", wallA: "#d8d0bc", wallB: "#c4bca6", roadA: "#a89c84", roadB: "#9c907a", line: "#f4f0e4", fog: "#e8dcc0" },
-    { name: "Slate Steps", sky: ["#2a3448", "#8a96a8"], cliff: "#3a4250", wallA: "#4a5262", wallB: "#424a58", roadA: "#5c6068", roadB: "#54585f", line: "#c8ccd4", fog: "#8a96a8" },
-    { name: "Red Sandstone", sky: ["#3a2244", "#f09858"], cliff: "#7a3828", wallA: "#b05a3a", wallB: "#a04e32", roadA: "#8a5a44", roadB: "#80523e", line: "#f4d0a8", fog: "#e89868" },
-    { name: "Lamp Shift", sky: ["#05070c", "#1a1e2a"], cliff: "#14161c", wallA: "#2a2622", wallB: "#24201c", roadA: "#3a342c", roadB: "#332e27", line: "#ffcf7a", fog: "#0e0f14", night: 1 },
-    { name: "Granite Rain", sky: ["#3a4048", "#7a828a"], cliff: "#4a4a50", wallA: "#6a6a70", wallB: "#606066", roadA: "#55575c", roadB: "#4e5055", line: "#d0d4d8", fog: "#7a828a", rain: 1 },
-    { name: "Ironstone", sky: ["#402818", "#c87838"], cliff: "#5a3020", wallA: "#7a4a2a", wallB: "#6e4226", roadA: "#6a4a34", roadB: "#62442f", line: "#f0c890", fog: "#c08048" },
-    { name: "Limestone Frost", sky: ["#8aa8c8", "#e8f0f8"], cliff: "#c8d0d8", wallA: "#e0e4e8", wallB: "#d4d8dc", roadA: "#b8bcc0", roadB: "#aeb2b6", line: "#ffffff", fog: "#e8f0f8", snow: 1 },
-    { name: "Deep Cut", sky: ["#0a0606", "#2a1810"], cliff: "#1a100a", wallA: "#3a2618", wallB: "#322014", roadA: "#4a3424", roadB: "#422e20", line: "#ff9a2a", fog: "#1a0e08", night: 1 }
+    { name: "Fern Cut", sky: ["#3a9ae0", "#b8ecff"], cliff: "#1e6a32", wallA: "#2e8a40", wallB: "#257a38", roadA: "#e0c490", roadB: "#d4b67c", line: "#fff6d8", fog: "#8ad0c8" },
+    { name: "Jade Steps", sky: ["#1a5a80", "#6ab8c8"], cliff: "#145828", wallA: "#1c6e34", wallB: "#186430", roadA: "#c8b078", roadB: "#bca46c", line: "#f4ecd0", fog: "#4aa898" },
+    { name: "Sunset Haul", sky: ["#2a3a7a", "#ff8a4a"], cliff: "#c45a28", wallA: "#e07838", wallB: "#d06830", roadA: "#e8c080", roadB: "#dcb470", line: "#fff0d0", fog: "#f0a070" },
+    { name: "Lamp Vine", sky: ["#061018", "#0a2430"], cliff: "#0c2a18", wallA: "#163c22", wallB: "#12361e", roadA: "#6a5840", roadB: "#5e4e38", line: "#f0d878", fog: "#0c1c18", night: 1 },
+    { name: "Rain Canopy", sky: ["#3a6070", "#7aa8a0"], cliff: "#1a4a32", wallA: "#2a6a44", wallB: "#24623c", roadA: "#8a7a58", roadB: "#7e7050", line: "#e8e0c8", fog: "#6a9088", rain: 1 },
+    { name: "Sand Shelf", sky: ["#3a70b0", "#f0c070"], cliff: "#d08a40", wallA: "#e8a858", wallB: "#d89a4c", roadA: "#f0d8a0", roadB: "#e4cc94", line: "#fff8e8", fog: "#80d0c8" },
+    { name: "Frost Glade", sky: ["#7ab8e0", "#e8f8ff"], cliff: "#8ab8a8", wallA: "#c8e8dc", wallB: "#b8dcc8", roadA: "#d0e0e8", roadB: "#c4d4dc", line: "#ffffff", fog: "#d0f0f0", snow: 1 },
+    { name: "Night Cut", sky: ["#061016", "#123028"], cliff: "#0a2014", wallA: "#163c24", wallB: "#12361e", roadA: "#3a4a30", roadB: "#324028", line: "#7ad0a0", fog: "#0a1814", night: 1 }
   ];
   // Track 1 is hand-built. Each string is one row (left, middle, right lane), 7 m apart.
   // . empty  p pebbles  c crate  h hard-hat crate  i iron crate (jump it)  r rock (jump)

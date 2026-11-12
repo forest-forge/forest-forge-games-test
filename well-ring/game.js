@@ -4,6 +4,12 @@
  * Drawn in code into a low-res buffer; sound and music generated (shell.js). */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#030614;--water:#05081c;--amber:#d8f0ff;--amber-hi:#a8f0ff;--amber-soft:#e8e0ff;--amber-line:#3ad0f0;--ember:#d45cff;--btn:#10183a;--lamp:#f0f8ff;--glow-line:rgba(80,220,255,.4);--glow-fill:rgba(80,220,255,.1)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #142060 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#10183a,#050814);border-bottom-color:rgba(58,208,240,.35)}.ff{border-left-color:rgba(58,208,240,.28);border-right-color:rgba(58,208,240,.28)}.ff-icon-btn:active{background:#1a2870;box-shadow:0 0 16px rgba(80,220,255,.5)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(80,220,255,.55)}`);
   var clamp = FF.clamp, lerp = FF.lerp, TAU = Math.PI * 2;
   var ui = FF.create({
     id: "well-ring", title: "Well Ring", course: "The well", view: { w: 360, h: 640, flex: true },
@@ -19,17 +25,17 @@
   function bmp(rows, pal) { var h = rows.length, w = rows[0].length, c = document.createElement("canvas"); c.width = w; c.height = h; var x = c.getContext("2d"); for (var j = 0; j < h; j++) for (var i = 0; i < w; i++) { var ch = rows[j][i]; if (ch !== "." && pal[ch]) { x.fillStyle = pal[ch]; x.fillRect(i, j, 1, 1); } } return c; }
   // enemy pixel art (original)
   var ART = {
-    bat: [bmp(["a.........a", "aa.......aa", "aaa.bbb.aaa", ".aaabcbaaa.", "..aabbbaa..", "...a...a..."], { a: "#7a5aa8", b: "#a88ad8", c: "#ff4a4a" }),
-          bmp(["...........", "...........", "aaa.bbb.aaa", "aaaabcbaaaa", "a.aabbbaa.a", "...a...a..."], { a: "#7a5aa8", b: "#a88ad8", c: "#ff4a4a" })],
-    moth: [bmp(["aa.....aa", "aaa.b.aaa", "aaabbbaaa", ".aabcbaa.", "..abbba..", "...b.b..."], { a: "#d8b060", b: "#8a6a3a", c: "#fff0a0" }),
-           bmp([".a.....a.", "aaa.b.aaa", ".aabbbaa.", "..abcba..", "..abbba..", "...b.b..."], { a: "#d8b060", b: "#8a6a3a", c: "#fff0a0" })],
-    imp: [bmp(["..a.a..", ".abbba.", "abcbcba", "abbbbba", ".bdddb.", ".b...b."], { a: "#3aa08a", b: "#2a7a6a", c: "#ffe060", d: "#1a4a40" }),
-          bmp(["..a.a..", ".abbba.", "abcbcba", "abbbbba", ".bdddb.", "b.....b"], { a: "#3aa08a", b: "#2a7a6a", c: "#ffe060", d: "#1a4a40" })],
-    wisp: [bmp(["..aaa..", ".abbba.", "abbcbba", "abbbbba", ".abbba.", "..a.a.."], { a: "#4a8ae8", b: "#9ad0ff", c: "#ffffff" }),
-           bmp(["..aaa..", ".abbba.", "abbbbba", "abbcbba", ".abbba.", ".a...a."], { a: "#4a8ae8", b: "#9ad0ff", c: "#ffffff" })],
+    bat: [bmp(["a.........a", "aa.......aa", "aaa.bbb.aaa", ".aaabcbaaa.", "..aabbbaa..", "...a...a..."], { a: "#6a40e0", b: "#c89aff", c: "#ff5ac8" }),
+          bmp(["...........", "...........", "aaa.bbb.aaa", "aaaabcbaaaa", "a.aabbbaa.a", "...a...a..."], { a: "#6a40e0", b: "#c89aff", c: "#ff5ac8" })],
+    moth: [bmp(["aa.....aa", "aaa.b.aaa", "aaabbbaaa", ".aabcbaa.", "..abbba..", "...b.b..."], { a: "#f0d050", b: "#7a50d0", c: "#fff8c8" }),
+           bmp([".a.....a.", "aaa.b.aaa", ".aabbbaa.", "..abcba..", "..abbba..", "...b.b..."], { a: "#f0d050", b: "#7a50d0", c: "#fff8c8" })],
+    imp: [bmp(["..a.a..", ".abbba.", "abcbcba", "abbbbba", ".bdddb.", ".b...b."], { a: "#2ad0a0", b: "#18a878", c: "#e8ff6a", d: "#0a4840" }),
+          bmp(["..a.a..", ".abbba.", "abcbcba", "abbbbba", ".bdddb.", "b.....b"], { a: "#2ad0a0", b: "#18a878", c: "#e8ff6a", d: "#0a4840" })],
+    wisp: [bmp(["..aaa..", ".abbba.", "abbcbba", "abbbbba", ".abbba.", "..a.a.."], { a: "#3ad0ff", b: "#b0f0ff", c: "#ffffff" }),
+           bmp(["..aaa..", ".abbba.", "abbbbba", "abbcbba", ".abbba.", ".a...a."], { a: "#3ad0ff", b: "#b0f0ff", c: "#ffffff" })],
     lantern: [bmp(["..aa..", ".abba.", "abccba", "abccba", ".abba.", "..dd.."], { a: "#8a5a1a", b: "#ffb040", c: "#fff0b0", d: "#5a3a10" })]
   };
-  var POD = bmp(["....aa....", "...abba...", "..abccba..", ".aabccbaa.", "aaddddddaa", "a.d.ee.d.a", "...eeee...", "....ee...."], { a: "#c98a35", b: "#ffcf7a", c: "#fff4c0", d: "#6a4a20", e: "#ff9a2a" });
+  var POD = bmp(["....aa....", "...abba...", "..abccba..", ".aabccbaa.", "aaddddddaa", "a.d.ee.d.a", "...eeee...", "....ee...."], { a: "#3a8ad8", b: "#8ae8ff", c: "#f0ffff", d: "#1a3060", e: "#d45cff" });
 
   // ---------- sound ----------
   var S = {
@@ -223,21 +229,21 @@
   // ---------- render ----------
   function render(c, t) {
     if (!W) sizeLo();
-    R(0, 0, W, H, "#050403");
+    R(0, 0, W, H, "#030614");
     // the well: brick rings falling away towards the glow
-    var gr = g.createRadialGradient(CX, CY, 0, CX, CY, RR * 0.35); gr.addColorStop(0, "#ffb040"); gr.addColorStop(0.25, "#5a2a08"); gr.addColorStop(1, "rgba(5,4,3,0)");
+    var gr = g.createRadialGradient(CX, CY, 0, CX, CY, RR * 0.35); gr.addColorStop(0, "#8af0ff"); gr.addColorStop(0.22, "#1a3a90"); gr.addColorStop(1, "rgba(3,6,20,0)");
     g.fillStyle = gr; g.fillRect(0, 0, W, H);
     for (var i = 0; i < rings.length; i++) {
       var r = rings[i].r; if (r < 0.04) continue;
       var rad = r * RR * 1.0, k = clamp(r, 0, 1) * (r > 1 ? clamp(1.6 - r, 0, 0.6) / 0.6 : 1);
-      g.strokeStyle = "rgba(" + Math.round(120 + 80 * k) + "," + Math.round(70 + 40 * k) + "," + Math.round(30 + 10 * k) + "," + (0.15 + 0.5 * k) + ")";
+      var hue = i % 4; var rr = hue === 0 ? 80 + 80 * k : hue === 1 ? 180 + 50 * k : hue === 2 ? 40 + 40 * k : 220 + 20 * k, gg = hue === 0 ? 200 + 40 * k : hue === 1 ? 80 + 40 * k : hue === 2 ? 220 + 20 * k : 80 + 40 * k, bb = hue === 0 ? 255 : hue === 1 ? 255 : hue === 2 ? 140 : 200; g.strokeStyle = "rgba(" + Math.round(rr) + "," + Math.round(gg) + "," + Math.round(bb) + "," + (0.2 + 0.55 * k) + ")";
       g.lineWidth = Math.max(1, r * 3); g.beginPath(); g.arc(CX, CY, rad, 0, TAU); g.stroke();
       // brick joints
       var n = 12, off = i * 0.37;
-      for (var j = 0; j < n; j++) { var a = off + j / n * TAU, p1 = { x: CX + Math.cos(a) * rad, y: CY + Math.sin(a) * rad }; R(p1.x, p1.y, Math.max(1, r * 2), Math.max(1, r * 2), "rgba(40,24,10,0.8)"); }
+      for (var j = 0; j < n; j++) { var a = off + j / n * TAU, p1 = { x: CX + Math.cos(a) * rad, y: CY + Math.sin(a) * rad }; R(p1.x, p1.y, Math.max(1, r * 2), Math.max(1, r * 2), "rgba(180,240,255,0.7)"); }
     }
     // player ring track
-    g.strokeStyle = "rgba(201,138,53,0.35)"; g.lineWidth = 1; g.beginPath(); g.arc(CX, CY, RR, 0, TAU); g.stroke();
+    g.strokeStyle = "rgba(80,220,255,0.5)"; g.lineWidth = 1; g.beginPath(); g.arc(CX, CY, RR, 0, TAU); g.stroke();
     // foes
     var fr = Math.floor(t * 6) % 2;
     foes.forEach(function (f) {
@@ -259,7 +265,7 @@
       g.drawImage(POD, -8, -6, 16, 13); if (twin > 0) { R(-9, -2, 2, 4, "#4ae0a0"); R(7, -2, 2, 4, "#4ae0a0"); }
       g.restore();
       // lamp beam into the well
-      g.globalAlpha = 0.07; g.fillStyle = "#ffe0a0"; g.beginPath(); g.moveTo(me.x, me.y); var b1 = polar(pa - 0.12, 0.35), b2 = polar(pa + 0.12, 0.35); g.lineTo(b1.x, b1.y); g.lineTo(b2.x, b2.y); g.fill(); g.globalAlpha = 1;
+      g.globalAlpha = 0.07; g.fillStyle = "#8af0ff"; g.beginPath(); g.moveTo(me.x, me.y); var b1 = polar(pa - 0.12, 0.35), b2 = polar(pa + 0.12, 0.35); g.lineTo(b1.x, b1.y); g.lineTo(b2.x, b2.y); g.fill(); g.globalAlpha = 1;
     }
     if (mode === "title") { var tp = polar(t * 0.8, 1); g.save(); g.translate(tp.x, tp.y); g.rotate(t * 0.8 + Math.PI / 2); g.drawImage(POD, -8, -6, 16, 13); g.restore(); }
     fx.forEach(function (p) { R(p.x, p.y, 1.5, 1.5, p.c); });
@@ -268,7 +274,7 @@
     if (mode === "play" && !ui.menuOpen) {
       if (bannerT > 0) ui.text(banner, ui.VW / 2, CY * PX - RR * PX - 18 > 20 ? CY * PX - RR * PX - 14 : 30, 17, "#ffe3a0", "center", "#ff9a2a");
       if (twin > 0) ui.text("TWIN " + Math.ceil(twin), 10, 18, 11, "#4ae0a0");
-      ui.text("WAVE " + wave, ui.VW - 10, 18, 11, "#c98a35", "right");
+      ui.text("WAVE " + wave, ui.VW - 10, 18, 11, "#8ae8ff", "right");
     }
   }
 
