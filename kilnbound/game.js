@@ -10,9 +10,10 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#1a1030;--water:#140c28;--amber:#f0e4b0;--amber-hi:#ffe27a;--amber-soft:#d8f4f0;--amber-line:#7a4ad0;--ember:#2ab8a8;--btn:#2a1850;--lamp:#ffe9a0;--glow-line:rgba(160,120,255,.4);--glow-fill:rgba(42,184,168,.1)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #3a2080 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#2a1850,#140c28);border-bottom-color:rgba(122,74,208,.4)}.ff{border-left-color:rgba(122,74,208,.3);border-right-color:rgba(122,74,208,.3)}.ff-icon-btn:active{background:#3a2890;box-shadow:0 0 16px rgba(255,210,100,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(255,210,100,.5)}.ff-shade{background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.52))!important}.ff-modal{text-shadow:0 2px 10px rgba(0,0,0,.7);animation:ffIn .35s ease}.ff-display{letter-spacing:.18em;filter:drop-shadow(0 0 16px var(--ember))}.ff-lede,.ff-stat-line,.ff-fine{text-shadow:0 1px 6px rgba(0,0,0,.7)}.ff-btns{background:rgba(0,0,0,.42);border:1px solid var(--glow-line);border-radius:16px;padding:14px 16px 16px;box-shadow:0 14px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);backdrop-filter:blur(7px)}.ff-btn{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 18px var(--glow-fill);letter-spacing:.06em}.ff-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.35)}.ff-hud{box-shadow:0 10px 24px rgba(0,0,0,.28)}.ff-toast{backdrop-filter:blur(6px)}@keyframes ffIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}`);
+  })(`:root{--bg:#4a2ab8;--sky1:#ff9a4a;--sky2:#7a3aff;--water:#2a1a78;--amber:#ffffff;--amber-hi:#ffe27a;--amber-soft:#ffffff;--amber-line:#14b8a0;--ember:#6a1aa0;--btn:#3a2098;--lamp:#fff6d8;--pop1:#ffb03a;--pop2:#4af0d8;--pop3:#ff7ae0;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
   var clamp = FF.clamp, TS = PF.TS;
   var ui = FF.create({
+    deco: ["spark", "drop", "diamond"], 
     id: "kilnbound", title: "Kilnbound", course: "Ashcombe", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "coins", label: "Coins", value: "0" }, { id: "form", label: "Form", value: "Clay" }],
     pads: {
@@ -42,9 +43,9 @@
     return { w: w, h: h, r: function (x0, y0, x1, y1, c) { for (var y = Math.max(0, y0); y <= Math.min(h - 1, y1); y++) for (var x = Math.max(0, x0); x <= Math.min(w - 1, x1); x++) gr[y][x] = c; }, p: function (x, y, c) { if (x >= 0 && x < w && y >= 0 && y < h) gr[y][x] = c; }, rows: function () { return gr.map(function (r) { return r.join(""); }); } };
   }
   var THEMES = {
-    town: { sky: ["#1a1048", "#6a40c0"], stars: 1, far: "#2a1860", near: "#3a2080", dirt: "#4a3a62", dirtD: "#3a2a50", top: "#2ab8a8", topD: "#1a8a80", deco: ["#ffe27a", "#f0e4b0"], plank: "#c4a050", water: "#1a3a7a", waterHi: "#7ab0ff", soft: "#5a3a70", spike: "#2ab8a8", rock: "#6a5a80" },
+    town: { sky: ["#1a1048", "#6a40c0"], stars: 1, far: "#2a1860", near: "#3a2080", dirt: "#4a3a62", dirtD: "#3a2a50", top: "#2ab8a8", topD: "#1a8a80", plank: "#c4a050", water: "#1a3a7a", waterHi: "#7ab0ff", soft: "#5a3a70", spike: "#2ab8a8", rock: "#6a5a80" },
     kiln: { sky: ["#201038", "#8a3060"], far: "#4a1860", near: "#3a1048", dirt: "#5a3060", dirtD: "#3a1848", top: "#c49040", topD: "#8a6828", plank: "#c4a050", brick: "#7a4a90", soft: "#5a3a70", spike: "#2ab8a8", backY: 2, back: "#2a0c30" },
-    cliffs: { sky: ["#3a70d0", "#8ad8f0"], sun: "#ffe27a", far: "#5a48a0", near: "#3a80a0", dirt: "#6a6a80", dirtD: "#4a4a68", top: "#2ab8a8", topD: "#1a8a80", deco: ["#ffe27a", "#ffffff"], plank: "#c4a050", soft: "#5a3a70" },
+    cliffs: { sky: ["#3a70d0", "#8ad8f0"], sun: "#ffe27a", far: "#5a48a0", near: "#3a80a0", dirt: "#6a6a80", dirtD: "#4a4a68", top: "#2ab8a8", topD: "#1a8a80", plank: "#c4a050", soft: "#5a3a70" },
     mere: { sky: ["#0a3048", "#1a6878"], far: "#0e4860", near: "#0a3850", dirt: "#1a5a62", dirtD: "#0e444c", top: "#2ab8a8", topD: "#1a8a80", water: "rgba(20,160,180,0.45)", waterHi: "rgba(160,255,240,0.55)", plank: "#c4a050", soft: "#2a4a50" },
     sett: { sky: ["#1a1440", "#3a2870"], stars: 1, far: "#2a2060", near: "#1a1848", trees: "#1a3860", dirt: "#3a3a5a", dirtD: "#2a2a48", top: "#2ab8a8", topD: "#1a8a80", soft: "#5a3a70", spike: "#2ab8a8", backY: 5, back: "#180c28" },
     heart: { sky: ["#280848", "#8040b0"], far: "#4a1868", near: "#3a1050", dirt: "#5a2460", dirtD: "#3a1448", top: "#e0b040", topD: "#b08828", plank: "#c4a050", brick: "#7a4a90", backY: 1, back: "#200830" }
