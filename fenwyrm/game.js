@@ -11,8 +11,8 @@
     keys: [{ id: "U", keys: ["ArrowUp", "KeyW"] }, { id: "D", keys: ["ArrowDown", "KeyS"] }, { id: "L", keys: ["ArrowLeft", "KeyA"] }, { id: "R", keys: ["ArrowRight", "KeyD"] }]
   });
   var A = ui.audio, save = ui.save; save.hi = save.hi || 0; save.got = save.got || {}; save.freed = save.freed || {};
-  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180;
-  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); lo.width = W; lo.height = H; g.imageSmoothingEnabled = false; }
+  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180, Q = 1;
+  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); Q = FF.hdq ? FF.hdq(ui, PX) : 1; lo.width = Math.round(W * Q); lo.height = Math.round(H * Q); g.setTransform(Q, 0, 0, Q, 0, 0); g.imageSmoothingEnabled = false; g.hdQ = Q; }
   function R(x, y, w, h, c) { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
   function hash(x, y) { var n = (x * 374761393 + y * 668265263) | 0; n = (n ^ (n >>> 13)) * 1274126177; return ((n ^ (n >>> 16)) >>> 0) / 4294967296; }
 
@@ -236,7 +236,7 @@
     FXP.glow(g, W * 0.78 - cx * 0.05, H * 0.2 - cy * 0.05, 90, th.star, 0.35);
     for (var ci = 0; ci < 4; ci++) { var ccx = ((ci * 173 - cx * 0.15 + tt * 4) % (W + 120) + W + 120) % (W + 120) - 60; FXP.cloud(g, ccx, 24 + ci * 22 - cy * 0.1, 7 + (ci % 2) * 3, "rgba(255,255,255,0.22)", "rgba(0,0,0,0.06)"); }
     var x0 = Math.max(0, Math.floor(cx / TS) - 1), x1 = Math.min(M.w - 1, Math.floor((cx + W) / TS) + 1), y0 = Math.max(0, Math.floor(cy / TS) - 1), y1 = Math.min(M.h - 1, Math.floor((cy + H) / TS) + 2);
-    var water = M.d.fill === "~";
+    var water = M.d.fill === "~", gBase = g; g = FXP.tileLayer(W, H);
     for (var ty = y0; ty <= y1; ty++) for (var tx = x0; tx <= x1; tx++) {
       var ch = M.t[ty][tx], px = tx * TS - cx, py = ty * TS - cy;
       if (ch === "~") { R(px, py, TS, TS, th.water); if ((tx + ty + Math.floor(tt * 2)) % 3 === 0) R(px + 3 + (Math.floor(tt * 3) % 4), py + 6, 6, 1, "rgba(255,255,255,0.5)"); continue; }
@@ -250,12 +250,15 @@
       if (ch === "=") { var pv = hash(ty, tx); R(px + 2 + pv * 9, py + 3 + pv * 30 % 9, 3, 2, th.path2); R(px + 9 - pv * 5, py + 10 - pv * 4, 2, 2, th.path2); }
       if (ch === "T") { R(px + 6, py - 10, 4, 14, "#6a3a8a"); R(px - 2, py - 26, 20, 16, M.id === "spires" ? "#ff4a8a" : M.id === "mere" ? "#ff9a2a" : "#1fb85a"); R(px + 1, py - 30, 14, 6, M.id === "spires" ? "#ff8ab8" : M.id === "mere" ? "#ffc85a" : "#5ae86a"); R(px + 2, py - 22, 3, 3, "#ffffff"); }
     }
+    g = gBase; FXP.tileFlush(g, function (tx, ty) { var c2 = tile(M, tx, ty); return c2 !== " " && c2 !== "~"; }, { x: cx, y: cy }, TS, { r: 5, topOnly: true, line: "rgba(20,0,40,0.3)" });
     // sprites sorted by y
     var list = M.ents.filter(function (e) { return e.alive && e.x - cx > -30 && e.x - cx < W + 30 && e.y - cy > -40 && e.y - cy < H + 40; });
     if (mode !== "title") list.push({ hero: 1, y: hero.y });
     list.sort(function (a, b) { return a.y - b.y; });
+    // gems: smooth vector crystals straight onto the scene (no outline pass needed); everything else gets the outlined sprite layer
+    list.forEach(function (e) { if (e.k === "g" || e.k === "G") drawGem(e, tt); });
     var g0 = g; g = FXP.layer(W, H);
-    list.forEach(function (e) { if (e.hero) drawHero(tt); else if (e.k === "B") drawBoss(e, tt); else drawEnt(e, tt); });
+    list.forEach(function (e) { if (e.hero) drawHero(tt); else if (e.k === "B") drawBoss(e, tt); else if (e.k !== "g" && e.k !== "G") drawEnt(e, tt); });
     g = g0; FXP.flush(g, "#1a0a2a");
     parts.forEach(function (p) { R(p.x - cx - 1, p.y - cy - p.z - 1, 2, 2, p.col); });
     floats.forEach(function (f) { var x = f.x - cx, y = f.y - cy - f.t * 22; drawCritter(f.kind, x - 5, y - 4, tt, true); g.fillStyle = "#ffffff"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText(f.txt, x, y - 8); });
@@ -267,7 +270,18 @@
     if (stick && stick.on) { R(stick.ox / PX - 12, stick.oy / PX - 12, 24, 24, "rgba(255,255,255,0.15)"); R(stick.x / PX - 5, stick.y / PX - 5, 10, 10, "rgba(255,255,255,0.45)"); }
     if (mode === "play") { for (var k = 0; k < 3; k++) { var hx = 6 + k * 12; R(hx, 6, 9, 8, k < hero.hp ? "#ffd23a" : "rgba(0,0,0,0.3)"); R(hx + 2, 4, 5, 2, k < hero.hp ? "#ffd23a" : "rgba(0,0,0,0.3)"); R(hx + 2, 8, 2, 2, k < hero.hp ? "#ff5ad8" : "rgba(0,0,0,0)"); }
       if (msgT > 0) { g.font = "bold 9px sans-serif"; g.textAlign = "center"; g.fillStyle = "rgba(20,0,40,0.55)"; var tw = g.measureText(msg).width; g.fillRect(W / 2 - tw / 2 - 6, 20, tw + 12, 14); g.fillStyle = "#fff6c8"; g.fillText(msg, W / 2, 30); } }
-    c.drawImage(lo, 0, 0, W * PX, H * PX);
+    c.imageSmoothingEnabled = Q > 1; c.drawImage(lo, 0, 0, W * PX, H * PX); c.imageSmoothingEnabled = false;
+  }
+  function drawGem(e, tt) {
+    var x = e.x - cam.x, b = gh(e.x, e.y), y = e.y - cam.y - Math.max(0, b), bob = Math.sin(tt * 4 + e.t) * 2, big = e.k === "G", s = big ? 1.35 : 1;
+    var col = big ? "#ff3ad8" : "#ffe23a", lt = big ? "#ffc8f0" : "#fff6a8", dk = big ? "#a81a8a" : "#c8901a";
+    g.fillStyle = "rgba(0,0,0,0.2)"; g.beginPath(); g.ellipse(x, y + 3, 3.2 * s, 1.1 * s, 0, 0, 7); g.fill();
+    var cy0 = y - 4 * s + bob, hw = 3.4 * s, hh = 4.4 * s;
+    g.beginPath(); g.moveTo(x, cy0 - hh); g.lineTo(x + hw, cy0 - hh * 0.25); g.lineTo(x, cy0 + hh); g.lineTo(x - hw, cy0 - hh * 0.25); g.closePath();
+    g.fillStyle = col; g.fill(); g.lineWidth = 0.7; g.strokeStyle = dk; g.stroke();
+    g.fillStyle = lt; g.beginPath(); g.moveTo(x, cy0 - hh); g.lineTo(x - hw, cy0 - hh * 0.25); g.lineTo(x, cy0 - hh * 0.05); g.closePath(); g.fill();
+    g.fillStyle = dk; g.globalAlpha = 0.45; g.beginPath(); g.moveTo(x, cy0 + hh); g.lineTo(x + hw, cy0 - hh * 0.25); g.lineTo(x, cy0 - hh * 0.05); g.closePath(); g.fill(); g.globalAlpha = 1;
+    var tw = 0.5 + 0.5 * Math.sin(tt * 5 + e.t * 3); if (tw > 0.75) { g.fillStyle = "rgba(255,255,255," + ((tw - 0.75) * 4).toFixed(2) + ")"; g.beginPath(); g.arc(x - hw * 0.35, cy0 - hh * 0.45, 0.9 * s, 0, 7); g.fill(); }
   }
   function drawEnt(e, tt) {
     var x = Math.round(e.x - cam.x), b = gh(e.x, e.y), y = Math.round(e.y - cam.y - Math.max(0, b)), z = e.k === "w" ? e.z : 0, bob;
