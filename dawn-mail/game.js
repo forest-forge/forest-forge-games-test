@@ -9,9 +9,10 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#12305a;--water:#1a3a68;--amber:#ffe8dc;--amber-hi:#ffd0c0;--amber-soft:#fff0e8;--amber-line:#e87848;--ember:#e04040;--btn:#1a3a70;--lamp:#ffe8c0;--glow-line:rgba(255,140,90,.35);--glow-fill:rgba(255,140,90,.08)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #2a5088 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#1a3a70,#0c2040);border-bottom-color:rgba(232,120,72,.4)}.ff{border-left-color:rgba(232,120,72,.28);border-right-color:rgba(232,120,72,.28)}.ff-icon-btn:active{background:#2a5088;box-shadow:0 0 16px rgba(255,140,90,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(255,140,90,.5)}.ff-shade{background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.52))!important}.ff-modal{text-shadow:0 2px 10px rgba(0,0,0,.7);animation:ffIn .35s ease}.ff-display{letter-spacing:.18em;filter:drop-shadow(0 0 16px var(--ember))}.ff-lede,.ff-stat-line,.ff-fine{text-shadow:0 1px 6px rgba(0,0,0,.7)}.ff-btns{background:rgba(0,0,0,.42);border:1px solid var(--glow-line);border-radius:16px;padding:14px 16px 16px;box-shadow:0 14px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);backdrop-filter:blur(7px)}.ff-btn{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 18px var(--glow-fill);letter-spacing:.06em}.ff-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.35)}.ff-hud{box-shadow:0 10px 24px rgba(0,0,0,.28)}.ff-toast{backdrop-filter:blur(6px)}@keyframes ffIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}`);
+  })(`:root{--bg:#6a3ab8;--sky1:#ffb07a;--sky2:#a05aff;--water:#4a2a98;--amber:#ffffff;--amber-hi:#fff0a0;--amber-soft:#ffffff;--amber-line:#ff5a7a;--ember:#b0284a;--btn:#5a2aa8;--lamp:#fff6d8;--pop1:#ffd27a;--pop2:#ff7aa8;--pop3:#ffffff;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
   var clamp = FF.clamp, lerp = FF.lerp;
   var ui = FF.create({
+    deco: ["letter", "star", "spark"], 
     id: "dawn-mail", title: "Dawn Mail", course: "The post run", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "time", label: "Time", value: "60" }, { id: "mph", label: "MPH", value: "0" }, { id: "score", label: "Score" }],
     pads: {
