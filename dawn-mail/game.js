@@ -13,6 +13,7 @@
   var clamp = FF.clamp, lerp = FF.lerp;
   var ui = FF.create({
     deco: ["letter", "star", "spark"], 
+    
     id: "dawn-mail", title: "Dawn Mail", course: "The post run", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "time", label: "Time", value: "60" }, { id: "mph", label: "MPH", value: "0" }, { id: "score", label: "Score" }],
     pads: {
