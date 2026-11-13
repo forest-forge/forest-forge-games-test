@@ -14,8 +14,28 @@
     }
   });
   var A = ui.audio, save = ui.save; save.hi = save.hi || 0; save.best = save.best || {}; save.open = save.open || 1;
+  // bigger, clearer touch pads (high contrast, solid outline, icon + label) — scoped to this game
+  (function () {
+    var st = document.createElement("style");
+    st.textContent = ".ff.lw .ff-pads{gap:14px;padding-bottom:calc(14px + var(--sab))}.ff.lw .ff-pad-group{gap:14px}" +
+      ".ff.lw .ff-pad{width:80px;height:80px;border-radius:50%;border:3px solid #fff;background:rgba(10,22,52,.58);color:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.6),0 4px 12px rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font:800 12px/1 system-ui,-apple-system,'Segoe UI',sans-serif;letter-spacing:.08em;text-shadow:0 1px 2px rgba(0,0,0,.9);-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}" +
+      ".ff.lw .ff-pad svg{width:34px;height:34px;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.9))}.ff.lw .ff-pad.big{width:104px;height:104px}.ff.lw .ff-pad.big svg{width:42px;height:42px}.ff.lw .ff-pad span{display:block}" +
+      ".ff.lw .ff-pad.on,.ff.lw .ff-pad:active{background:#ffd23a;color:#0a1a40;border-color:#fff;text-shadow:none;box-shadow:0 0 0 2px rgba(0,0,0,.6),0 0 16px rgba(255,220,80,.9)}.ff.lw .ff-pad.on svg,.ff.lw .ff-pad:active svg{filter:none}" +
+      "@media (max-height:620px){.ff.lw .ff-pad{width:72px;height:72px}.ff.lw .ff-pad.big{width:92px;height:92px}.ff.lw .ff-pad svg{width:30px;height:30px}.ff.lw .ff-pad.big svg{width:38px;height:38px}}" +
+      "@media (max-width:440px){.ff.lw .ff-pads,.ff.lw .ff-pad-group{gap:9px}.ff.lw .ff-pad{width:70px;height:70px}.ff.lw .ff-pad.big{width:86px;height:86px}.ff.lw .ff-pad svg{width:30px;height:30px}.ff.lw .ff-pad.big svg{width:36px;height:36px}}" +
+      "@media (max-height:360px){.ff.lw .ff-pad{width:62px;height:62px}.ff.lw .ff-pad.big{width:80px;height:80px}.ff.lw .ff-pads{padding-bottom:calc(8px + var(--sab))}}";
+    document.head.appendChild(st);
+    var root = document.querySelector(".ff"); if (root) root.classList.add("lw");
+    var DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg>';
+    var lab = { L: null, R: null, D: DOWN + "<span>TUCK</span>", J: null };
+    ["L", "R", "J"].forEach(function (id) { var b = document.querySelector('[data-pad="' + id + '"]'); if (b) { var sv = b.querySelector("svg"); if (sv) sv.setAttribute("stroke-width", "3"); if (id === "J") b.insertAdjacentHTML("beforeend", "<span>JUMP</span>"); } });
+    var d = document.querySelector('[data-pad="D"]'); if (d) d.innerHTML = lab.D;
+  })();
+  // camera zoom: the world is drawn at PX view-units per world px; PX grows so the visible world is about
+  // 280x132 (landscape) or 190 wide (portrait), making Fenn and the course clearly larger on phones.
   var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180, Q = 1;
-  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); Q = FF.hdq ? FF.hdq(ui, PX) : 1; lo.width = Math.round(W * Q); lo.height = Math.round(H * Q); g.setTransform(Q, 0, 0, Q, 0, 0); g.imageSmoothingEnabled = false; g.hdQ = Q; }
+  function zoomPX() { var land = ui.VW >= ui.VH; return Math.max(2, Math.min(ui.VW / (land ? 280 : 190), land ? ui.VH / 132 : 1e9)); }
+  function sizeLo() { PX = zoomPX(); W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); Q = FF.hdq ? FF.hdq(ui, PX) : 1; lo.width = Math.round(W * Q); lo.height = Math.round(H * Q); g.setTransform(Q, 0, 0, Q, 0, 0); g.imageSmoothingEnabled = false; g.hdQ = Q; }
   function R(x, y, w, h, c) { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
 
   // ---------- acts: built from a list of commands into a height field ----------
@@ -199,7 +219,7 @@
     }
     if (h.x >= L.goal && !won && !(L.boss && L.boss.alive)) { won = 2.2; S.clear(); A.stopSong(); }
     stepParts(dt);
-    var tx = h.x - W * 0.38 + clamp(h.gs || h.vx, -300, 300) * 0.25, ty = h.y - H * 0.58;
+    var tx = h.x - W * (0.38 - 0.19 * clamp((h.gs || h.vx) / 300, -1, 1)), ty = h.y - H * 0.58; // look-ahead scales with the view width
     cam.x += (tx - cam.x) * Math.min(1, dt * 6); cam.y += (ty - cam.y) * Math.min(1, dt * 5);
     cam.x = clamp(cam.x, 0, L.w - W);
   }
@@ -264,7 +284,8 @@
     if (mode !== "title") { var t2 = Math.floor(tm), ss = t2 % 60; g.fillStyle = "rgba(0,40,120,0.5)"; g.fillRect(3, 3, 60, 10); g.fillStyle = "#fff"; g.font = "8px monospace"; g.fillText("TIME " + Math.floor(t2 / 60) + ":" + (ss < 10 ? "0" : "") + ss, 6, 11); for (var lv = 0; lv < 3; lv++) { var hc = lv < hp ? "#ff3a5a" : "rgba(0,40,120,0.5)"; R(70 + lv * 8, 5, 3, 3, hc); R(73 + lv * 8, 5, 3, 3, hc); R(71 + lv * 8, 7, 4, 3, hc); } g.fillStyle = "#fff"; g.fillText("x" + lives, W - 18, 11); }
     FXP.ambient(g, W, H, cam, tt, "drift", "rgba(255,255,255,0.8)", 18);
     FXP.vignette(g, W, H, 0.32);
-    if (L.boss && L.boss.seen && L.boss.alive) { var bw = 90, bx2 = W / 2 - bw / 2; R(bx2 - 1, H - 13, bw + 2, 7, "#0a2440"); R(bx2, H - 12, bw * L.boss.hp / L.boss.max, 5, L.boss.bc[0]); R(bx2, H - 12, bw * L.boss.hp / L.boss.max, 1, "#ffffff"); if (bossT > 0) FXP.banner(g, L.boss.name, W / 2, H * 0.38, 16, L.boss.bc[1] === "#ffffff" ? "#8ad8ff" : L.boss.bc[1]); }
+    if (L.boss && L.boss.seen && L.boss.alive && mode !== "title") { var obx = L.boss.x - cam.x, oby = clamp(L.boss.y - cam.y, 18, H - 30); if (obx < -6 || obx > W + 6) { var lft = obx < 0, ax0 = lft ? 4 : W - 4, pul = 0.65 + 0.35 * Math.sin(tt * 8); g.globalAlpha = pul; g.fillStyle = "#0a2440"; g.beginPath(); g.moveTo(ax0, oby); g.lineTo(ax0 + (lft ? 11 : -11), oby - 8); g.lineTo(ax0 + (lft ? 11 : -11), oby + 8); g.closePath(); g.fill(); g.fillStyle = L.boss.bc[0]; g.beginPath(); g.moveTo(ax0 + (lft ? 2 : -2), oby); g.lineTo(ax0 + (lft ? 9.5 : -9.5), oby - 5.5); g.lineTo(ax0 + (lft ? 9.5 : -9.5), oby + 5.5); g.closePath(); g.fill(); g.globalAlpha = 1; } }
+    if (L.boss && L.boss.seen && L.boss.alive) { var bw = 90, bx2 = W / 2 - bw / 2; R(bx2 - 1, 17, bw + 2, 7, "#0a2440"); R(bx2, 18, bw * L.boss.hp / L.boss.max, 5, L.boss.bc[0]); R(bx2, 18, bw * L.boss.hp / L.boss.max, 1, "#ffffff"); if (bossT > 0) FXP.banner(g, L.boss.name, W / 2, H * 0.38, 16, L.boss.bc[1] === "#ffffff" ? "#8ad8ff" : L.boss.bc[1]); }
     if (bossT > 0) bossT -= 1 / 60; if (irisT > 0) { FXP.iris(g, W, H, irisT, hero ? hero.x - cam.x : W / 2, hero ? hero.y - cam.y - 10 : H / 2); irisT -= 1 / 40; }
     c.imageSmoothingEnabled = Q > 1; c.drawImage(lo, 0, 0, W * PX, H * PX); c.imageSmoothingEnabled = false;
     
