@@ -14,8 +14,8 @@
     }
   });
   var A = ui.audio, save = ui.save; save.hi = save.hi || 0; save.beat = save.beat || {};
-  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180;
-  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); lo.width = W; lo.height = H; g.imageSmoothingEnabled = false; }
+  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180, Q = 1;
+  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); Q = FF.hdq ? FF.hdq(ui, PX) : 1; lo.width = Math.round(W * Q); lo.height = Math.round(H * Q); g.setTransform(Q, 0, 0, Q, 0, 0); g.imageSmoothingEnabled = false; g.hdQ = Q; }
   function R(x, y, w, h, c) { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
 
   // ---------- stages from segments ----------
@@ -194,13 +194,15 @@
   function render(c, tt) {
     if (!W) sizeLo(); if (!L) load(0);
     var s = STAGES[st]; PF.drawBack(g, s.th, cam, W, H, tt);
-    // stage back details: bold shapes per stage
+    // stage back details: bold shapes per stage (soft prop layer: rounded corners + light-to-dark shading)
+    var gP = g; g = FXP.layer(W, H, { round: 2.5 });
     for (var k = 0; k < 8; k++) { var bx = ((k * 90 - cam.x * 0.4) % (W + 90) + W + 90) % (W + 90) - 45, by = H * 0.75 - cam.y * 0.2;
       if (s.id === "kate") { R(bx, by - 50, 30, 50, "#ffffff"); R(bx + 4, by - 44, 8, 8, "#3ac8ff"); R(bx + 18, by - 44, 8, 8, "#3ac8ff"); R(bx + 22, by - 64, 6, 16, "#ff3a4a"); R(bx + 21, by - 70 - (tt * 10 + k * 5) % 12, 8, 6, "rgba(255,255,255,0.8)"); }
       else if (s.id === "percy") { R(bx + 12, by - 70, 3, 70, "#ffd23a"); R(bx, by - 62, 28, 2, "#ffd23a"); R(bx + 4, by - 50, 20, 2, "#ffd23a"); R(bx + 6, by - 70, 2, 70, "#ffd23a"); R(bx + 20, by - 70, 2, 70, "#ffd23a"); if (Math.floor(tt * 3 + k) % 5 === 0) R(bx + 27, by - 62, 60, 1, "#3affff"); }
       else if (s.id === "hal") { R(bx, by - 20, 40, 8, "#ffffff"); R(bx + 8, by - 26, 24, 8, "#ffffff"); R(bx + 18, by - 80, 2, 40, "#2a5ad8"); R(bx + 10, by - 82, 18, 4, "#ffd23a"); }
       else if (s.id === "bess") { R(bx, by - 40, 36, 40, "#1aa83a"); R(bx + 6, by - 46, 24, 8, "#3ad84a"); R(bx + 10, by - 30, 4, 4, "#ff2a8a"); R(bx + 22, by - 20, 4, 4, "#ffffff"); }
       else { R(bx + 10, by - 90, 20, 90, "#3a1a7a"); R(bx + 12, by - 84, 16, 16, "#ffd23a"); R(bx + 19, by - 82, 2, 7, "#2a0a5a"); R(bx + 19, by - 77, 6, 2, "#2a0a5a"); } }
+    g = gP; FXP.flush(g, FXP.shade(s.th.sky[1], -0.35), false, { props: true, top: H * 0.75 - cam.y * 0.2 - 90, bottom: H * 0.75 - cam.y * 0.2, light: 0.15, dark: 0.07 });
     PF.drawTiles(g, L, s.th, cam, W, H, tt);
     items.forEach(function (it) { if (it.k === "K") { var x = it.x - cam.x, y = it.y - cam.y; R(x + 7, y - 4, 2, 20, "#ffffff"); R(x + 9, y - 4, 7, 5, it.got ? "#3affff" : "#ff3a4a"); } });
     var ax = arenaX - cam.x; if (!locked && ax > -20 && ax < W + 20) { R(ax, 0, 16, (HT - 3) * TS - cam.y, "#3a3a6a"); for (var dy = 0; dy < (HT - 3) * TS - cam.y; dy += 8) R(ax + 2, dy, 12, 4, "#6a6ad8"); }
@@ -220,7 +222,7 @@
     FXP.ambient(g, W, H, cam, tt, "drift", "rgba(200,240,255,0.8)", 20); FXP.vignette(g, W, H, 0.35);
     if (irisT > 0) { FXP.iris(g, W, H, irisT, hero ? hero.x - cam.x : W / 2, hero ? hero.y - cam.y : H / 2); irisT -= 1 / 40; }
     if (mode === "play") { bar(4, 4, hp, "#ffe23a"); if (wpn !== "pea") bar(12, 4, ammo[wpn] || 0, WPN[wpn].col); if (boss) bar(W - 10, 4, Math.max(0, boss.hp), "#ff3a4a"); g.fillStyle = "#fff"; g.font = "8px monospace"; g.fillText("x" + lives, 4, 70); }
-    c.drawImage(lo, 0, 0, W * PX, H * PX);
+    c.imageSmoothingEnabled = Q > 1; c.drawImage(lo, 0, 0, W * PX, H * PX); c.imageSmoothingEnabled = false;
   }
   function bar(x, y, v, col) { R(x, y, 6, 58, "#111"); for (var i = 0; i < 28; i++) R(x + 1, y + 56 - i * 2, 4, 1, i < v ? col : "#333"); }
   function drawJack(tt) {
