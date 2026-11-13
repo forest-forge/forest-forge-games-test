@@ -11,8 +11,8 @@
       right: [{ id: "J", icon: "up", cls: "big", aria: "Jump", keys: ["Space", "ArrowUp", "KeyW", "KeyZ"] }] }
   });
   var A = ui.audio, save = ui.save; save.hi = save.hi || 0; save.reach = save.reach || 0;
-  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180, OX = 32, OY = 6;
-  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); lo.width = W; lo.height = H; g.imageSmoothingEnabled = false; OX = Math.floor((W - 256) / 2); OY = Math.max(0, Math.floor((H - 164) / 2)); }
+  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180, Q = 1, OX = 32, OY = 6;
+  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); Q = FF.hdq ? FF.hdq(ui, PX) : 1; lo.width = Math.round(W * Q); lo.height = Math.round(H * Q); g.setTransform(Q, 0, 0, Q, 0, 0); g.imageSmoothingEnabled = false; g.hdQ = Q; OX = Math.floor((W - 256) / 2); OY = Math.max(0, Math.floor((H - 164) / 2)); }
   function R(x, y, w, h, c) { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
   var BR = ["#ff3a3a", "#3aff4a", "#4a6aff", "#ff4aff", "#3affff", "#ffff4a", "#ffffff"];
   function pal(i) { return { floor: BR[i % 5], wall: BR[(i + 2) % 6], haz: BR[(i + 1) % 6 === i % 5 ? 5 : (i + 1) % 6], conv: BR[(i + 3) % 6], bar: BR[(i + 4) % 7] }; }
@@ -83,7 +83,7 @@
     R(ex, ey, 16, 2, ec); R(ex, ey + 14, 16, 2, ec); for (var b = 0; b < 4; b++) R(ex + b * 5, ey, 1, 16, ec); R(ex + 6, ey - 4, 4, 4, ec); R(ex + 7, ey - 8, 2, 4, "#888");
     if (open) R(ex + 2, ey + 3, 12, 10, "rgba(255,255,160,0.25)");
     FXP.glow(g, ex + 8, ey + 6, open ? 26 : 12, open ? "#fff0a0" : "#8888aa", open ? 0.45 : 0.15);
-    var g0 = g; g = FXP.layer(W, H);
+    var g0 = g; g = FXP.layer(W, H, { round: 0.45 });
     guards.forEach(function (gd) { drawGuard(OX + gd.x, OY + gd.y - 16, gd.kind, gd.dir, fl, p); });
     if (!dying || Math.floor(tt * 16) % 2) drawDavy(OX + s.x, OY + s.y - 16, fl, s);
     g = g0; FXP.flush(g, "#000000");
@@ -95,7 +95,7 @@
     hy -= 6;
     for (var l = 0; l < Math.min(8, lives - 1); l++) drawDavy(OX + l * 10, hy + 20, 0, { m: 0 }, true);
     if (irisT > 0) { FXP.iris(g, W, H, irisT, OX + s.x + 4, OY + s.y - 8); irisT -= 1 / 30; }
-    c.drawImage(lo, 0, 0, W * PX, H * PX);
+    c.imageSmoothingEnabled = Q > 1; c.drawImage(lo, 0, 0, W * PX, H * PX); c.imageSmoothingEnabled = false;
   }
   function drawHaz(x, y, c, k, fl) {
     if (k === 0) { R(x + 3, y + 3, 2, 5, "#3aff4a"); R(x + 1, y + 1, 2, 3, c); R(x + 5, y + 1, 2, 3, c); R(x + 3, y, 2, 2, c); }
