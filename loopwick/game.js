@@ -4,8 +4,17 @@
  * code, all sound generated (shell.js). */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#1a8ad8;--sky1:#6ae0ff;--sky2:#3ac85a;--water:#1a78c8;--amber:#ffffff;--amber-hi:#ffe84a;--amber-soft:#ffffff;--amber-line:#ff5a3a;--ember:#1a4ab0;--btn:#1a6ac0;--lamp:#fff6d8;--pop1:#ffe84a;--pop2:#ffffff;--pop3:#5af0c8;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
   var clamp = FF.clamp;
   var ui = FF.create({
+    deco: ["ring", "circle", "spark"], 
+    
+    
     id: "loopwick", title: "Loopwick", course: "Chalk Downs", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "rings", label: "Sea-glass", value: "0" }, { id: "score", label: "Score", value: "0" }],
     pads: {
