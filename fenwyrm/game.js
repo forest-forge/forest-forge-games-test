@@ -3,8 +3,15 @@
  * Original game: all art drawn in code, all sound generated (shell.js). */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#8a3ad8;--sky1:#ff8a6a;--sky2:#6ae05a;--water:#6a2ab8;--amber:#ffffff;--amber-hi:#fff27a;--amber-soft:#ffffff;--amber-line:#ff5a7a;--ember:#5a1a98;--btn:#7a30c8;--lamp:#fff6d8;--pop1:#b8ff5a;--pop2:#ff7a9a;--pop3:#ffe14a;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
   var clamp = FF.clamp, TS = 16;
   var ui = FF.create({
+    deco: ["diamond", "spark", "leaf"], 
     id: "fenwyrm", title: "Fenwyrm", course: "Thistle Green", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "gems", label: "Gems", value: "0" }, { id: "free", label: "Freed", value: "0/12" }],
     pads: { left: [], right: [{ id: "C", label: "Charge", aria: "Charge", keys: ["KeyX", "KeyK", "ShiftLeft", "KeyC"] }, { id: "J", icon: "up", cls: "big", aria: "Jump, hold to glide", keys: ["Space", "KeyZ", "KeyJ"] }] },
