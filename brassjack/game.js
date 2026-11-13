@@ -4,8 +4,15 @@
  * all sound generated (shell.js). */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#d83a9a;--sky1:#ff8ad0;--sky2:#6ae8c8;--water:#b02a80;--amber:#ffffff;--amber-hi:#ffe14a;--amber-soft:#ffffff;--amber-line:#18b090;--ember:#8a1a60;--btn:#b0287a;--lamp:#fff6d8;--pop1:#ffd23a;--pop2:#6af0d0;--pop3:#ffffff;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
   var clamp = FF.clamp, TS = PF.TS;
   var ui = FF.create({
+    deco: ["gear", "star", "bolt"], 
     id: "brassjack", title: "Brassjack", course: "Stage board", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "score", label: "Score", value: "0" }, { id: "wpn", label: "Trick", value: "Pea" }],
     pads: {
