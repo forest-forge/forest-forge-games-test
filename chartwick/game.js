@@ -8,9 +8,10 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#1a3a5a;--water:#123044;--amber:#e8f0f8;--amber-hi:#f0d080;--amber-soft:#e8f4f8;--amber-line:#6aa8c8;--ember:#e08050;--btn:#1e3a54;--lamp:#fff8e8;--glow-line:rgba(100,180,210,.4);--glow-fill:rgba(100,180,210,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #3a6a8a 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#1e4a6a,#123044);border-bottom-color:rgba(106,168,200,.4)}` + (window.FFX ? FFX.menuChrome() : ""));
+  })(`:root{--bg:#0a8ab0;--sky1:#7ae8ff;--sky2:#ffc87a;--water:#0a6a90;--amber:#ffffff;--amber-hi:#fff0a0;--amber-soft:#ffffff;--amber-line:#ff6a5a;--ember:#08507a;--btn:#0a7aa0;--lamp:#fff6d8;--pop1:#ff7a6a;--pop2:#ffe14a;--pop3:#ffffff;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
   var ui = FF.create({
+    deco: ["star", "spark", "circle"], 
     id: "chartwick", title: "Chartwick", course: "The harbour", view: { w: 390, h: 720, flex: true },
     stats: [{ id: "ch", label: "Chapter", value: "1/12" }, { id: "solved", label: "Solved", value: "0" }]
   });
