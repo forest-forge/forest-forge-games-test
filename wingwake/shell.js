@@ -9,6 +9,28 @@
  */
 (function () {
   "use strict";
+  // original simple shapes for the floating title decorations (24x24, currentColor)
+  var HL = '<circle cx="9" cy="8" r="2.4" fill="#fff" opacity=".55"/>';
+  var DECO = {
+    star: '<path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 16.9 5.9 20.4l1.5-6.8L2.2 9l6.9-.7z"/>',
+    spark: '<path d="M12 0C13 8 16 11 24 12 16 13 13 16 12 24 11 16 8 13 0 12 8 11 11 8 12 0z"/>',
+    circle: '<circle cx="12" cy="12" r="9"/>' + HL,
+    ring: '<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="3.5"/>',
+    leaf: '<path d="M3 21C3 10 10 3 21 3c0 11-7 18-18 18z"/><path d="M5 19L16 8" stroke="#fff" stroke-width="1.4" opacity=".55"/>',
+    flower: '<circle cx="12" cy="5.5" r="4.5"/><circle cx="18.2" cy="10" r="4.5"/><circle cx="15.8" cy="17.3" r="4.5"/><circle cx="8.2" cy="17.3" r="4.5"/><circle cx="5.8" cy="10" r="4.5"/><circle cx="12" cy="12" r="3.6" fill="#fff" opacity=".85"/>',
+    flag: '<path d="M3 4h18L12 21z"/><path d="M6 6h12" stroke="#fff" stroke-width="1.5" opacity=".5"/>',
+    gear: '<circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="5" stroke-dasharray="3.2 3.24"/><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2.6" fill="#fff" opacity=".6"/>',
+    hex: '<path d="M12 2l8.7 5v10L12 22l-8.7-5V7z"/><path d="M12 5l5.8 3.4" stroke="#fff" stroke-width="1.6" opacity=".5"/>',
+    diamond: '<path d="M12 2l9 10-9 10-9-10z"/><path d="M12 5l-5 7" stroke="#fff" stroke-width="1.6" opacity=".5"/>',
+    moth: '<ellipse cx="7" cy="10" rx="5.5" ry="7.5" transform="rotate(-25 7 10)"/><ellipse cx="17" cy="10" rx="5.5" ry="7.5" transform="rotate(25 17 10)"/><ellipse cx="8" cy="18" rx="3" ry="4" transform="rotate(30 8 18)"/><ellipse cx="16" cy="18" rx="3" ry="4" transform="rotate(-30 16 18)"/><rect x="11" y="6" width="2" height="15" rx="1" fill="#fff" opacity=".7"/>',
+    drop: '<path d="M12 2S5 11 5 15a7 7 0 0 0 14 0c0-4-7-13-7-13z"/><circle cx="9.5" cy="15" r="2" fill="#fff" opacity=".55"/>',
+    cloud: '<path d="M7 19a5 5 0 0 1-.6-10A6.5 6.5 0 0 1 18.4 9.6 4.7 4.7 0 0 1 17.5 19z"/>',
+    square: '<rect x="3" y="3" width="18" height="18" rx="5"/><rect x="6" y="6" width="5" height="3" rx="1.5" fill="#fff" opacity=".55"/>',
+    triangle: '<path d="M12 3l10 18H2z"/>',
+    bolt: '<path d="M13.5 1L4 14h7l-1.5 9L20 10h-7z"/>',
+    heart: '<path d="M12 21s-8.5-5.4-8.5-11.2A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8.5 2.8C20.5 15.6 12 21 12 21z"/>',
+    letter: '<rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M3 6.5l9 7 9-7" fill="none" stroke="#fff" stroke-width="1.8" opacity=".75"/>'
+  };
   var ICON = {
     sound: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
     mute: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>',
@@ -232,6 +254,29 @@
     };
     ui.setPadLabel = function (id, label) { var b = q('[data-pad="' + id + '"]'); if (b) b.innerHTML = label; };
 
+    // ---------- title logo + floating decorations (shapes and colours set per game: cfg.deco, --pop1..3) ----------
+    function isLogo(t) { var a = String(t).replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").trim().toLowerCase(); return a === String(cfg.title).toLowerCase() && !/[<&]/.test(t); }
+    function logoHtml(t) {
+      var i = 0;
+      return '<p class="ff-display ff-logo" aria-label="' + t + '">' + t.split("").map(function (ch) {
+        return ch === " " ? '<span class="sp" aria-hidden="true"></span>' : '<span aria-hidden="true" style="--i:' + (i++) + '">' + ch + "</span>";
+      }).join("") + "</p>";
+    }
+    var deco = document.createElement("div"); deco.className = "ff-deco"; deco.hidden = true; deco.setAttribute("aria-hidden", "true");
+    stage.insertBefore(deco, el.modal);
+    function showDeco(on) {
+      if (on && !deco.firstChild) {
+        var shapes = (cfg.deco && cfg.deco.length ? cfg.deco : ["star", "circle", "spark"]), h = "", n = 14;
+        for (var k = 0; k < n; k++) {
+          var sh = DECO[shapes[k % shapes.length]] || DECO.star, r = function (a, b) { return (a + Math.random() * (b - a)).toFixed(2); };
+          h += '<i style="left:' + r(-2, 96) + "%;--s:" + r(14, 34) + "px;--c:var(--pop" + (k % 3 + 1) + ");--d:" + r(7, 13) + "s;--w:-" + r(0, 12) + "s;--r:" + r(-300, 300) + "deg;--sw:" + r(1.8, 3.4) + 's"><svg viewBox="0 0 24 24" fill="currentColor">' + sh + "</svg></i>";
+        }
+        deco.innerHTML = h;
+      }
+      deco.hidden = !on;
+    }
+    ui.setDeco = function (list) { cfg.deco = list; deco.innerHTML = ""; if (!deco.hidden) showDeco(true); };
+
     // ---------- menus ----------
     // ui.menu({kicker,title,body,stats,html,buttons:[{label,act,small,disabled}],help,fine,app,solid})
     var menuActs = [];
@@ -240,7 +285,7 @@
       shell.classList.add("ff-menu-open");
       var h = "";
       if (o.kicker) h += '<p class="ff-kicker">' + o.kicker + "</p>";
-      if (o.title) h += '<p class="ff-display">' + o.title + "</p>";
+      if (o.title) h += isLogo(o.title) ? logoHtml(o.title) : '<p class="ff-display">' + o.title + "</p>";
       if (o.body) h += '<p class="ff-lede">' + o.body + "</p>";
       if (o.stats) h += '<p class="ff-stat-line">' + o.stats + "</p>";
       if (o.html) h += o.html;
@@ -264,9 +309,9 @@
       h += "</div>";
       if (o.help && o.help.length) h += '<ul class="ff-help">' + o.help.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>";
       if (o.fine) h += '<p class="ff-fine">' + o.fine + "</p>";
-      el.modal.innerHTML = h;
-      el.modal.hidden = false; el.shade.hidden = false;
-      el.shade.classList.toggle("is-solid", o.solid !== false);
+      el.modal.innerHTML = '<div class="ff-card">' + h + "</div>";
+      el.modal.hidden = false; el.shade.hidden = false; showDeco(true);
+      el.shade.classList.toggle("is-solid", !!o.solid);
       el.pause.hidden = !!o.hidePause;
       var first = el.modal.querySelector("[data-mi]:not([disabled])");
       if (first && !coarse) try { first.focus({ preventScroll: true }); } catch (e) {}
@@ -274,7 +319,7 @@
     ui.closeMenu = function () {
       ui.menuOpen = false; ui.pausedMenu = false;
       shell.classList.remove("ff-menu-open");
-      el.modal.hidden = true; el.shade.hidden = true; el.modal.innerHTML = ""; el.pause.hidden = false;
+      el.modal.hidden = true; el.shade.hidden = true; el.modal.innerHTML = ""; el.pause.hidden = false; showDeco(false);
     };
     el.modal.addEventListener("click", function (e) {
       var b = e.target.closest("[data-mi]");
@@ -297,9 +342,15 @@
       held = {}; padHeld = {};
       var p = root.querySelectorAll(".ff-pad.on"); for (var i = 0; i < p.length; i++) p[i].classList.remove("on");
       if (ui.game.onPause) ui.game.onPause();
-      ui.menu({ title: "Paused", buttons: [{ label: "Resume", act: ui.resume }, { label: "Menu", act: function () { ui.game.toTitle(); } }], solid: true });
-      ui.pausedMenu = true;
+      pauseMenu();
     };
+    // games may add settings to the pause menu with game.pauseButtons() -> [{label, act, small}]; call ui.refreshPause() after a toggle
+    function pauseMenu() {
+      var extra = ui.game.pauseButtons ? ui.game.pauseButtons() || [] : [];
+      ui.menu({ title: "Paused", buttons: [{ label: "Resume", act: ui.resume }].concat(extra, [{ label: "Menu", act: function () { ui.game.toTitle(); } }]), solid: true });
+      ui.pausedMenu = true;
+    }
+    ui.refreshPause = function () { if (!ui.playing) pauseMenu(); };
     ui.resume = function () { ui.closeMenu(); ui.playing = true; last = performance.now(); acc = 0; if (ui.game.onResume) ui.game.onResume(); };
     el.pause.addEventListener("click", function () { audio.unlock(); if (ui.playing) ui.pause(); else if (ui.menuOpen && ui.pausedMenu) ui.resume(); });
     el.sound.addEventListener("click", function () { audio.unlock(); ui.setMuted(!muted); });
@@ -387,7 +438,7 @@
       ctx.setTransform(ui.scale * dpr, 0, 0, ui.scale * dpr, ui.ox * dpr, ui.oy * dpr);
     };
     ui.text = function (s, x, y, size, color, align, glow) {
-      ctx.font = (cfg.fontWeight || "bold ") + size + "px " + (cfg.font || "Georgia, 'Times New Roman', serif");
+      ctx.font = (cfg.fontWeight || "bold ") + size + "px " + (cfg.font || "Fredoka, 'Baloo 2', ui-rounded, system-ui, sans-serif");
       ctx.textAlign = align || "left"; ctx.textBaseline = "middle";
       if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 8; }
       ctx.fillStyle = color || "#ffcf7a"; ctx.fillText(s, x, y);
@@ -427,5 +478,14 @@
   function lerp(a, b, t) { return a + (b - a) * t; }
   function fmtTime(s) { var m = Math.floor(s / 60), r = s - m * 60; return (m ? m + ":" + (r < 10 ? "0" : "") : "") + r.toFixed(2); }
   function n(x) { return Math.round(x).toLocaleString("en-GB"); }
-  window.FF = { create: create, store: store, inApp: inApp, post: post, rng: rng, clamp: clamp, lerp: lerp, fmtTime: fmtTime, n: n, noteFreq: noteFreq };
+  // hi-res render scale for games that draw into a low-res buffer (logical px -> device px), capped by a pixel budget.
+  // ?hdq=1 forces the old chunky look; ?hdq=N sets the cap.
+  function hdq(ui, px) {
+    var m = /[?&]hdq=([\d.]+)/.exec(location.search), cap = m ? +m[1] : 3;
+    var q = Math.max(1, Math.min(cap, px * (ui.scale || 1) * (ui.dpr || 1)));
+    var w = ui.VW / px, h = ui.VH / px, budget = 1.2e6;
+    if (w * h * q * q > budget) q = Math.sqrt(budget / (w * h));
+    q = Math.max(1, Math.floor(q * 2) / 2); hdq.last = q; return q;
+  }
+  window.FF = { hdq: hdq, create: create, store: store, inApp: inApp, post: post, rng: rng, clamp: clamp, lerp: lerp, fmtTime: fmtTime, n: n, noteFreq: noteFreq };
 })();

@@ -8,7 +8,7 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#1a2850;--water:#141e42;--amber:#f8e8c8;--amber-hi:#ffd18a;--amber-soft:#ffe8c8;--amber-line:#e08a6a;--ember:#ff6a8a;--btn:#24305a;--lamp:#fff0d0;--glow-line:rgba(255,160,140,.4);--glow-fill:rgba(255,160,140,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #3a4a88 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#24305a,#121830);border-bottom-color:rgba(224,138,106,.4)}.ff{border-left-color:rgba(224,138,106,.3);border-right-color:rgba(224,138,106,.3)}` + (window.FFX ? FFX.menuChrome() : ""));
+  })(`:root{--bg:#4a2aa8;--sky1:#ff9ac8;--sky2:#5a3ad8;--water:#34208a;--amber:#ffffff;--amber-hi:#ffd84a;--amber-soft:#ffffff;--amber-line:#ff5a9a;--ember:#2a1478;--btn:#4228a0;--lamp:#fff6d8;--pop1:#ffd84a;--pop2:#ff8ac0;--pop3:#ffffff;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
   var COLS = 8, ROWS = 8, COLORS = 6, colorN = 6, grove = -1, goalScore = 0, idleT = 0;
   var GROVES = [
@@ -24,6 +24,7 @@
   var WING = ["#ff6a6a", "#f0c03a", "#3cbcb0", "#a05ae0", "#f8f0d8", "#6ac04a"];
   var WING_DK = ["#c03838", "#c09018", "#217870", "#6a38a0", "#c8c0a0", "#3a8030"];
   var ui = FF.create({
+    deco: ["moth", "star", "spark"], 
     id: "wingwake", title: "Wingwake", course: "Dusk board", view: { w: 390, h: 720, flex: true },
     stats: [{ id: "score", label: "Score", value: "0" }, { id: "mult", label: "Lift", value: "x1" }]
   });
