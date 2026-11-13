@@ -11,8 +11,8 @@
       right: [{ id: "W", label: "Whip", aria: "Bootlace whip", keys: ["KeyC", "KeyQ"] }, { id: "B", label: "Hose", aria: "Hose", keys: ["KeyX", "KeyK", "ShiftLeft"] }, { id: "J", icon: "up", cls: "big", aria: "Jump", keys: ["Space", "ArrowUp", "KeyW", "KeyZ"] }] }
   });
   var A = ui.audio, save = ui.save; save.hi = save.hi || 0; save.open = save.open || 1;
-  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180;
-  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); lo.width = W; lo.height = H; g.imageSmoothingEnabled = false; }
+  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180, Q = 1;
+  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); Q = FF.hdq ? FF.hdq(ui, PX) : 1; lo.width = Math.round(W * Q); lo.height = Math.round(H * Q); g.setTransform(Q, 0, 0, Q, 0, 0); g.imageSmoothingEnabled = false; g.hdQ = Q; }
   function R(x, y, w, h, c) { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
 
   // ---------- stages from segments (same composer idea as Brassjack) ----------
@@ -180,11 +180,13 @@
   function render(c, tt) {
     if (!W) sizeLo(); if (!L) load(0);
     var s = STAGES[st]; PF.drawBack(g, s.th, cam, W, H, tt);
+    var gP = g; g = FXP.layer(W, H, { round: 2.5 });
     for (var k = 0; k < 7; k++) { var bx = ((k * 70 - cam.x * 0.35) % (W + 70) + W + 70) % (W + 70) - 35, by = H * 0.78 - cam.y * 0.2;
       if (s.id === "marrow") { R(bx, by - 30, 26, 30, "#ff3ad8"); R(bx - 3, by - 34, 32, 5, "#ffe21a"); R(bx + 9, by - 22, 8, 12, "#6a1ac8"); R(bx + 30, by - 12, 14, 12, "#3ad81a"); R(bx + 33, by - 16, 8, 4, "#b8ff1a"); }
       else if (s.id === "floss") { var hc = ["#ff3a8a", "#3a8aff", "#ffe21a", "#3ad86a"][k % 4]; R(bx, by - 24, 22, 24, hc); for (var st2 = 0; st2 < 3; st2++) R(bx + 2 + st2 * 7, by - 24, 3, 24, "#ffffff"); g.fillStyle = FXP.shade(hc, -0.25); g.beginPath(); g.moveTo(bx - 3, by - 24); g.lineTo(bx + 11, by - 34); g.lineTo(bx + 25, by - 24); g.fill(); R(bx + 8, by - 14, 6, 14, "#7a3a1a"); R(bx + 30, by - 6, 16, 2, "#ffffff"); }
       else if (s.id === "tub") { R(bx, by - 46, 10, 46, "#3a1a6a"); R(bx - 6, by - 50, 22, 6, "#5a2a8a"); R(bx + 22, by - 20, 30, 6, "#3ad81a"); R(bx + 24, by - 24, 4, 4, "#e8ff1a"); }
       else { R(bx, by - 50, 24, 50, "#ff9ae8"); R(bx + 4, by - 44, 16, 14, "#ffffff"); R(bx + 10, by - 44, 2, 14, "#c83ad8"); R(bx + 4, by - 38, 16, 2, "#c83ad8"); R(bx + 28, by - 18, 14, 18, "#3aff6a"); } }
+    g = gP; FXP.flush(g, FXP.shade(s.th.sky[1], -0.4), false, { props: true, top: H * 0.78 - cam.y * 0.2 - 52, bottom: H * 0.78 - cam.y * 0.2 });
     PF.drawTiles(g, L, s.th, cam, W, H, tt);
     hooks.forEach(function (hk) { var x = hk.x - cam.x, y = hk.y - cam.y; R(x - 1, y - 12, 2, 10, "#c8c8d8"); R(x - 4, y - 3, 8, 3, "#ffe21a"); R(x - 4, y, 2, 3, "#ffe21a"); R(x + 2, y, 2, 3, "#ffe21a"); });
     items.forEach(function (it) { if (it.got) return; var x = it.x - cam.x, y = it.y - cam.y; if (x < -20 || x > W + 20) return;
@@ -207,7 +209,7 @@
     FXP.ambient(g, W, H, cam, tt, "drift", "rgba(240,255,120,0.85)", 20); FXP.vignette(g, W, H, 0.35);
     if (irisT > 0) { FXP.iris(g, W, H, irisT, hero ? hero.x - cam.x : W / 2, hero ? hero.y - cam.y : H / 2); irisT -= 1 / 40; }
     if (mode === "play") { for (var i = 0; i < 5; i++) R(4 + i * 7, 4, 5, 6, i < hp ? "#3aff6a" : "rgba(0,0,0,0.35)"); if (boss) { R(W - 64, 4, 60, 6, "rgba(0,0,0,0.4)"); R(W - 63, 5, 58 * Math.max(0, boss.hp) / (boss.id === "tub" ? 30 : boss.id === "hoover" ? 34 : 26), 4, "#ff3ad8"); g.font = "bold 7px sans-serif"; g.textAlign = "right"; g.fillStyle = "#fff"; g.fillText(boss.name, W - 4, 18); } }
-    c.drawImage(lo, 0, 0, W * PX, H * PX);
+    c.imageSmoothingEnabled = Q > 1; c.drawImage(lo, 0, 0, W * PX, H * PX); c.imageSmoothingEnabled = false;
   }
   function drawBoot(tt) {
     var h = hero, x = Math.round(h.x - cam.x), y = Math.round(h.y - cam.y), F = h.face > 0, sq = h.ground ? 0 : 1, step = h.ground && h.vx ? Math.floor(h.ph) % 2 : 0;

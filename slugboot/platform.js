@@ -88,9 +88,36 @@
     var h = rows.length, w = 0; for (var k = 0; k < h; k++) w = Math.max(w, rows[k].length);
     var c = document.createElement("canvas"); c.width = w; c.height = h; var x = c.getContext("2d");
     for (var j = 0; j < h; j++) for (var i = 0; i < w; i++) { var ch = rows[j][i]; if (ch && ch !== "." && ch !== " " && pal[ch]) { x.fillStyle = pal[ch]; x.fillRect(i, j, 1, 1); } }
+    try { c._hd = scale2x(scale2x(c)); } catch (e) {}
     return c;
   }
-  function flipped(img) { var c = document.createElement("canvas"); c.width = img.width; c.height = img.height; var x = c.getContext("2d"); x.translate(img.width, 0); x.scale(-1, 1); x.drawImage(img, 0, 0); return c; }
+  // Scale2x (EPX) pixel-art smoothing: rounds stair-step diagonals without inventing colours. Applied twice -> 4x.
+  function scale2x(src) {
+    var w = src.width, h = src.height, S = new Uint32Array(src.getContext("2d").getImageData(0, 0, w, h).data.buffer.slice(0));
+    var out = document.createElement("canvas"); out.width = w * 2; out.height = h * 2;
+    var ox = out.getContext("2d"), id = ox.createImageData(w * 2, h * 2), D = new Uint32Array(id.data.buffer), W2 = w * 2;
+    function P(x, y) { return x < 0 || y < 0 || x >= w || y >= h ? 0 : S[y * w + x]; }
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      var E = S[y * w + x], B = P(x, y - 1), Dd = P(x - 1, y), F = P(x + 1, y), Hh = P(x, y + 1), e0 = E, e1 = E, e2 = E, e3 = E;
+      if (B !== Hh && Dd !== F) { if (Dd === B) e0 = Dd; if (B === F) e1 = F; if (Dd === Hh) e2 = Dd; if (Hh === F) e3 = F; }
+      var o = y * 2 * W2 + x * 2; D[o] = e0; D[o + 1] = e1; D[o + W2] = e2; D[o + W2 + 1] = e3;
+    }
+    ox.putImageData(id, 0, 0); return out;
+  }
+  // canvases carrying a smoothed _hd twin are drawn from the twin when the target is scaled up (hi-res buffers)
+  (function () {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype; if (!P || P._hdPatched) return; P._hdPatched = 1;
+    var DI = P.drawImage;
+    P.drawImage = function (img, a, b, c, d, e, f, g, h) {
+      var hd = img && img._hd; if (!hd) return DI.apply(this, arguments);
+      var m = this.getTransform(); if (Math.abs(m.a) + Math.abs(m.b) < 1.5) return DI.apply(this, arguments);
+      var k = hd.width / img.width, n = arguments.length;
+      if (n === 3) return DI.call(this, hd, a, b, img.width, img.height);
+      if (n === 5) return DI.call(this, hd, a, b, c, d);
+      return DI.call(this, hd, a * k, b * k, c * k, d * k, e, f, g, h);
+    };
+  })();
+  function flipped(img) { var c = document.createElement("canvas"); c.width = img.width; c.height = img.height; var x = c.getContext("2d"); x.translate(img.width, 0); x.scale(-1, 1); x.drawImage(img, 0, 0); if (img._hd) c._hd = flipped(img._hd); return c; }
   function hash(x, y, s) { var n = (x * 374761393 + y * 668265263 + (s || 0) * 1442695041) >>> 0; n = (n ^ (n >> 13)) * 1274126177 >>> 0; return (n ^ (n >> 16)) / 4294967296; }
   // theme: {sky:[top,bot], far, near, dirt, dirtD, top, topD, plank, water, waterHi, spike, rock, deco:[colors]}
   function drawBack(g, th, cam, W, H, t) {
@@ -146,21 +173,35 @@
     }
   }
   // limb figure (hero) at hip x,y in px; pose angles from straight down, +forward
-  function line(g, x0, y0, x1, y1, c, th) { g.fillStyle = c; var dx = x1 - x0, dy = y1 - y0, n = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy)))); for (var i = 0; i <= n; i++) g.fillRect(Math.round(x0 + dx * i / n - th / 2), Math.round(y0 + dy * i / n - th / 2), th, th); }
+  function hiRes(g) { var m = g.getTransform(); return Math.abs(m.a) + Math.abs(m.b) > 1.5; }
+  function line(g, x0, y0, x1, y1, c, th) {
+    if (hiRes(g)) { g.strokeStyle = c; g.lineWidth = th; g.lineCap = "round"; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); return; }
+    g.fillStyle = c; var dx = x1 - x0, dy = y1 - y0, n = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy)))); for (var i = 0; i <= n; i++) g.fillRect(Math.round(x0 + dx * i / n - th / 2), Math.round(y0 + dy * i / n - th / 2), th, th); }
   function limb(g, x, y, a1, a2, l1, l2, c) { var kx = x + Math.sin(a1) * l1, ky = y + Math.cos(a1) * l1; line(g, x, y, kx, ky, c, 2); var fx = kx + Math.sin(a2) * l2, fy = ky + Math.cos(a2) * l2; line(g, kx, ky, fx, fy, c, 2); return [fx, fy]; }
   function figure(g, x, y, p, pal, flip, sc) {
     sc = sc || 1; var s = flip ? -1 : 1, Lr = p.lean * s, f = function (a) { return a * s; };
     var T = 6 * sc, LG = 4.5 * sc, AR = 3.5 * sc;
     var sx = x + Math.sin(Lr) * T, sy = y - Math.cos(Lr) * T;
-    var bf = limb(g, x, y, f(p.tb), f(p.sb), LG, LG, pal.legD); g.fillStyle = pal.boot; g.fillRect(Math.round(bf[0] - 1 + s), Math.round(bf[1] - 1), 3, 2);
+    var HR = hiRes(g);
+    function boot(pt) { g.fillStyle = pal.boot; if (HR) { g.beginPath(); g.ellipse(pt[0] + s * 0.8, pt[1], 2, 1.25, 0, 0, 7); g.fill(); } else g.fillRect(Math.round(pt[0] - 1 + s), Math.round(pt[1] - 1), 3, 2); }
+    var bf = limb(g, x, y, f(p.tb), f(p.sb), LG, LG, pal.legD); boot(bf);
     limb(g, sx, sy + 1, f(p.ab), f(p.fb), AR, AR, pal.skinD);
     line(g, x, y, sx, sy, pal.top, 3 * sc > 3 ? 4 : 3);
     var hx = sx + Math.sin(Lr) * 3, hy = sy - Math.cos(Lr) * 3;
-    g.fillStyle = pal.skin; g.fillRect(Math.round(hx - 2), Math.round(hy - 4), 5, 5);
-    g.fillStyle = pal.hair; g.fillRect(Math.round(hx - 2 - s), Math.round(hy - 5), 5, 2); g.fillRect(Math.round(flip ? hx + 2 : hx - 3), Math.round(hy - 4), 2, 3);
-    if (pal.band) { g.fillStyle = pal.band; g.fillRect(Math.round(hx - 2), Math.round(hy - 4), 5, 1); }
-    g.fillStyle = "#1a1010"; g.fillRect(Math.round(hx + s * 2), Math.round(hy - 2), 1, 1);
-    var ff = limb(g, x, y, f(p.tf), f(p.sf), LG, LG, pal.leg); g.fillStyle = pal.boot; g.fillRect(Math.round(ff[0] - 1 + s), Math.round(ff[1] - 1), 3, 2);
+    if (HR) {
+      var cx = hx + 0.5, cy = hy - 1.5;
+      g.fillStyle = pal.skin; g.beginPath(); g.ellipse(cx, cy, 2.7, 2.9, 0, 0, 7); g.fill();
+      g.fillStyle = pal.hair; g.beginPath(); g.ellipse(cx - s * 0.5, cy - 1.3, 2.9, 1.9, 0, Math.PI, 0); g.fill(); g.beginPath(); g.ellipse(cx - s * 2, cy - 0.3, 1.3, 2.1, 0, 0, 7); g.fill();
+      if (pal.band) { g.strokeStyle = pal.band; g.lineWidth = 0.9; g.beginPath(); g.ellipse(cx, cy - 0.4, 2.8, 2.4, 0, Math.PI * 1.05, Math.PI * 1.95); g.stroke(); }
+      g.fillStyle = "rgba(255,255,255,0.35)"; g.beginPath(); g.arc(cx + s * 0.9, cy - 0.2, 0.9, 0, 7); g.fill();
+      g.fillStyle = "#1a1010"; g.beginPath(); g.arc(cx + s * 1.6, cy - 0.3, 0.6, 0, 7); g.fill();
+    } else {
+      g.fillStyle = pal.skin; g.fillRect(Math.round(hx - 2), Math.round(hy - 4), 5, 5);
+      g.fillStyle = pal.hair; g.fillRect(Math.round(hx - 2 - s), Math.round(hy - 5), 5, 2); g.fillRect(Math.round(flip ? hx + 2 : hx - 3), Math.round(hy - 4), 2, 3);
+      if (pal.band) { g.fillStyle = pal.band; g.fillRect(Math.round(hx - 2), Math.round(hy - 4), 5, 1); }
+      g.fillStyle = "#1a1010"; g.fillRect(Math.round(hx + s * 2), Math.round(hy - 2), 1, 1);
+    }
+    var ff = limb(g, x, y, f(p.tf), f(p.sf), LG, LG, pal.leg); boot(ff);
     var hf = limb(g, sx, sy + 1, f(p.af), f(p.ff), AR, AR, pal.skin);
     return { hand: hf, head: [hx, hy] };
   }
@@ -180,10 +221,10 @@
   function Parts() { var list = []; return {
     add: function (x, y, n, c, sp, life, grav) { for (var i = 0; i < n; i++) { var a = Math.random() * Math.PI * 2, v = (sp || 60) * (0.4 + Math.random() * 0.6); list.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - (sp || 60) * 0.3, life: (life || 0.5) * (0.6 + Math.random() * 0.6), c: c, g: grav == null ? 300 : grav }); } },
     step: function (dt) { for (var i = list.length - 1; i >= 0; i--) { var p = list[i]; p.life -= dt; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.life <= 0) list.splice(i, 1); } },
-    draw: function (g, cam) { for (var i = 0; i < list.length; i++) { var p = list[i]; g.fillStyle = p.c; g.fillRect(Math.round(p.x - cam.x), Math.round(p.y - cam.y), 2, 2); } },
+    draw: function (g, cam) { var hr = hiRes(g); for (var i = 0; i < list.length; i++) { var p = list[i]; g.fillStyle = p.c; if (hr) { g.globalAlpha = Math.min(1, p.life * 4); g.beginPath(); g.arc(p.x - cam.x + 1, p.y - cam.y + 1, 1.2, 0, 7); g.fill(); } else g.fillRect(Math.round(p.x - cam.x), Math.round(p.y - cam.y), 2, 2); } g.globalAlpha = 1; },
     clear: function () { list.length = 0; }
   }; }
-  window.PF = { TS: TS, TILES: TILES, Level: Level, move: move, touching: touching, overlapTiles: overlapTiles, aabb: aabb, Camera: Camera, follow: follow, bmp: bmp, flipped: flipped, hash: hash, drawBack: drawBack, drawTiles: drawTiles, figure: figure, runPose: runPose, POSE: POSE, Parts: Parts, line: line };
+  window.PF = { TS: TS, TILES: TILES, Level: Level, move: move, touching: touching, overlapTiles: overlapTiles, aabb: aabb, Camera: Camera, follow: follow, bmp: bmp, flipped: flipped, hash: hash, drawBack: drawBack, drawTiles: drawTiles, figure: figure, runPose: runPose, POSE: POSE, Parts: Parts, line: line, scale2x: scale2x, hiRes: hiRes };
 })();
 
 /* ---- shared creatures (Nettle Run, Kilnbound) ----
