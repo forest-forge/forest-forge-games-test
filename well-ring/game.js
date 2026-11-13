@@ -17,10 +17,10 @@
     pads: { left: [{ id: "L", icon: "left", aria: "Round to the left", keys: ["ArrowLeft", "KeyA"] }], right: [{ id: "F", label: "Fire", cls: "big", aria: "Fire", keys: ["Space", "ArrowUp", "KeyW"] }, { id: "R", icon: "right", aria: "Round to the right", keys: ["ArrowRight", "KeyD"] }] }
   });
   var A = ui.audio, save = ui.save;
-  save.hi = save.hi || 0; save.deep = save.deep || 0; save.fire = save.fire || "auto"; save.ctl = save.ctl || "drag";
+  save.hi = save.hi || 0; save.deep = save.deep || 0; save.fire = save.fire || "auto"; save.ctl = save.ctl || "drag"; if (save.lines == null) save.lines = true;
 
-  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 180, H = 320, CX = 90, CY = 160, RR = 80;
-  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); lo.width = W; lo.height = H; CX = W / 2; CY = Math.min(H * 0.46, H / 2); RR = Math.min(W * 0.46, H * 0.36); }
+  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 180, H = 320, CX = 90, CY = 160, RR = 80, Q = 1;
+  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); Q = FF.hdq ? FF.hdq(ui, PX) : 1; lo.width = Math.round(W * Q); lo.height = Math.round(H * Q); g.setTransform(Q, 0, 0, Q, 0, 0); g.imageSmoothingEnabled = false; CX = W / 2; CY = Math.min(H * 0.46, H / 2); RR = Math.min(W * 0.46, H * 0.36); }
   function R(x, y, w, h, c) { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
   function bmp(rows, pal) { var h = rows.length, w = rows[0].length, c = document.createElement("canvas"); c.width = w; c.height = h; var x = c.getContext("2d"); for (var j = 0; j < h; j++) for (var i = 0; i < w; i++) { var ch = rows[j][i]; if (ch !== "." && pal[ch]) { x.fillStyle = pal[ch]; x.fillRect(i, j, 1, 1); } } return c; }
   // enemy pixel art (original)
@@ -78,6 +78,33 @@
   var pa = Math.PI / 2, pav = 0, target = null, firing = false, fireT = 0, twin = 0, inv = 0, deadT = 0, flare = 0;
   var shots = [], foes = [], pel = [], fx = [], items = [], rings = [], spawnQ = [], waveT = 0, landT = 0, bonus = false, banner = "", bannerT = 0, diveT = 0, formRot = 0, caught = 0;
   for (var i0 = 0; i0 < 14; i0++) rings.push({ r: Math.pow(i0 / 14, 2) });
+  // ---------- warp: on a cleared wave the pod dives down the middle of the well ----------
+  // Runs inside the existing 2.6 s landing gap (wave timing and the bonus-wave cycle are unchanged):
+  // 0.35-1.95 s dive (pod shrinks to the centre, well zooms in, streaks rush past), flash at 1.95 s, then the new depth eases in.
+  var LAND = 2.6, WARP_DIVE0 = 0.35, WARP_FLASH = 1.95;
+  function warpK() {
+    if (landT <= 0 || mode !== "play") return { on: false, e: 0, dive: 0, de: 0, z: 1, flash: 0, arrive: -1, streak: 0 };
+    var e = LAND - landT, dive = clamp((e - WARP_DIVE0) / (WARP_FLASH - WARP_DIVE0), 0, 1), de = dive * dive * dive, z = 1 + 1.9 * de, arrive = -1;
+    if (e >= WARP_FLASH) { arrive = clamp((e - WARP_FLASH) / (LAND - WARP_FLASH), 0, 1); var ea = 1 - Math.pow(1 - arrive, 3); z = 0.55 + 0.45 * ea; de = 0; }
+    var flash = Math.max(0, 1 - Math.abs(e - WARP_FLASH) / 0.2);
+    var streak = arrive >= 0 ? Math.max(0, 1 - arrive * 1.6) : clamp(dive * 1.4, 0, 1);
+    return { on: true, e: e, dive: dive, de: de, z: z, flash: flash, arrive: arrive, streak: streak };
+  }
+  function hash1(n) { n = (Math.imul(n, 374761393) + 668265263) | 0; n = Math.imul(n ^ (n >>> 13), 1274126177); return ((n ^ (n >>> 16)) >>> 0) / 4294967296; }
+  var STREAK_COLS = ["#bff8ff", "#ffffff", "#ff8ae8", "#8ae8ff", "#ffe08a", "#9aff9a"];
+  function drawWarpStreaks(k, t) {
+    if (k.streak <= 0) return;
+    var n = 90, maxR = Math.hypot(W, H) * 0.6;
+    g.save(); g.lineCap = "round"; g.globalCompositeOperation = "lighter";
+    for (var i = 0; i < n; i++) {
+      var a = hash1(i) * TAU, sp = 0.6 + hash1(i + 999) * 0.9, ph = (hash1(i + 77) + k.e * sp * (0.6 + 2.6 * k.streak)) % 1;
+      var r0 = ph * ph * maxR, len = (8 + 70 * k.streak) * (0.3 + ph);
+      var x0 = CX + Math.cos(a) * r0, y0 = CY + Math.sin(a) * r0, x1 = CX + Math.cos(a) * (r0 + len), y1 = CY + Math.sin(a) * (r0 + len);
+      g.globalAlpha = k.streak * (0.25 + 0.75 * ph); g.strokeStyle = STREAK_COLS[i % STREAK_COLS.length]; g.lineWidth = 0.6 + ph * 1.8;
+      g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
+    }
+    g.restore(); g.globalAlpha = 1;
+  }
   function polar(a, r) { var rr = r * RR; return { x: CX + Math.cos(a) * rr, y: CY + Math.sin(a) * rr }; }
   function scaleAt(r) { return 0.35 + 1.3 * Math.min(r, 1.1); }
   function hud() { ui.setStat("score", FF.n(score)); ui.setStat("depth", depth + " m"); ui.setStat("lives", lives); }
@@ -145,7 +172,7 @@
   // ---------- update ----------
   function update(dt) {
     // descending wall rings
-    var ringSp = landT > 0 ? 1.4 : 0.18;
+    var wk = warpK(), ringSp = landT > 0 ? 1.4 + 5 * wk.de : 0.18;
     rings.forEach(function (r) { r.r += dt * ringSp * (0.12 + r.r * 0.9); if (r.r > 1.6) r.r -= 1.6; });
     bannerT -= dt;
     if (deadT > 0) { deadT -= dt; if (deadT <= 0) { if (lives <= 0) return over(); inv = 2.2; pel = []; } }
@@ -161,6 +188,7 @@
       fireT -= dt;
       var wantFire = save.fire === "auto" ? true : (firing || ui.down("F"));
       if (ui.down("F")) wantFire = true;
+      if (landT > 0) wantFire = false;
       if (wantFire && fireT <= 0 && shots.length < (twin ? 8 : 5)) {
         fireT = 0.16;
         if (twin) { shots.push({ a: pa - 0.05, r: 0.94 }); shots.push({ a: pa + 0.05, r: 0.94 }); } else shots.push({ a: pa, r: 0.94 });
@@ -220,7 +248,7 @@
       // wave end
       if (!spawnQ.length && !foes.length && landT <= 0 && waveT > 1.5) {
         if (bonus) { var b = caught === 24 ? 10000 : caught * 100; addScore(b); banner = caught + "/24 lanterns" + (caught === 24 ? ": perfect 10,000" : ""); bannerT = 2.4; }
-        depth += 30; save.deep = Math.max(save.deep, depth); ui.persist(); hud(); landT = 2.6; S.land();
+        depth += 30; save.deep = Math.max(save.deep, depth); ui.persist(); hud(); landT = LAND; pel = []; S.land();
         if (!bonus) { banner = "Down to " + depth + " m"; bannerT = 2; }
       }
     }
@@ -248,9 +276,11 @@
       R((s * 47 + 11) % W, (s * 31 + 5) % H, s % 6 ? 1 : 2, 1, s % 4 ? "#8aa0d0" : "#e8f0ff");
     }
     g.globalAlpha = 1;
-    // depth glow + caustic pulse
+    var wk = warpK();
+    g.save(); if (wk.z !== 1) { g.translate(CX, CY); g.scale(wk.z, wk.z); g.translate(-CX, -CY); }
+    // depth glow + caustic pulse (grows as the pod dives)
     var pulse = 0.85 + 0.15 * Math.sin(t * 2.2);
-    var gr = g.createRadialGradient(CX, CY, 0, CX, CY, RR * 0.5);
+    var gr = g.createRadialGradient(CX, CY, 0, CX, CY, RR * 0.5 * (1 + 1.5 * wk.de));
     gr.addColorStop(0, "rgba(160,255,255," + (0.95 * pulse) + ")"); gr.addColorStop(0.18, "rgba(40,80,200,0.85)"); gr.addColorStop(0.55, "rgba(20,20,80,0.4)"); gr.addColorStop(1, "rgba(3,6,20,0)");
     g.fillStyle = gr; g.fillRect(0, 0, W, H);
     for (var i = 0; i < rings.length; i++) {
@@ -260,12 +290,12 @@
       g.strokeStyle = "rgba(" + Math.round(rr) + "," + Math.round(gg) + "," + Math.round(bb) + "," + (0.22 + 0.6 * k) + ")";
       g.lineWidth = Math.max(1.5, r * 3.4); g.beginPath(); g.arc(CX, CY, rad, 0, TAU); g.stroke();
       var n = 14, off = i * 0.37 + t * 0.05;
-      for (var j = 0; j < n; j++) { var a = off + j / n * TAU, p1 = { x: CX + Math.cos(a) * rad, y: CY + Math.sin(a) * rad }; R(p1.x, p1.y, Math.max(1, r * 2), Math.max(1, r * 2), "rgba(180,240,255,0.75)"); }
+      if (save.lines) for (var j = 0; j < n; j++) { var a = off + j / n * TAU, p1 = { x: CX + Math.cos(a) * rad, y: CY + Math.sin(a) * rad }; R(p1.x, p1.y, Math.max(1, r * 2), Math.max(1, r * 2), "rgba(180,240,255,0.75)"); }
     }
     // mossy brick rim around the well
     g.save();
-    g.beginPath(); g.rect(-1, -1, W + 2, H + 2); g.arc(CX, CY, RR + 1, 0, TAU, true); g.clip("evenodd");
-    g.fillStyle = "#12182c"; g.fillRect(0, 0, W, H);
+    g.beginPath(); g.rect(-W, -H, W * 3, H * 3); g.arc(CX, CY, RR + 1, 0, TAU, true); g.clip("evenodd");
+    g.fillStyle = "#12182c"; g.fillRect(-W, -H, W * 3, H * 3);
     for (var br = 0; br < 28; br++) {
       var ba = br / 28 * TAU, bx = CX + Math.cos(ba) * (RR + 8), by = CY + Math.sin(ba) * (RR + 8);
       g.fillStyle = br % 3 ? "#2a3458" : "#1a2440";
@@ -297,22 +327,30 @@
     shots.forEach(function (s) { var p = polar(s.a, s.r), sz = Math.max(1, 2.5 * scaleAt(s.r)); var q = polar(s.a, s.r + 0.07); g.strokeStyle = "rgba(255,244,192,0.45)"; g.lineWidth = Math.max(1, sz * 0.5); g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(q.x, q.y); g.stroke(); R(p.x - sz / 2, p.y - sz / 2, sz, sz, "#fff4c0"); R(q.x - sz / 3, q.y - sz / 3, sz * 0.66, sz * 0.66, "#ff9a2a"); });
     // pellets
     pel.forEach(function (p) { var q = polar(p.a, p.r), sz = Math.max(1, 2.5 * scaleAt(p.r)); R(q.x - sz / 2, q.y - sz / 2, sz, sz, Math.floor(t * 20) % 2 ? "#ff4a6a" : "#ffe0e0"); });
-    // pod
-    if (deadT <= 0 && (inv <= 0 || Math.floor(t * 12) % 2) && mode !== "title") {
-      var me = polar(pa, 1);
-      g.globalAlpha = 0.28; g.fillStyle = "#8af0ff"; g.beginPath(); g.arc(me.x, me.y, 10, 0, TAU); g.fill(); g.globalAlpha = 1;
-      g.save(); g.translate(Math.round(me.x), Math.round(me.y)); g.rotate(pa + Math.PI / 2);
+    g.restore();
+    // pod (screen space, so it visibly travels down the middle during the warp)
+    if (deadT <= 0 && (inv <= 0 || wk.on || Math.floor(t * 12) % 2) && mode !== "title") {
+      var pd = wk.dive * wk.dive * (3 - 2 * wk.dive), podR = 1 - 0.96 * pd + (wk.on && wk.e < WARP_DIVE0 ? 0.04 * Math.sin(wk.e / WARP_DIVE0 * Math.PI) : 0), podS = 1 - 0.78 * pd;
+      if (wk.arrive >= 0) { podR = 1; podS = 1; }
+      var me = polar(pa, podR);
+      g.globalAlpha = 0.28; g.fillStyle = "#8af0ff"; g.beginPath(); g.arc(me.x, me.y, 10 * podS, 0, TAU); g.fill(); g.globalAlpha = 1;
+      g.save(); g.translate(me.x, me.y); g.rotate(pa + Math.PI / 2); if (podS !== 1) g.scale(podS, podS);
+      if (pd > 0.02 && wk.arrive < 0) { g.globalAlpha = Math.min(1, pd * 2); g.fillStyle = "rgba(160,255,255,0.6)"; g.beginPath(); g.moveTo(-5, 4); g.lineTo(0, 10 + 30 * pd); g.lineTo(5, 4); g.fill(); g.globalAlpha = 1; }
       g.drawImage(POD, -10, -8, 20, 16); if (twin > 0) { R(-11, -2, 3, 5, "#4ae0a0"); R(8, -2, 3, 5, "#4ae0a0"); }
       g.restore();
-      g.globalAlpha = 0.12; g.fillStyle = "#8af0ff"; g.beginPath(); g.moveTo(me.x, me.y); var b1 = polar(pa - 0.16, 0.28), b2 = polar(pa + 0.16, 0.28); g.lineTo(b1.x, b1.y); g.lineTo(b2.x, b2.y); g.fill(); g.globalAlpha = 1;
+      if (!wk.on) { g.globalAlpha = 0.12; g.fillStyle = "#8af0ff"; g.beginPath(); g.moveTo(me.x, me.y); var b1 = polar(pa - 0.16, 0.28), b2 = polar(pa + 0.16, 0.28); g.lineTo(b1.x, b1.y); g.lineTo(b2.x, b2.y); g.fill(); g.globalAlpha = 1; }
     }
     if (mode === "title") { var tp = polar(t * 0.8, 1); g.globalAlpha = 0.28; g.fillStyle = "#8af0ff"; g.beginPath(); g.arc(tp.x, tp.y, 10, 0, TAU); g.fill(); g.globalAlpha = 1; g.save(); g.translate(tp.x, tp.y); g.rotate(t * 0.8 + Math.PI / 2); g.drawImage(POD, -10, -8, 20, 16); g.restore(); }
     fx.forEach(function (p) { R(p.x, p.y, 2, 2, p.c); g.globalAlpha = 0.35; R(p.x - 1, p.y - 1, 4, 4, p.c); g.globalAlpha = 1; });
+    if (wk.on) {
+      drawWarpStreaks(wk, t);
+      if (wk.flash > 0) { var fg = g.createRadialGradient(CX, CY, 0, CX, CY, Math.hypot(W, H) * (0.3 + 0.7 * wk.flash)); fg.addColorStop(0, "rgba(255,255,255," + (0.95 * wk.flash) + ")"); fg.addColorStop(0.5, "rgba(190,250,255," + (0.7 * wk.flash) + ")"); fg.addColorStop(1, "rgba(120,200,255," + (0.25 * wk.flash) + ")"); g.fillStyle = fg; g.fillRect(0, 0, W, H); }
+    }
     if (flare > 0) { g.globalAlpha = flare * 2; R(0, 0, W, H, "#fff8e0"); g.globalAlpha = 1; }
     var vg = g.createRadialGradient(CX, CY, RR * 0.3, CX, CY, RR * 1.35);
     vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(3,6,20,0.45)");
     g.fillStyle = vg; g.fillRect(0, 0, W, H);
-    c.drawImage(lo, 0, 0, W * PX, H * PX);
+    c.imageSmoothingEnabled = Q > 1; c.drawImage(lo, 0, 0, W * PX, H * PX); c.imageSmoothingEnabled = false;
     if (mode === "play" && !ui.menuOpen) {
       if (bannerT > 0) ui.text(banner, ui.VW / 2, CY * PX - RR * PX - 18 > 20 ? CY * PX - RR * PX - 14 : 30, 17, "#ffe3a0", "center", "#ff9a2a");
       if (twin > 0) ui.text("TWIN " + Math.ceil(twin), 10, 18, 11, "#4ae0a0");
@@ -325,6 +363,7 @@
   function aim(x, y) { var lx = x / PX - CX, ly = y / PX - CY; if (lx * lx + ly * ly > 64) target = Math.atan2(ly, lx); }
   var game = {
     toTitle: toTitle, onResize: sizeLo, update: update, render: render,
+    pauseButtons: function () { return [{ label: "Depth lines: " + (save.lines ? "on" : "off"), small: true, act: function () { save.lines = !save.lines; ui.persist(); ui.refreshPause(); } }]; },
     idle: function (dt) { rings.forEach(function (r) { r.r += dt * 0.25 * (0.12 + r.r * 0.9); if (r.r > 1.6) r.r -= 1.6; }); },
     onBack: function () { if (mode === "title") return "exit"; toTitle(); return "menu"; },
     onPointer: function (type, x, y, id) {
@@ -345,11 +384,12 @@
       stats: "<span>HIGH SCORE " + (save.hi ? FF.n(save.hi) : "-") + "</span><span>DEEPEST " + save.deep + " m</span>",
       buttons: [{ label: "Go down", act: newGame },
         { label: "Moving: " + (save.ctl === "drag" ? "touch the ring" : "pads"), small: true, act: function () { save.ctl = save.ctl === "drag" ? "pads" : "drag"; ui.persist(); toTitle(); } },
-        { label: "Firing: " + (save.fire === "auto" ? "automatic" : "hold to fire"), small: true, act: function () { save.fire = save.fire === "auto" ? "hold" : "auto"; ui.persist(); toTitle(); } }], app: true,
+        { label: "Firing: " + (save.fire === "auto" ? "automatic" : "hold to fire"), small: true, act: function () { save.fire = save.fire === "auto" ? "hold" : "auto"; ui.persist(); toTitle(); } },
+        { label: "Depth lines: " + (save.lines ? "on" : "off"), small: true, act: function () { save.lines = !save.lines; ui.persist(); toTitle(); } }], app: true,
       help: ["Touch or drag anywhere: the pod runs round the ring to that side.", "Shots fly down into the well. Divers come right up to the ring, so keep moving.", "Every fourth landing: catch all 24 lanterns for 10,000. Green = twin lamps, red = flare."],
       fine: "A Forest Forge game", solid: false });
   }
   ui.onAdsRemoved = function () { if (mode === "title") toTitle(); };
-  game.qa = { start: newGame, state: function () { return { mode: mode, wave: wave, depth: depth, lives: lives, score: score, foes: foes.length, pa: pa, deadT: deadT }; }, foes: function () { return foes; }, aimAt: function (a) { target = a; }, god: function () { inv = 1e9; } };
+  game.qa = { start: newGame, state: function () { return { mode: mode, wave: wave, depth: depth, lives: lives, score: score, foes: foes.length, pa: pa, deadT: deadT }; }, foes: function () { return foes; }, aimAt: function (a) { target = a; }, god: function () { inv = 1e9; }, clearWave: function () { foes = []; spawnQ = []; waveT = 2; }, warp: function () { return warpK(); }, landT: function () { return landT; }, lines: function (v) { if (v != null) { save.lines = !!v; ui.persist(); } return save.lines; } };
   ui.start(game);
 })();
