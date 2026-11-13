@@ -24,8 +24,8 @@
   function freshSave() { save.started = 0; save.forms = ["clay"]; save.form = "clay"; save.boss = {}; save.chests = {}; save.coins = 0; save.maxH = 3; save.ward = 0; save.edge = 0; save.stones = 0; save.spawn = { area: "town", x: 5, y: 13 }; save.cleared = 0; }
   if (!save.forms) freshSave();
 
-  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180;
-  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); lo.width = W; lo.height = H; g.imageSmoothingEnabled = false; }
+  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180, Q = 1;
+  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); Q = FF.hdq ? FF.hdq(ui, PX) : 1; lo.width = Math.round(W * Q); lo.height = Math.round(H * Q); g.setTransform(Q, 0, 0, Q, 0, 0); g.imageSmoothingEnabled = false; g.hdQ = Q; }
 
   // ---------- forms ----------
   var FORMS = {
@@ -477,6 +477,7 @@
     if (area === "town") drawTown(tt);
     doors.forEach(function (d) { drawDoor(d, tt); });
     PF.drawTiles(g, L, th, cam, W, H, tt);
+    var g0 = g; if (window.FXP) g = FXP.layer(W, H);
     items.forEach(function (it) { if (!it.got) drawItem(it, tt); });
     coinsLoose.forEach(function (cn) { if (cn.life > 2 || Math.floor(tt * 10) % 2) g.drawImage(COIN, Math.round(cn.x - cam.x), Math.round(cn.y - cam.y)); });
     foes.forEach(function (f) {
@@ -487,11 +488,12 @@
     if (boss) drawBoss(boss, tt);
     shots.forEach(function (s) { g.fillStyle = s.c; g.fillRect(Math.round(s.x - cam.x), Math.round(s.y - cam.y), 6, 6); g.fillStyle = "#fff"; g.fillRect(Math.round(s.x - cam.x) + 2, Math.round(s.y - cam.y) + 2, 2, 2); });
     if (hero && mode !== "title" && (hero.inv <= 0 || Math.floor(tt * 14) % 2)) drawHero(tt);
+    if (window.FXP) { g = g0; FXP.flush(g, "#140c28"); }
     parts.draw(g, cam);
     if (window.FFGfx) FFGfx.motes(g, cam, W, H, tt, area === "kiln" || area === "heart" ? "rgba(255,160,60,0.65)" : "rgba(180,160,255,0.55)", 14);
     if (mode !== "title" && hero) drawHud(tt);
     if (window.FFGfx) FFGfx.vignette(g, W, H, 0.4);
-    c.drawImage(lo, 0, 0, W * PX, H * PX);
+    c.imageSmoothingEnabled = Q > 1; c.drawImage(lo, 0, 0, W * PX, H * PX); c.imageSmoothingEnabled = false;
     if (mode === "play" && !ui.menuOpen) {
       if (bannerT > 0) ui.text(banner, ui.VW / 2, ui.VH * 0.22, 20, "#ffe3a0", "center", "#ff9a2a");
       else if (prompt) ui.text(prompt.k === "S" ? "Act: shrine" : "Act: night market", ui.VW / 2, ui.VH * 0.22, 16, "#ffe3a0", "center", "#ff9a2a");
