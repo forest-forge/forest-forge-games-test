@@ -4,9 +4,16 @@
  * Original game: all art drawn in code, all sound generated (shell.js). */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#e8682a;--sky1:#ffc04a;--sky2:#ff5a8a;--water:#c84a20;--amber:#ffffff;--amber-hi:#fff27a;--amber-soft:#ffffff;--amber-line:#22a844;--ember:#a82a10;--btn:#c04a2a;--lamp:#fff6d8;--pop1:#ffe14a;--pop2:#5ae05a;--pop3:#ff7ab0;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
   var clamp = FF.clamp, TS = PF.TS;
   PF.TILES["-"] = { oneway: 1, rail: 1 };
   var ui = FF.create({
+    deco: ["leaf", "flower", "circle"], 
     id: "canopy-carts", title: "Canopy Carts", course: "Great Glasshouse", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "fruit", label: "Fruit", value: "0" }, { id: "score", label: "Score", value: "0" }],
     pads: {
@@ -46,10 +53,10 @@
       m.r(112, 11, 113, 11, "="); m.fruit(112, 113, 10); m.ground(115, 124, 3); m.r(125, 15, 127, 15, "^"); m.p(126, 10, "F"); m.ground(128, 149, 3); m.p(136, 12, "c"); m.p(144, 12, "G"); return m; } }
   ];
   var THEMES = {
-    palm: { sky: ["#3ac8f0", "#d8ffd0"], far: "#2a9a4a", near: "#1a7a3a", trees: "#0e5a2a", dirt: "#7a4a2a", dirtD: "#5a3420", top: "#3ae04a", topD: "#1fa83a", deco: ["#ff4aa0", "#ffe23a", "#ff8a2a"], plank: "#c87a3a", spike: "#2a8a3a", glass: "rgba(220,255,240,0.25)" },
-    sunset: { sky: ["#ff6a3a", "#ffd27a"], sun: "#fff0a0", far: "#c84a5a", near: "#7a2a4a", trees: "#3a1a3a", dirt: "#6a3a2a", dirtD: "#4a2418", top: "#ff9a3a", topD: "#d86a2a", deco: ["#ffe23a", "#ff4a6a"], plank: "#a85a2a", spike: "#5a2a3a", glass: "rgba(255,220,180,0.2)" },
-    cave: { sky: ["#0a1a4a", "#1a4a8a"], far: "#12306a", near: "#0e2458", dirt: "#1e3a7a", dirtD: "#142a5a", top: "#3ad8c8", topD: "#1aa8a0", deco: ["#7affea", "#c8a0ff"], plank: "#5a6aa8", spike: "#5ad8ff", glass: "rgba(120,200,255,0.12)" },
-    vault: { sky: ["#1a2a6a", "#ff8a3a"], far: "#3a2a5a", near: "#2a1e4a", dirt: "#4a3a6a", dirtD: "#342850", top: "#ffb03a", topD: "#d8782a", deco: ["#ffe23a"], plank: "#ff8a3a", spike: "#ffb03a", glass: "rgba(255,180,120,0.15)" }
+    palm: { sky: ["#3ac8f0", "#d8ffd0"], far: "#2a9a4a", near: "#1a7a3a", trees: "#0e5a2a", dirt: "#7a4a2a", dirtD: "#5a3420", top: "#3ae04a", topD: "#1fa83a", plank: "#c87a3a", spike: "#2a8a3a", glass: "rgba(220,255,240,0.25)" },
+    sunset: { sky: ["#ff6a3a", "#ffd27a"], sun: "#fff0a0", far: "#c84a5a", near: "#7a2a4a", trees: "#3a1a3a", dirt: "#6a3a2a", dirtD: "#4a2418", top: "#ff9a3a", topD: "#d86a2a", plank: "#a85a2a", spike: "#5a2a3a", glass: "rgba(255,220,180,0.2)" },
+    cave: { sky: ["#0a1a4a", "#1a4a8a"], far: "#12306a", near: "#0e2458", dirt: "#1e3a7a", dirtD: "#142a5a", top: "#3ad8c8", topD: "#1aa8a0", plank: "#5a6aa8", spike: "#5ad8ff", glass: "rgba(120,200,255,0.12)" },
+    vault: { sky: ["#1a2a6a", "#ff8a3a"], far: "#3a2a5a", near: "#2a1e4a", dirt: "#4a3a6a", dirtD: "#342850", top: "#ffb03a", topD: "#d8782a", plank: "#ff8a3a", spike: "#ffb03a", glass: "rgba(255,180,120,0.15)" }
   };
   var PODS = { O: [0.707, -0.707], Q: [1, 0], U: [0, -1] };
 
