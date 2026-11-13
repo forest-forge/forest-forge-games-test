@@ -15,8 +15,8 @@
     }
   });
   var A = ui.audio, save = ui.save; save.hi = save.hi || 0; save.open = save.open || 1; save.best = save.best || {};
-  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180;
-  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); lo.width = W; lo.height = H; g.imageSmoothingEnabled = false; }
+  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180, Q = 1;
+  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); Q = FF.hdq ? FF.hdq(ui, PX) : 1; lo.width = Math.round(W * Q); lo.height = Math.round(H * Q); g.setTransform(Q, 0, 0, Q, 0, 0); g.imageSmoothingEnabled = false; g.hdQ = Q; }
   function R(x, y, w, h, c) { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
 
   // ---------- stages ----------
@@ -222,7 +222,9 @@
     var th = L.theme; th.noClouds = th === THEMES.cave || th === THEMES.vault; PF.drawBack(g, th, cam, W, H, tt);
     // glasshouse frame
     g.fillStyle = th.glass; for (var x = 0; x < W + 40; x += 40) { var gx = Math.round(x - (cam.x * 0.3) % 40); g.fillRect(gx, 0, 2, H); } for (var y = 20; y < H; y += 36) g.fillRect(0, Math.round(y - (cam.y * 0.3) % 36), W, 1);
+    var gP = g; g = FXP.layer(W, H, { round: 1.5 });
     if (th === THEMES.palm || th === THEMES.sunset) for (var k = 0; k < 10; k++) { var px = ((k * 83 - cam.x * 0.6) % (W + 80) + W + 80) % (W + 80) - 40, py = H * 0.8 - cam.y * 0.2; R(px + 6, py - 50, 3, 60, th === THEMES.palm ? "#6a4a2a" : "#4a1a2a"); for (var l = 0; l < 5; l++) { R(px + 7 - 14 + l * 6, py - 54 + Math.abs(l - 2) * 3, 8, 3, th.near); } }
+    g = gP; FXP.flush(g, null, false, { props: true, top: H * 0.8 - cam.y * 0.2 - 60, bottom: H * 0.8 - cam.y * 0.2 + 10, light: 0.12, dark: 0.18 });
     PF.drawTiles(g, L, th, cam, W, H, tt);
     for (var ty = Math.floor(cam.y / TS); ty <= Math.ceil((cam.y + H) / TS); ty++) for (var tx = Math.floor(cam.x / TS); tx <= Math.ceil((cam.x + W) / TS); tx++) if (L.get(tx, ty) === "-") { var rx = tx * TS - cam.x, ry = ty * TS - cam.y; R(rx, ry, TS, 2, "#d8e0f0"); R(rx, ry + 5, TS, 2, "#a8b0c8"); R(rx + 2, ry + 2, 3, 6, "#8a5a3a"); R(rx + 10, ry + 2, 3, 6, "#8a5a3a"); R(rx + 6, ry + 7, 2, 9, "#5a6a8a"); }
     vines.forEach(function (v) { var on = hero.vine === v, th2 = on ? hero.th : Math.sin(v.sway) * 0.12, ex = v.x + Math.sin(th2) * v.len, ey = v.y + Math.cos(th2) * v.len; for (var i = 0; i <= 16; i++) { var t2 = i / 16; R(v.x + (ex - v.x) * t2 - cam.x - 1, v.y + (ey - v.y) * t2 - cam.y, 2, 4, i % 3 ? "#2ab84a" : "#1a8a3a"); if (i % 4 === 2) R(v.x + (ex - v.x) * t2 - cam.x + 1, v.y + (ey - v.y) * t2 - cam.y, 3, 2, "#5ae05a"); } R(v.x - cam.x - 4, v.y - cam.y - 2, 8, 4, "#1a6a2a"); });
@@ -252,7 +254,7 @@
     if (boss && boss.seen && boss.alive) { var bw = 90, bx2 = W / 2 - bw / 2; R(bx2 - 1, H - 13, bw + 2, 7, "#102808"); R(bx2, H - 12, bw * boss.hp / boss.max, 5, boss.col); R(bx2, H - 12, bw * boss.hp / boss.max, 1, "#ffffff"); if (bannerT > 0) FXP.banner(g, boss.name, W / 2, H * 0.36, 14, boss.col2); }
     if (bannerT > 0) bannerT -= 1 / 60; if (irisT > 0) { FXP.iris(g, W, H, irisT, hero.x - cam.x, hero.y - cam.y); irisT -= 1 / 40; }
     if (mode !== "title") { R(3, 3, 40, 9, "rgba(0,0,0,0.4)"); g.fillStyle = "#fff"; g.font = "8px monospace"; g.fillText("x" + lives + (buddy ? " +1" : ""), 6, 10); }
-    c.drawImage(lo, 0, 0, W * PX, H * PX);
+    c.imageSmoothingEnabled = Q > 1; c.drawImage(lo, 0, 0, W * PX, H * PX); c.imageSmoothingEnabled = false;
   }
   function drawChar(k, x, by, face, ph, air, tt, sad, hang, dash) {
     x = Math.round(x); by = Math.round(by); var lg = air ? 2 : Math.round(Math.sin(ph * 2) * 2), f = face < 0;
