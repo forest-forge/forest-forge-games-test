@@ -9,9 +9,10 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#06243c;--water:#07324c;--amber:#e8f4ff;--amber-hi:#fff4b8;--amber-soft:#d4ecff;--amber-line:#2c86d0;--ember:#e23c3c;--btn:#0a3a68;--lamp:#fff6c8;--glow-line:rgba(70,170,255,.35);--glow-fill:rgba(70,170,255,.08)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #0a4c80 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#0a3868,#061e34);border-bottom-color:rgba(44,134,208,.35)}.ff{border-left-color:rgba(44,134,208,.28);border-right-color:rgba(44,134,208,.28)}.ff-icon-btn:active{background:#155a9a;box-shadow:0 0 16px rgba(70,170,255,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(70,170,255,.5)}.ff-shade{background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.52))!important}.ff-modal{text-shadow:0 2px 10px rgba(0,0,0,.7);animation:ffIn .35s ease}.ff-display{letter-spacing:.18em;filter:drop-shadow(0 0 16px var(--ember))}.ff-lede,.ff-stat-line,.ff-fine{text-shadow:0 1px 6px rgba(0,0,0,.7)}.ff-btns{background:rgba(0,0,0,.42);border:1px solid var(--glow-line);border-radius:16px;padding:14px 16px 16px;box-shadow:0 14px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);backdrop-filter:blur(7px)}.ff-btn{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 18px var(--glow-fill);letter-spacing:.06em}.ff-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.35)}.ff-hud{box-shadow:0 10px 24px rgba(0,0,0,.28)}.ff-toast{backdrop-filter:blur(6px)}@keyframes ffIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}`);
+  })(`:root{--bg:#0a64c8;--sky1:#4fd2ff;--sky2:#1a7ae8;--water:#0a5ab8;--amber:#ffffff;--amber-hi:#ffe14a;--amber-soft:#ffffff;--amber-line:#ff4a4a;--ember:#b0182a;--btn:#0c4aa0;--lamp:#fff6d8;--pop1:#ffe14a;--pop2:#ff5a5a;--pop3:#ffffff;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
   var clamp = FF.clamp, lerp = FF.lerp;
   var ui = FF.create({
+    deco: ["flag", "circle", "star"], 
     id: "wharf-games", title: "Wharf Games", course: "Sports day", view: { w: 360, h: 640, flex: true },
     stats: [{ id: "pts", label: "Points" }, { id: "tries", label: "Tries", value: "3" }],
     pads: {
