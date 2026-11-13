@@ -1,53 +1,68 @@
 <!DOCTYPE html>
 <html lang="en-GB"><head><meta charset="utf-8" /><meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#ff9fb2" />
 <meta name="viewport" content="width=device-width, initial-scale=1" /><title>Forest Forge games: test builds</title>
 <style>
-body{margin:0;background:#050505;color:#f3c779;font-family:Georgia,serif;padding:28px 18px;line-height:1.5}
-main{max-width:720px;margin:0 auto}
-h1{font-weight:normal;color:#ffcf7a;letter-spacing:.08em;margin:0 0 8px}
-h2{font-weight:normal;color:#ffcf7a;letter-spacing:.06em;font-size:20px;margin:32px 0 10px}
-#list a{display:block;margin:10px 0;padding:14px 16px;border:1px solid #c98a35;border-radius:8px;background:#2a1a08;color:#ffd38a;text-decoration:none;font-size:18px}
-#list small{display:block;font-size:13px;opacity:.7}
-p{opacity:.7;font-size:14px}
-#all a,#all .n{display:flex;gap:14px;align-items:center;justify-content:space-between;min-height:56px;padding:10px 14px;margin:0 0 8px;border-radius:8px;border:1px solid #3a2a14;background:#160e06;color:#ffd38a;text-decoration:none}
-#all a{border-color:#c98a35;background:#2a1a08}
-#all b{display:block;font-size:17px;font-weight:normal}
-#all small{display:block;font-size:13px;opacity:.7}
+@font-face{font-family:"Fredoka";src:url("./wharf-games/fredoka.woff2") format("woff2");font-weight:400 700;font-display:swap}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:#24335a;font-family:"Fredoka",system-ui,sans-serif;padding:28px 18px;line-height:1.45;
+ background:linear-gradient(135deg,#ffe36e 0%,#ff9fb2 35%,#8fd3ff 70%,#9cf0c0 100%);background-size:300% 300%;animation:ffbg 18s ease-in-out infinite}
+@keyframes ffbg{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+main{max-width:760px;margin:0 auto}
+h1{font-weight:700;font-size:clamp(34px,7vw,52px);margin:0 0 4px;color:#fff;letter-spacing:.02em;
+ text-shadow:0 3px 0 #ff5d8f,0 6px 0 #6b4cff,0 10px 18px rgba(40,30,90,.25)}
+h1 span{display:inline-block;animation:ffbob 2.4s ease-in-out infinite}
+@keyframes ffbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+h2{font-weight:700;color:#fff;font-size:24px;margin:36px 0 10px;text-shadow:0 2px 0 #6b4cff}
+p{font-size:15px;color:#2f3d66;opacity:.85}
+#list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:16px}
+#list a{position:relative;display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:20px;background:#fff;color:#24335a;text-decoration:none;
+ font-size:19px;font-weight:600;box-shadow:0 6px 0 rgba(107,76,255,.35),0 12px 24px rgba(40,30,90,.18);transition:transform .15s,box-shadow .15s;border:3px solid transparent;
+ background-image:linear-gradient(#fff,#fff),linear-gradient(120deg,#ff5d8f,#ffb02e,#3ec7ff,#6b4cff);background-origin:border-box;background-clip:padding-box,border-box}
+#list a:hover,#list a:focus-visible{transform:translateY(-4px) rotate(-.6deg);box-shadow:0 10px 0 rgba(107,76,255,.35),0 18px 30px rgba(40,30,90,.22)}
+#list a:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(107,76,255,.35)}
+#list img{flex:0 0 56px;width:56px;height:56px;border-radius:14px;box-shadow:0 3px 8px rgba(0,0,0,.18)}
+#list small{display:block;font-size:13px;font-weight:400;opacity:.75;line-height:1.3;margin-top:2px}
+#all a,#all .n{display:flex;gap:14px;align-items:center;justify-content:space-between;min-height:56px;padding:10px 14px;margin:0 0 8px;border-radius:16px;background:rgba(255,255,255,.7);color:#24335a;text-decoration:none}
+#all a{background:#fff;box-shadow:0 3px 0 rgba(107,76,255,.25)}
+#all b{display:block;font-size:17px;font-weight:600}
+#all small{display:block;font-size:13px;opacity:.75}
 #all em{display:block;font-style:normal;font-size:12px;opacity:.65;margin-top:2px}
 #all time{flex:0 0 72px;font-size:12px;opacity:.7;font-variant-numeric:tabular-nums}
 #all span{flex:1}
-#all i{font-style:normal;font-size:13px;font-weight:600;white-space:nowrap;color:#ffcf7a}
-#all i.x{color:#8a7350;font-weight:400}
-footer{margin-top:24px;opacity:.6;font-size:13px;text-align:center}
+#all i{font-style:normal;font-size:13px;font-weight:700;white-space:nowrap;color:#fff;background:#ff5d8f;border-radius:999px;padding:4px 12px}
+#all i.x{color:#5c6688;background:none;font-weight:400;padding:0}
+footer{margin-top:24px;opacity:.7;font-size:13px;text-align:center}
+@media (prefers-reduced-motion:reduce){body,h1 span{animation:none}#list a{transition:none}}
 </style></head>
 <body><main>
-<h1>Forest Forge games</h1>
+<h1><span style="animation-delay:0.00s">F</span><span style="animation-delay:0.08s">o</span><span style="animation-delay:0.16s">r</span><span style="animation-delay:0.24s">e</span><span style="animation-delay:0.32s">s</span><span style="animation-delay:0.40s">t</span><span style="animation-delay:0.48s">&nbsp;</span><span style="animation-delay:0.56s">F</span><span style="animation-delay:0.64s">o</span><span style="animation-delay:0.72s">r</span><span style="animation-delay:0.80s">g</span><span style="animation-delay:0.88s">e</span><span style="animation-delay:0.96s">&nbsp;</span><span style="animation-delay:1.04s">g</span><span style="animation-delay:1.12s">a</span><span style="animation-delay:1.20s">m</span><span style="animation-delay:1.28s">e</span><span style="animation-delay:1.36s">s</span></h1>
 <p>Test builds. Not public yet.</p>
 <div id="list">
-<a href="./wharf-games/">Wharf Games<small>Hyper Sports style sports day on the docks</small></a>
-<a href="./downcut/">Downcut<small>Crash-style chase runner down the quarry</small></a>
-<a href="./dawn-mail/">Dawn Mail<small>OutRun-style road race against the sunrise (best in landscape)</small></a>
-<a href="./well-ring/">Well Ring<small>Gyruss-style ring shooter down a deep well</small></a>
-<a href="./nettle-run/">Nettle Run<small>Wonder Boy-style platformer: Wren Ashby, 10 stages, food bar, hill-cart</small></a>
-<a href="./kilnbound/">Kilnbound<small>Wonder Boy III-style adventure: Tamsin Vey, clay/crow/eel/badger forms, night market (vertical slice)</small></a>
-<a href="./fenwyrm/">Fenwyrm<small>Glide-and-charge creature adventure: Fen frees 12 critters across a hub and 3 realms (vertical slice)</small></a>
-<a href="./loopwick/">Loopwick<small>Momentum platformer: Fenn the hare races loops and slopes on the chalk downs (3 acts)</small></a>
-<a href="./pitlamp/">Pitlamp<small>20 cavern rooms, keys and air — 8-bit colours on black</small></a>
-<a href="./canopy-carts/">Canopy Carts<small>Otter and squirrel tag-team through a glasshouse jungle: pods, vines, rail carts</small></a>
-<a href="./slugboot/">Slugboot<small>A googly-eyed welly with a hose and a bootlace whip vs. comedy bosses</small></a>
-<a href="./brassjack/">Brassjack<small>A clockwork fox beats four runaway town machines and takes their tricks</small></a>
-<a href="./hourgate/">Hourgate<small>Weighty runs, ledge grabs, traps and sword duels against the clock</small></a>
-<a href="./quoinring/">Quoinring<small>Hex stones settle inward; complete a ring and the work drops in</small></a>
-<a href="./weftshed/">Weftshed<small>Match dyed yarns on a loom, clear knots, drop shuttles</small></a>
-<a href="./wingwake/">Wingwake<small>Swap moths so matching wings can lift off into the dusk</small></a>
-<a href="./loftpeg/">Loftpeg<small>Toss painted pegs into a hanging loft cluster</small></a>
-<a href="./tickmites/">Tickmites<small>Guide clockwork mites through a clock tower</small></a>
-<a href="./hatchpair/">Hatchpair<small>Place paired hatch plates and keep your footing</small></a>
-<a href="./sowbench/">Sowbench<small>Drop seed cakes and clear husks on the potting bench</small></a>
-<a href="./spoolweir/">Spoolweir<small>Fire wooden spools into a mill leat before they reach the weir</small></a>
-<a href="./benchkeen/">Benchkeen<small>A short morning warm-up at the bench, with a Keen index</small></a>
-<a href="./chartwick/">Chartwick<small>Nedda Cray's harbour riddles, and a missing gong</small></a>
-<a href="./spanclimb/">Spanclimb<small>A puffin throws bunting bridges up four sea stacks ahead of the rising tide</small></a>
+<a href="./wharf-games/"><img src="./wharf-games/icons/icon-192.png" alt="" loading="lazy" /><span>Wharf Games<small>Six quayside events, three tries each, one cup.</small></span></a>
+<a href="./downcut/"><img src="./downcut/icons/icon-192.png" alt="" loading="lazy" /><span>Downcut<small>Run the quarry haul road with a runaway skip behind you.</small></span></a>
+<a href="./dawn-mail/"><img src="./dawn-mail/icons/icon-192.png" alt="" loading="lazy" /><span>Dawn Mail<small>Get the morning post through before sunrise.</small></span></a>
+<a href="./well-ring/"><img src="./well-ring/icons/icon-192.png" alt="" loading="lazy" /><span>Well Ring<small>Hold the rim of the well as the creatures spiral up.</small></span></a>
+<a href="./nettle-run/"><img src="./nettle-run/icons/icon-192.png" alt="" loading="lazy" /><span>Nettle Run<small>Ten stages of meadow, wood and marsh, with Wren Ashby.</small></span></a>
+<a href="./kilnbound/"><img src="./kilnbound/icons/icon-192.png" alt="" loading="lazy" /><span>Kilnbound<small>Cursed into clay: four forms, one kiln to break.</small></span></a>
+<a href="./fenwyrm/"><img src="./fenwyrm/icons/icon-192.png" alt="" loading="lazy" /><span>Fenwyrm<small>Glide-and-charge creature adventure: Fen frees 12 critters across a hub and 3 realms (vertical slice)</small></span></a>
+<a href="./loopwick/"><img src="./loopwick/icons/icon-192.png" alt="" loading="lazy" /><span>Loopwick<small>Momentum platformer: Fenn the hare races loops and slopes on the chalk downs (3 acts)</small></span></a>
+<a href="./pitlamp/"><img src="./pitlamp/icons/icon-192.png" alt="" loading="lazy" /><span>Pitlamp<small>20 cavern rooms, keys and air — 8-bit colours on black</small></span></a>
+<a href="./canopy-carts/"><img src="./canopy-carts/icons/icon-192.png" alt="" loading="lazy" /><span>Canopy Carts<small>Otter and squirrel tag-team through a glasshouse jungle: pods, vines, rail carts</small></span></a>
+<a href="./slugboot/"><img src="./slugboot/icons/icon-192.png" alt="" loading="lazy" /><span>Slugboot<small>A googly-eyed welly with a hose and a bootlace whip vs. comedy bosses</small></span></a>
+<a href="./brassjack/"><img src="./brassjack/icons/icon-192.png" alt="" loading="lazy" /><span>Brassjack<small>A clockwork fox beats four runaway town machines and takes their tricks</small></span></a>
+<a href="./hourgate/"><img src="./hourgate/icons/icon-192.png" alt="" loading="lazy" /><span>Hourgate<small>Weighty runs, ledge grabs, traps and sword duels against the clock</small></span></a>
+<a href="./quoinring/"><img src="./quoinring/icons/icon-192.png" alt="" loading="lazy" /><span>Quoinring<small>Hex stones settle inward; complete a ring and the work drops in</small></span></a>
+<a href="./weftshed/"><img src="./weftshed/icons/icon-192.png" alt="" loading="lazy" /><span>Weftshed<small>Match dyed yarns on a loom, clear knots, drop shuttles</small></span></a>
+<a href="./wingwake/"><img src="./wingwake/icons/icon-192.png" alt="" loading="lazy" /><span>Wingwake<small>Swap moths so matching wings can lift off into the dusk</small></span></a>
+<a href="./loftpeg/"><img src="./loftpeg/icons/icon-192.png" alt="" loading="lazy" /><span>Loftpeg<small>Toss painted pegs into a hanging loft cluster</small></span></a>
+<a href="./tickmites/"><img src="./tickmites/icons/icon-192.png" alt="" loading="lazy" /><span>Tickmites<small>Guide clockwork mites through a clock tower</small></span></a>
+<a href="./hatchpair/"><img src="./hatchpair/icons/icon-192.png" alt="" loading="lazy" /><span>Hatchpair<small>Place paired hatch plates and keep your footing</small></span></a>
+<a href="./sowbench/"><img src="./sowbench/icons/icon-192.png" alt="" loading="lazy" /><span>Sowbench<small>Drop seed cakes and clear husks on the potting bench</small></span></a>
+<a href="./spoolweir/"><img src="./spoolweir/icons/icon-192.png" alt="" loading="lazy" /><span>Spoolweir<small>Fire wooden spools into a mill leat before they reach the weir</small></span></a>
+<a href="./benchkeen/"><img src="./benchkeen/icons/icon-192.png" alt="" loading="lazy" /><span>Benchkeen<small>A short morning warm-up at the bench, with a Keen index</small></span></a>
+<a href="./chartwick/"><img src="./chartwick/icons/icon-192.png" alt="" loading="lazy" /><span>Chartwick<small>Nedda Cray's harbour riddles, and a missing gong</small></span></a>
+<a href="./spanclimb/"><img src="./spanclimb/icons/icon-192.png" alt="" loading="lazy" /><span>Spanclimb<small>A puffin throws bunting bridges up four sea stacks ahead of the rising tide</small></span></a>
 <!--GAMES-->
 </div>
 
