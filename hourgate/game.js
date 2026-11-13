@@ -12,8 +12,8 @@
       right: [{ id: "S", label: "Sword", aria: "Sword", keys: ["KeyX", "KeyK", "ShiftLeft"] }, { id: "J", icon: "up", cls: "big", aria: "Jump, climb, parry", keys: ["Space", "ArrowUp", "KeyW", "KeyZ"] }] }
   });
   var A = ui.audio, save = ui.save; save.hi = save.hi || 0; save.best = save.best || 0; save.reached = save.reached || 0;
-  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180;
-  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); lo.width = W; lo.height = H; g.imageSmoothingEnabled = false; }
+  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180, Q = 1;
+  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); Q = FF.hdq ? FF.hdq(ui, PX) : 1; lo.width = Math.round(W * Q); lo.height = Math.round(H * Q); g.setTransform(Q, 0, 0, Q, 0, 0); g.imageSmoothingEnabled = false; g.hdQ = Q; }
   function R(x, y, w, h, c) { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
 
   // ---------- levels: cells. _ floor, . open, # block, ^ spikes, x chopper, ~ loose, g gate, p plate, h potion, E exit, S start, G warden, C captain ----------
@@ -212,7 +212,7 @@
     if (foe) for (var j = 0; j < foe.max; j++) R(W - 10 - j * 8, H - 10, 6, 6, j < foe.hp ? "#7ac8ff" : "#2a2a3a");
     if (msgT > 0) { g.font = "bold 9px serif"; g.textAlign = "center"; g.fillStyle = "rgba(0,0,0,0.5)"; var tw = g.measureText(msg).width; g.fillRect(W / 2 - tw / 2 - 6, 6, tw + 12, 14); g.fillStyle = "#ffe0a0"; g.fillText(msg, W / 2, 16); }
     if (irisT > 0) { FXP.iris(g, W, H, irisT, hero.x - ox, hero.y - oy - 20); irisT -= 1 / 30; }
-    c.drawImage(lo, 0, 0, W * PX, H * PX);
+    c.imageSmoothingEnabled = Q > 1; c.drawImage(lo, 0, 0, W * PX, H * PX); c.imageSmoothingEnabled = false;
   }
   function gatesPressed() { for (var k in gates) if (gates[k].timer > 0) return true; return false; }
   var EPAL = { skin: "#f0c8a0", skinD: "#d8a880", hair: "#8a2a1a", top: "#2a6ad8", leg: "#3a3a5a", legD: "#2a2a44", boot: "#5a3a1a", band: "#ffd23a" };
