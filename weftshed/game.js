@@ -8,13 +8,14 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#5a3418;--water:#4a2c14;--amber:#f8ecd0;--amber-hi:#f0d48a;--amber-soft:#f6e8c8;--amber-line:#c47838;--ember:#c43a2a;--btn:#3a2414;--lamp:#fff6e0;--glow-line:rgba(220,140,60,.45);--glow-fill:rgba(220,140,60,.12)}.ff-host{background:radial-gradient(ellipse at 50% 30%, #8a5a28 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#6a3c18,#3a2410);border-bottom-color:rgba(196,120,56,.45)}.ff{border-left-color:rgba(196,120,56,.3);border-right-color:rgba(196,120,56,.3)}` + (window.FFX ? FFX.menuChrome() : ""));
+  })(`:root{--bg:#e04a7a;--sky1:#ffd84a;--sky2:#3ac8d8;--water:#c03a68;--amber:#ffffff;--amber-hi:#fff6a0;--amber-soft:#ffffff;--amber-line:#1a98c8;--ember:#8a1a48;--btn:#c83a6a;--lamp:#fff6d8;--pop1:#3ad8e8;--pop2:#ffe14a;--pop3:#8aff6a;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
   var COLS = 8, ROWS = 8;
   var YARN = ["#c43a2a", "#e0a01a", "#2a4a9a", "#3a8a48", "#f0e0c0", "#c45a28"];
   var YARN_DK = ["#8a2010", "#a87810", "#1a2c6a", "#246030", "#c8b898", "#8a3a14"];
   var YARN_NAME = ["madder", "weld", "woad", "moss", "flax", "rust"];
   var ui = FF.create({
+    deco: ["circle", "flower", "spark"], 
     id: "weftshed", title: "Weftshed", course: "The loom", view: { w: 390, h: 720, flex: true },
     stats: [{ id: "goal", label: "Goal", value: "-" }, { id: "moves", label: "Moves", value: "-" }]
   });
@@ -495,7 +496,7 @@
     var W = ui.VW, H = ui.VH;
     var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
     c.save(); c.translate(sh.x, sh.y);
-    if (window.FFX) FFX.sky(c, W, H, "#c48a48", "#8a5a30", "#3a2210");
+    if (window.FFX) FFX.sky(c, W, H, "#ffe27a", "#ff9ab0", "#3ab8c8");
     else {
       var bg = c.createLinearGradient(0, 0, 0, H);
       bg.addColorStop(0, "#8a5a30"); bg.addColorStop(1, "#3a2210");
