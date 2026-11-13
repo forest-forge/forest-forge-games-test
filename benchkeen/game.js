@@ -8,9 +8,10 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#2a2a28;--water:#1e1e1c;--amber:#f0ead8;--amber-hi:#f0d070;--amber-soft:#f6f0e0;--amber-line:#c8a050;--ember:#e0a040;--btn:#3a3a34;--lamp:#fff8e8;--glow-line:rgba(200,160,80,.4);--glow-fill:rgba(200,160,80,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #4a4a40 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#3a3a34,#1e1e1c);border-bottom-color:rgba(200,160,80,.4)}` + (window.FFX ? FFX.menuChrome() : ""));
+  })(`:root{--bg:#0a9a98;--sky1:#5af0d8;--sky2:#ff9a3a;--water:#087a7a;--amber:#ffffff;--amber-hi:#fff27a;--amber-soft:#ffffff;--amber-line:#ff7a1a;--ember:#065a5a;--btn:#088a88;--lamp:#fff6d8;--pop1:#ffe14a;--pop2:#ff8a3a;--pop3:#ffffff;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
   var ui = FF.create({
+    deco: ["gear", "square", "bolt"], 
     id: "benchkeen", title: "Benchkeen", course: "The bench", view: { w: 390, h: 720, flex: true },
     stats: [{ id: "keen", label: "Keen", value: "-" }, { id: "round", label: "Set", value: "-" }]
   });
@@ -242,7 +243,7 @@
     var W = ui.VW, H = ui.VH;
     var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
     c.save(); c.translate(sh.x, sh.y);
-    if (window.FFX) FFX.sky(c, W, H, "#4a4a42", "#3a3a34", "#1e1e1c");
+    if (window.FFX) FFX.sky(c, W, H, "#9af5e6", "#3ac8c0", "#0a7a78");
     else { c.fillStyle = "#3a3a34"; c.fillRect(0, 0, W, H); }
     // lamp glow
     var lg = c.createRadialGradient(W * 0.5, 20, 10, W * 0.5, 20, W * 0.7);
