@@ -3,8 +3,15 @@
  * Built on platform.js. Original game: all art drawn in code, all sound generated. */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#2a9ae8;--sky1:#bdf0ff;--sky2:#3aa8ff;--water:#1a80d0;--amber:#ffffff;--amber-hi:#ffffff;--amber-soft:#ffffff;--amber-line:#ff8a1a;--ember:#1a5ab0;--btn:#1a7ad0;--lamp:#fff6d8;--pop1:#ffffff;--pop2:#ff9a3a;--pop3:#ffe14a;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
   var clamp = FF.clamp, TS = PF.TS, LW = 20;
   var ui = FF.create({
+    deco: ["cloud", "flag", "circle"], 
     id: "spanclimb", title: "Spanclimb", course: "Puffin Rock", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "score", label: "Score", value: "0" }, { id: "lives", label: "Pip", value: "3" }],
     pads: { left: [{ id: "L", icon: "left", aria: "Left", keys: ["ArrowLeft", "KeyA"] }, { id: "R", icon: "right", aria: "Right", keys: ["ArrowRight", "KeyD"] }],
