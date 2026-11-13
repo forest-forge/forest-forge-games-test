@@ -8,10 +8,11 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#2a3a3a;--water:#1e2c2c;--amber:#f0e4c4;--amber-hi:#e8c878;--amber-soft:#f4ecd4;--amber-line:#6aaa9a;--ember:#c87a3a;--btn:#2a3c3c;--lamp:#fff6e0;--glow-line:rgba(80,180,160,.4);--glow-fill:rgba(80,180,160,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #3a5850 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#2a3c3c,#1a2828);border-bottom-color:rgba(106,170,154,.4)}` + (window.FFX ? FFX.menuChrome() : ""));
+  })(`:root{--bg:#6a5ad8;--sky1:#8af0d0;--sky2:#c08aff;--water:#5040b8;--amber:#ffffff;--amber-hi:#fff27a;--amber-soft:#ffffff;--amber-line:#ff8a3a;--ember:#3a2a98;--btn:#5a4ac8;--lamp:#fff6d8;--pop1:#8af0d0;--pop2:#ffe14a;--pop3:#ff9ad8;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
   var TS = 20;
   var ui = FF.create({
+    deco: ["square", "star", "circle"], 
     id: "hatchpair", title: "Hatchpair", course: "The attic", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "room", label: "Room", value: "1" }, { id: "hatches", label: "Hatches", value: "0" }],
     pads: {
@@ -405,7 +406,7 @@
     var Wv = ui.VW, Hv = ui.VH, L = layout(), s = L.s;
     var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
     c.save(); c.translate(sh.x, sh.y);
-    if (window.FFX) FFX.sky(c, Wv, Hv, "#9ec4cc", "#7aa0a8", "#3a4a48");
+    if (window.FFX) FFX.sky(c, Wv, Hv, "#c8fff0", "#a8c8ff", "#6a5ad8");
     else {
       var g = c.createLinearGradient(0, 0, 0, Hv);
       g.addColorStop(0, "#7aa0a8"); g.addColorStop(1, "#3a4a48");
