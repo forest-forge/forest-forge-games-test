@@ -8,10 +8,11 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#2a1a10;--water:#1e140c;--amber:#f0d8a0;--amber-hi:#f0c060;--amber-soft:#f8e8c0;--amber-line:#c88840;--ember:#e07030;--btn:#3a2414;--lamp:#fff4d8;--glow-line:rgba(220,160,70,.4);--glow-fill:rgba(220,160,70,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #4a2e18 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#3a2414,#1e140c);border-bottom-color:rgba(200,136,64,.4)}` + (window.FFX ? FFX.menuChrome() : ""));
+  })(`:root{--bg:#1a9a9a;--sky1:#ffb05a;--sky2:#b07aff;--water:#107a7a;--amber:#ffffff;--amber-hi:#fff27a;--amber-soft:#ffffff;--amber-line:#ff7a2a;--ember:#0a5a5a;--btn:#148a8a;--lamp:#fff6d8;--pop1:#ffb03a;--pop2:#c49aff;--pop3:#6af0e0;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
   var TS = 20;
   var ui = FF.create({
+    deco: ["gear", "spark", "circle"], 
     id: "tickmites", title: "Tickmites", course: "The tower", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "in", label: "Home", value: "0" }, { id: "time", label: "Spring", value: "-" }],
     pads: {
@@ -366,10 +367,10 @@
     var Wv = ui.VW, Hv = ui.VH;
     var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
     c.save(); c.translate(sh.x, sh.y);
-    if (window.FFX) FFX.sky(c, Wv, Hv, "#6a3c18", "#3a2210", "#140c06");
+    if (window.FFX) FFX.sky(c, Wv, Hv, "#ffc27a", "#c08aff", "#5a3ab0");
     else {
       var g = c.createLinearGradient(0, 0, 0, Hv);
-      g.addColorStop(0, "#4a2c14"); g.addColorStop(1, "#1a1008");
+      g.addColorStop(0, "#ffc27a"); g.addColorStop(1, "#5a3ab0");
       c.fillStyle = g; c.fillRect(0, 0, Wv, Hv);
     }
     // clock-tower window
