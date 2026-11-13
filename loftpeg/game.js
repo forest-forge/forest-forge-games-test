@@ -9,12 +9,13 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#3a2414;--water:#2a1a0e;--amber:#f6e6c4;--amber-hi:#f0d080;--amber-soft:#f8ecce;--amber-line:#d4924a;--ember:#e06830;--btn:#4a2c14;--lamp:#fff6e0;--glow-line:rgba(220,150,70,.4);--glow-fill:rgba(220,150,70,.12)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #6a4a24 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#4a2c14,#2a180c);border-bottom-color:rgba(212,146,74,.4)}` + (window.FFX ? FFX.menuChrome() : ""));
+  })(`:root{--bg:#2a7ae8;--sky1:#8ad8ff;--sky2:#ff8ac8;--water:#1a60c8;--amber:#ffffff;--amber-hi:#fff27a;--amber-soft:#ffffff;--amber-line:#ff4a8a;--ember:#1a3aa0;--btn:#2a68d0;--lamp:#fff6d8;--pop1:#ffe14a;--pop2:#ff6aa8;--pop3:#5af0b0;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
   var COLS = 8, ROWS = 12, COLORS = 5;
   var PEG = ["#2a9aaa", "#e0a020", "#c43a28", "#4a7ad0", "#8a3a88"];
   var PEG_DK = ["#1a6a78", "#a87810", "#8a2010", "#2a4a98", "#5a2060"];
   var ui = FF.create({
+    deco: ["circle", "star", "spark"], 
     id: "loftpeg", title: "Loftpeg", course: "The loft", view: { w: 390, h: 720, flex: true },
     stats: [{ id: "left", label: "Pegs", value: "-" }, { id: "shots", label: "Tosses", value: "0" }],
     pads: {
@@ -323,7 +324,7 @@
     var W = ui.VW, H = ui.VH, L = layout();
     var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
     c.save(); c.translate(sh.x, sh.y);
-    if (window.FFX) FFX.sky(c, W, H, "#e8c888", "#8a5a30", "#3a2210");
+    if (window.FFX) FFX.sky(c, W, H, "#bfe8ff", "#8ac8ff", "#ff9ad0");
     else {
       var g = c.createLinearGradient(0, 0, 0, H);
       g.addColorStop(0, "#c8a060"); g.addColorStop(0.3, "#8a5a30"); g.addColorStop(1, "#3a2210");
