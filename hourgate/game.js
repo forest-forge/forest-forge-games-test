@@ -4,8 +4,15 @@
  * Flip-screen rooms of 10x3 cells. Original game: all art drawn in code, all sound generated. */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#2a3ac8;--sky1:#ffc860;--sky2:#3a5aff;--water:#1a2898;--amber:#ffffff;--amber-hi:#ffd84a;--amber-soft:#ffffff;--amber-line:#ff6a3a;--ember:#14208a;--btn:#2030a8;--lamp:#fff6d8;--pop1:#ffd84a;--pop2:#6ae0ff;--pop3:#ff8a5a;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
   var clamp = FF.clamp, CW = 32, CH = 56, RC = 10, RR = 3, LIMIT = 15 * 60;
   var ui = FF.create({
+    deco: ["star", "gear", "diamond"], 
     id: "hourgate", title: "Hourgate", course: "The Undercroft", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "time", label: "Time", value: "15:00" }, { id: "score", label: "Score", value: "0" }],
     pads: { left: [{ id: "L", icon: "left", aria: "Left", keys: ["ArrowLeft", "KeyA"] }, { id: "R", icon: "right", aria: "Right", keys: ["ArrowRight", "KeyD"] }],
