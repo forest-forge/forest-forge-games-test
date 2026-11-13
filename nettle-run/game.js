@@ -22,8 +22,8 @@
   var A = ui.audio, save = ui.save;
   save.open = save.open || 1; save.best = save.best || {}; save.hi = save.hi || 0;
 
-  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180;
-  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); lo.width = W; lo.height = H; g.imageSmoothingEnabled = false; }
+  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180, Q = 1;
+  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); Q = FF.hdq ? FF.hdq(ui, PX) : 1; lo.width = Math.round(W * Q); lo.height = Math.round(H * Q); g.setTransform(Q, 0, 0, Q, 0, 0); g.imageSmoothingEnabled = false; g.hdQ = Q; }
 
   // ---------- stages from hand-made segments ----------
   // g: one char per column: ground height in tiles from the bottom (0 = pit), w = water.
@@ -266,6 +266,7 @@
     var th = L.theme;
     PF.drawBack(g, th, cam, W, H, tt);
     PF.drawTiles(g, L, th, cam, W, H, tt);
+    var g0 = g; if (window.FXP) g = FXP.layer(W, H);
     items.forEach(function (it) {
       if (it.got) return; var img = ITEM[it.k], bob = it.k === "C" || it.k === "G" ? 0 : Math.round(Math.sin(tt * 4 + it.x) * 1.5);
       var ox = it.k === "C" || it.k === "G" ? it.tx + (TS - img.width) / 2 : it.x + 4 - img.width / 2, oy = it.k === "C" || it.k === "G" ? it.ty + TS - img.height : it.y + 4 - img.height / 2 + bob;
@@ -274,11 +275,12 @@
     foes.forEach(function (f) { if (f.alive && Math.abs(f.x - cam.x - W / 2) < W) PF.Foes.draw(g, f, cam, tt); });
     flints.forEach(function (f) { g.fillStyle = "#d8d8e0"; g.fillRect(Math.round(f.x - cam.x), Math.round(f.y - cam.y), 4, 4); g.fillStyle = "#6a6a70"; g.fillRect(Math.round(f.x - cam.x + (Math.floor(f.spin) % 2) * 2), Math.round(f.y - cam.y + 1), 2, 2); });
     if (hero && mode !== "title" && (hero.inv <= 0 || Math.floor(tt * 14) % 2)) drawHero(tt);
+    if (window.FXP) { g = g0; FXP.flush(g, "#140c28"); }
     parts.draw(g, cam);
     if (window.FFGfx) FFGfx.motes(g, cam, W, H, tt, th.stars ? "rgba(200,220,255,0.5)" : "rgba(255,240,140,0.55)", th.stars ? 10 : 16);
     if (mode !== "title" && hero) drawHud(tt);
     if (window.FFGfx) FFGfx.vignette(g, W, H, th.stars ? 0.4 : 0.28);
-    c.drawImage(lo, 0, 0, W * PX, H * PX);
+    c.imageSmoothingEnabled = Q > 1; c.drawImage(lo, 0, 0, W * PX, H * PX); c.imageSmoothingEnabled = false;
     if (mode === "play" && !ui.menuOpen && bannerT > 0) ui.text(banner, ui.VW / 2, ui.VH * 0.22, 20, "#ffe3a0", "center", "#ff9a2a");
   }
   function drawHero(tt) {

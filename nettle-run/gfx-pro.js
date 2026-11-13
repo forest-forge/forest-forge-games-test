@@ -148,12 +148,20 @@
       }
       if (c === "#" && (!TILES[above] || above === "w" || above === " ")) {
         g.fillStyle = th.top; g.fillRect(sx, sy, TS, 4);
-        g.fillStyle = th.topD; g.fillRect(sx, sy + 4, TS, 1);
-        for (var b = 0; b < 4; b++) g.fillRect(sx + b * 4 + (h > 0.5 ? 1 : 2), sy + 4, 2, 2);
+        if (PF.hiRes && PF.hiRes(g)) {
+          // scalloped grass lip + curved blades on hi-res buffers
+          g.fillStyle = th.topD; g.beginPath(); for (var b0 = 0; b0 < 4; b0++) { g.moveTo(sx + b0 * 4 + 4.4, sy + 4); g.arc(sx + b0 * 4 + 2, sy + 4, 2.4, 0, Math.PI); } g.fill();
+          g.fillStyle = th.top; g.beginPath(); for (var b1 = 0; b1 < 4; b1++) { g.moveTo(sx + b1 * 4 + 4, sy + 3.6); g.arc(sx + b1 * 4 + 2, sy + 3.6, 2, 0, Math.PI); } g.fill();
+          g.fillStyle = "rgba(255,255,255,0.3)"; g._fr ? g._fr(sx, sy, TS, 0.8) : g.fillRect(sx, sy, TS, 0.8);
+        } else {
+          g.fillStyle = th.topD; g.fillRect(sx, sy + 4, TS, 1);
+          for (var b = 0; b < 4; b++) g.fillRect(sx + b * 4 + (h > 0.5 ? 1 : 2), sy + 4, 2, 2);
+        }
         // grass blades
         if (above === " " || !above) {
           g.fillStyle = th.topD;
-          g.fillRect(sx + 2, sy - 3, 1, 3); g.fillRect(sx + 7, sy - 4, 1, 4); g.fillRect(sx + 12, sy - 2, 1, 2);
+          if (PF.hiRes && PF.hiRes(g)) { g.strokeStyle = th.topD; g.lineWidth = 0.8; g.lineCap = "round"; g.beginPath(); var sw = Math.sin(t * 2 + tx) * 0.8; g.moveTo(sx + 2, sy + 0.5); g.quadraticCurveTo(sx + 2, sy - 1.5, sx + 2 + sw, sy - 3); g.moveTo(sx + 7, sy + 0.5); g.quadraticCurveTo(sx + 7, sy - 2, sx + 7.5 + sw, sy - 4); g.moveTo(sx + 12, sy + 0.5); g.quadraticCurveTo(sx + 12, sy - 1, sx + 12 + sw, sy - 2); g.stroke(); }
+          else { g.fillRect(sx + 2, sy - 3, 1, 3); g.fillRect(sx + 7, sy - 4, 1, 4); g.fillRect(sx + 12, sy - 2, 1, 2); }
           if (th.deco && h > 0.7) { g.fillStyle = th.deco[Math.floor(h * 10) % th.deco.length]; g.fillRect(sx + 6, sy - 5, 3, 3); g.fillRect(sx + 7, sy - 6, 1, 2); }
         }
         if (th.snowTop) { g.fillStyle = "#f4f8ff"; g.fillRect(sx, sy, TS, 3); }
@@ -201,21 +209,24 @@
       g.fillStyle = "rgba(255,255,255,0.28)"; g.fillRect(sx + 6, sy + 8, 4, 1);
     }
   }
-  PF.drawTiles = function (g, L, th, cam, W, H, t) {
+  function isSolid(c) { return c === "#" || c === "d" || c === "B" || c === "K" || c === "I"; }
+  PF.drawTiles = function (g0, L, th, cam, W, H, t) {
+    // hi-res soft tiles (shared polish.js): tiles go into a layer, convex corners get rounded, then composite
+    var soft = window.FXP && FXP.tileLayer && FXP.Q() > 1, g = soft ? FXP.tileLayer(W, H) : g0;
     var x0 = Math.floor(cam.x / TS), x1 = Math.ceil((cam.x + W) / TS), y0 = Math.floor(cam.y / TS), y1 = Math.ceil((cam.y + H) / TS);
     for (var ty = y0; ty <= y1; ty++) for (var tx = x0; tx <= x1; tx++) {
       var c = L.get(tx, ty); if (c === " ") continue;
       if (ty >= L.h || tx < 0 || tx >= L.w) continue;
       drawTile(g, c, Math.round(tx * TS - cam.x), Math.round(ty * TS - cam.y), tx, ty, L, th, t);
     }
+    if (soft) FXP.tileFlush(g0, function (tx, ty) { return ty >= 0 && ty < L.h && tx >= 0 && tx < L.w && isSolid(L.get(tx, ty)); }, cam, TS, { r: 4, line: "rgba(20,10,30,0.35)" });
   };
   var _figure = PF.figure;
   PF.figure = function (g, x, y, p, pal, flip, sc) {
     sc = sc || 1;
-    g.fillStyle = "rgba(0,0,0,0.28)";
-    g.beginPath(); g.ellipse(x, y + 12 * sc, 7 * sc, 2.2 * sc, 0, 0, 7); g.fill();
+    if (!g.boxes) { g.fillStyle = "rgba(0,0,0,0.28)"; g.beginPath(); g.ellipse(x, y + 12 * sc, 7 * sc, 2.2 * sc, 0, 0, 7); g.fill(); }
     var r = _figure(g, x, y, p, pal, flip, sc);
-    if (r && r.head) {
+    if (r && r.head && !(PF.hiRes && PF.hiRes(g))) {
       g.fillStyle = "rgba(255,255,255,0.28)";
       g.fillRect(Math.round(r.head[0] - (flip ? 0 : 1)), Math.round(r.head[1] - 3), 2, 2);
     }
@@ -224,8 +235,7 @@
   if (PF.Foes && PF.Foes.draw) {
     var _fd = PF.Foes.draw;
     PF.Foes.draw = function (g, f, cam, t) {
-      g.fillStyle = "rgba(0,0,0,0.3)";
-      g.beginPath(); g.ellipse(f.x + f.w / 2 - cam.x, f.y + f.h - cam.y + 1, f.w * 0.45, 1.6, 0, 0, 7); g.fill();
+      if (!g.boxes) { g.fillStyle = "rgba(0,0,0,0.3)"; g.beginPath(); g.ellipse(f.x + f.w / 2 - cam.x, f.y + f.h - cam.y + 1, f.w * 0.45, 1.6, 0, 0, 7); g.fill(); }
       _fd(g, f, cam, t);
     };
   }
