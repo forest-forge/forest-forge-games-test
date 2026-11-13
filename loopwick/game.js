@@ -15,6 +15,7 @@
     deco: ["ring", "circle", "spark"], 
     
     
+    
     id: "loopwick", title: "Loopwick", course: "Chalk Downs", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "rings", label: "Sea-glass", value: "0" }, { id: "score", label: "Score", value: "0" }],
     pads: {
