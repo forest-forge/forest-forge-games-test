@@ -257,9 +257,9 @@
     // ---------- title logo + floating decorations (shapes and colours set per game: cfg.deco, --pop1..3) ----------
     function isLogo(t) { var a = String(t).replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").trim().toLowerCase(); return a === String(cfg.title).toLowerCase() && !/[<&]/.test(t); }
     function logoHtml(t) {
-      var i = 0;
-      return '<p class="ff-display ff-logo" aria-label="' + t + '">' + t.split("").map(function (ch) {
-        return ch === " " ? '<span class="sp" aria-hidden="true"></span>' : '<span aria-hidden="true" style="--i:' + (i++) + '">' + ch + "</span>";
+      var i = 0, words = t.split(/\s+/).filter(Boolean), n = Math.max.apply(null, words.map(function (w) { return w.length; }));
+      return '<p class="ff-display ff-logo" aria-label="' + t + '" style="--n:' + n + '">' + words.map(function (w) {
+        return '<span class="w" aria-hidden="true">' + w.split("").map(function (ch) { return '<span style="--i:' + (i++) + '">' + ch + "</span>"; }).join("") + "</span>";
       }).join("") + "</p>";
     }
     var deco = document.createElement("div"); deco.className = "ff-deco"; deco.hidden = true; deco.setAttribute("aria-hidden", "true");
