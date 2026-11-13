@@ -297,9 +297,15 @@
       held = {}; padHeld = {};
       var p = root.querySelectorAll(".ff-pad.on"); for (var i = 0; i < p.length; i++) p[i].classList.remove("on");
       if (ui.game.onPause) ui.game.onPause();
-      ui.menu({ title: "Paused", buttons: [{ label: "Resume", act: ui.resume }, { label: "Menu", act: function () { ui.game.toTitle(); } }], solid: true });
-      ui.pausedMenu = true;
+      pauseMenu();
     };
+    // games may add settings to the pause menu with game.pauseButtons() -> [{label, act, small}]; call ui.refreshPause() after a toggle
+    function pauseMenu() {
+      var extra = ui.game.pauseButtons ? ui.game.pauseButtons() || [] : [];
+      ui.menu({ title: "Paused", buttons: [{ label: "Resume", act: ui.resume }].concat(extra, [{ label: "Menu", act: function () { ui.game.toTitle(); } }]), solid: true });
+      ui.pausedMenu = true;
+    }
+    ui.refreshPause = function () { if (!ui.playing) pauseMenu(); };
     ui.resume = function () { ui.closeMenu(); ui.playing = true; last = performance.now(); acc = 0; if (ui.game.onResume) ui.game.onResume(); };
     el.pause.addEventListener("click", function () { audio.unlock(); if (ui.playing) ui.pause(); else if (ui.menuOpen && ui.pausedMenu) ui.resume(); });
     el.sound.addEventListener("click", function () { audio.unlock(); ui.setMuted(!muted); });
@@ -427,5 +433,14 @@
   function lerp(a, b, t) { return a + (b - a) * t; }
   function fmtTime(s) { var m = Math.floor(s / 60), r = s - m * 60; return (m ? m + ":" + (r < 10 ? "0" : "") : "") + r.toFixed(2); }
   function n(x) { return Math.round(x).toLocaleString("en-GB"); }
-  window.FF = { create: create, store: store, inApp: inApp, post: post, rng: rng, clamp: clamp, lerp: lerp, fmtTime: fmtTime, n: n, noteFreq: noteFreq };
+  // hi-res render scale for games that draw into a low-res buffer (logical px -> device px), capped by a pixel budget.
+  // ?hdq=1 forces the old chunky look; ?hdq=N sets the cap.
+  function hdq(ui, px) {
+    var m = /[?&]hdq=([\d.]+)/.exec(location.search), cap = m ? +m[1] : 3;
+    var q = Math.max(1, Math.min(cap, px * (ui.scale || 1) * (ui.dpr || 1)));
+    var w = ui.VW / px, h = ui.VH / px, budget = 1.2e6;
+    if (w * h * q * q > budget) q = Math.sqrt(budget / (w * h));
+    q = Math.max(1, Math.floor(q * 2) / 2); hdq.last = q; return q;
+  }
+  window.FF = { hdq: hdq, create: create, store: store, inApp: inApp, post: post, rng: rng, clamp: clamp, lerp: lerp, fmtTime: fmtTime, n: n, noteFreq: noteFreq };
 })();

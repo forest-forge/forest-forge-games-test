@@ -11,8 +11,8 @@
       right: [{ id: "B", label: "Bridge", aria: "Throw bridge", keys: ["KeyX", "KeyK", "ShiftLeft"] }, { id: "J", icon: "up", cls: "big", aria: "Jump", keys: ["Space", "ArrowUp", "KeyW", "KeyZ"] }] }
   });
   var A = ui.audio, save = ui.save; save.hi = save.hi || 0; save.open = save.open || 1;
-  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180;
-  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); lo.width = W; lo.height = H; g.imageSmoothingEnabled = false; }
+  var PX = 2, lo = document.createElement("canvas"), g = lo.getContext("2d"), W = 320, H = 180, Q = 1;
+  function sizeLo() { W = Math.ceil(ui.VW / PX); H = Math.ceil(ui.VH / PX); Q = FF.hdq ? FF.hdq(ui, PX) : 1; lo.width = Math.round(W * Q); lo.height = Math.round(H * Q); g.setTransform(Q, 0, 0, Q, 0, 0); g.imageSmoothingEnabled = false; g.hdQ = Q; }
   function R(x, y, w, h, c) { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
   function rng(seed) { var a = seed >>> 0; return function () { a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   var PASTEL = ["#ffb3c8", "#ffd2a8", "#fff0a0", "#c4f2b4", "#b4e4ff", "#d4c4ff"], PASTEL_D = ["#e88aa8", "#e8ae80", "#e8d470", "#94d884", "#84c4f0", "#a894f0"];
@@ -159,13 +159,21 @@
     var st = STAGES[si], cx = Math.round(cam.x), cy = Math.round(cam.y);
     var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, FXP.shade(st.sky[0], -0.1)); gr.addColorStop(0.5, st.sky[0]); gr.addColorStop(1, st.sky[1]); g.fillStyle = gr; g.fillRect(0, 0, W, H); FXP.glow(g, W * 0.78, H * 0.18, 80, "#fff8d0", 0.5);
     for (var ck = 0; ck < 5; ck++) FXP.cloud(g, ((ck * 131 + tt * (3 + ck)) % (W + 120)) - 60, ((ck * 47 - cy * 0.08) % (H + 60) + H + 60) % (H + 60) - 30, 5 + ck % 3 * 2, "rgba(255,255,255,0.9)", "rgba(150,190,240,0.35)");
+    var gP = g; g = FXP.layer(W, H, { round: 4 });
     for (var k = 0; k < 6; k++) { var bx = ((k * 83 + tt * 6 * (k % 2 ? 1 : 0.6)) % (W + 80)) - 40, by = ((k * 57 - cy * 0.2) % (H + 40) + H + 40) % (H + 40) - 20; R(bx, by, 34, 8, "rgba(255,255,255,0.85)"); R(bx + 6, by - 5, 18, 6, "rgba(255,255,255,0.85)"); }
     for (var s2 = 0; s2 < 5; s2++) { var sx = s2 * 90 - 30 - (cx * 0.2), sh = 60 + (s2 * 37) % 50; R(sx, H - sh + 40 - cy * 0.05 % 20, 26, sh, st.stack); R(sx + 4, H - sh + 36 - cy * 0.05 % 20, 18, 6, st.stack); }
-    // tiles
+    g = gP; FXP.flush(g, null, false, { props: true, top: H * 0.45, bottom: H, light: 0.2, dark: 0.16 });
+    // tiles (soft tile layer: rounded outer corners on the stack walls, rounded ends on ledges)
+    var gT = g; g = FXP.tileLayer(W, H);
     var y0 = Math.max(0, Math.floor(cy / TS)), y1 = Math.min(L.h - 1, Math.floor((cy + H) / TS) + 1);
     for (var ty = y0; ty <= y1; ty++) for (var tx = 0; tx < L.w; tx++) { var ch = L.get(tx, ty), px = tx * TS - cx, py = ty * TS - cy, band = Math.floor(ty / 6) % 6;
-      if (ch === "=") { R(px, py, TS, 7, PASTEL[band]); R(px, py, TS, 2, "#ffffff"); R(px, py + 7, TS, 2, PASTEL_D[band]); if ((tx + ty) % 3 === 0) R(px + 6, py + 3, 2, 2, PASTEL_D[band]); }
+      if (ch === "=") { var le = L.get(tx - 1, ty) !== "=", re = L.get(tx + 1, ty) !== "=", rl = le ? 3 : 0, rr2 = re ? 3 : 0;
+        g.fillStyle = PASTEL_D[band]; g.beginPath(); g.roundRect(px, py + 1, TS, 8, [rl, rr2, rr2, rl]); g.fill();
+        g.fillStyle = PASTEL[band]; g.beginPath(); g.roundRect(px, py, TS, 7, [rl, rr2, rr2, rl]); g.fill();
+        g.fillStyle = "rgba(255,255,255,0.85)"; g.beginPath(); g.roundRect(px + (le ? 1.5 : 0), py + 0.6, TS - (le ? 1.5 : 0) - (re ? 1.5 : 0), 1.6, 0.8); g.fill();
+        if ((tx + ty) % 3 === 0) { g.fillStyle = PASTEL_D[band]; g.beginPath(); g.arc(px + 7, py + 4, 1.1, 0, 7); g.fill(); } }
       else if (ch === "#") { R(px, py, TS, TS, ty >= L.h - 2 ? "#fff4d8" : "#ffffff"); R(px, py + (ty % 2 ? 4 : 11), TS, 1, PASTEL[band]); R(px + (ty % 2 ? 5 : 11), py, 1, TS, "#e8f0ff"); } }
+    g = gT; FXP.tileFlush(g, function (tx, ty) { return L.get(tx, ty) === "#" && tx >= 0 && tx < L.w; }, { x: cx, y: cy }, TS, { r: 4, line: "rgba(120,150,200,0.45)" });
     // side margins when the screen is wider than the stack
     if (cx < 0) { R(0, 0, -cx, H, "rgba(255,255,255,0.35)"); R(L.pw - cx, 0, W, H, "rgba(255,255,255,0.35)"); }
     items.forEach(function (it) { if (it.got) return; var x = Math.round(it.x - cx), y = Math.round(it.y - cy); if (y < -20 || y > H + 20) return;
@@ -188,7 +196,7 @@
     FXP.ambient(g, W, H, { x: cx, y: cy }, tt, "drift", "rgba(255,255,255,0.85)", 16); FXP.vignette(g, W, H, 0.28);
     if (boss && boss.seen && boss.alive) { var bw = 90, bx3 = W / 2 - bw / 2; R(bx3 - 1, H - 13, bw + 2, 7, "#1a3a6a"); R(bx3, H - 12, bw * boss.hp / boss.max, 5, boss.col); R(bx3, H - 12, bw * boss.hp / boss.max, 1, "#ffffff"); if (bannerT > 0) FXP.banner(g, boss.name, W / 2, H * 0.4, 14, boss.col); }
     if (bannerT > 0) bannerT -= 1 / 60; if (irisT > 0) { FXP.iris(g, W, H, irisT, hero.x - cx, hero.y - cy); irisT -= 1 / 40; }
-    c.drawImage(lo, 0, 0, W * PX, H * PX);
+    c.imageSmoothingEnabled = Q > 1; c.drawImage(lo, 0, 0, W * PX, H * PX); c.imageSmoothingEnabled = false;
   }
   function drawPip(tt) {
     var h = hero, x = Math.round(h.x - cam.x), y = Math.round(h.y - cam.y), F = h.face > 0, step = h.ground && h.vx ? Math.floor(h.ph) % 2 : 0;
