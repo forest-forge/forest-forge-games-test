@@ -9,12 +9,15 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#1e6a9a;--water:#1a5e8a;--amber:#fff4d8;--amber-hi:#ffe08a;--amber-soft:#ffe9c4;--amber-line:#e8a04a;--ember:#e85a2a;--btn:#185078;--lamp:#fff6e0;--glow-line:rgba(255,200,100,.4);--glow-fill:rgba(255,200,100,.1)}.ff-host{background:radial-gradient(ellipse at 50% 30%, #5eb8e0 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#1e6a9a,#123c5c);border-bottom-color:rgba(232,160,74,.4)}.ff{border-left-color:rgba(232,160,74,.3);border-right-color:rgba(232,160,74,.3)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(255,200,80,.45)}` + (window.FFX ? FFX.menuChrome() : ""));
+  })(`:root{--bg:#0a98b8;--sky1:#6af0e0;--sky2:#ff8a6a;--water:#0a7898;--amber:#ffffff;--amber-hi:#ffe14a;--amber-soft:#ffffff;--amber-line:#ff5a4a;--ember:#085a7a;--btn:#0a88a8;--lamp:#fff6d8;--pop1:#ffd23a;--pop2:#ff7a6a;--pop3:#ffffff;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
   var R = 4, N6 = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
   var STONE = ["#e8c878", "#d45a32", "#2a9a88", "#c87a2a", "#6a8aac", "#f0e0c0"];
   var STONE_DK = ["#c8a058", "#a83a1a", "#187060", "#9a5a14", "#4a6a88", "#d0c09a"];
   var ui = FF.create({
+    deco: ["hex", "diamond", "spark"], 
+    
+    
     id: "quoinring", title: "Quoinring", course: "The silo", view: { w: 390, h: 720, flex: true },
     stats: [{ id: "score", label: "Score", value: "0" }, { id: "rings", label: "Rings", value: "0" }],
     pads: {
@@ -474,7 +477,7 @@
   }
   function drawBackdrop(c, W, H, L) {
     if (window.FFX) {
-      FFX.sky(c, W, H, "#8fd4f0", "#f4d9a4", "#c4783a");
+      FFX.sky(c, W, H, "#8fd4f0", "#bff0e0", "#3ab8a8");
       FFX.clouds(c, W, H * 0.45, idleT, "rgba(255,255,255,.22)");
     } else {
       var g = c.createLinearGradient(0, 0, 0, H);
