@@ -3,8 +3,15 @@
  * Built on platform.js. Original game: all art drawn in code, all sound generated. */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#7a2ad8;--sky1:#c8ff4a;--sky2:#b04aff;--water:#5a1ab0;--amber:#ffffff;--amber-hi:#d8ff4a;--amber-soft:#ffffff;--amber-line:#ff4ab0;--ember:#4a0a90;--btn:#6a20c0;--lamp:#fff6d8;--pop1:#c8ff4a;--pop2:#ffe14a;--pop3:#ff7ad0;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
   var clamp = FF.clamp, TS = PF.TS, HT = 14;
   var ui = FF.create({
+    deco: ["drop", "flower", "circle"], 
     id: "slugboot", title: "Slugboot", course: "Allotment Ruckus", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "score", label: "Score", value: "0" }, { id: "lives", label: "Boots", value: "3" }],
     pads: { left: [{ id: "L", icon: "left", aria: "Left", keys: ["ArrowLeft", "KeyA"] }, { id: "R", icon: "right", aria: "Right", keys: ["ArrowRight", "KeyD"] }],
