@@ -9,9 +9,10 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#1a5aaa;--water:#1650a0;--amber:#fff8e0;--amber-hi:#ffe66a;--amber-soft:#e8ffe0;--amber-line:#3aaa40;--ember:#e83838;--btn:#1a4a88;--lamp:#fff6a8;--glow-line:rgba(80,200,70,.35);--glow-fill:rgba(80,200,70,.08)}.ff-host{background:radial-gradient(ellipse at 50% 40%, #3a8ad0 0%, transparent 60%), var(--bg)}.ff-hud{background:linear-gradient(#1a5aaa,#0e3878);border-bottom-color:rgba(58,170,64,.4)}.ff{border-left-color:rgba(58,170,64,.28);border-right-color:rgba(58,170,64,.28)}.ff-icon-btn:active{background:#2a6ac0;box-shadow:0 0 16px rgba(255,220,80,.45)}.ff-course,.ff-stat b{text-shadow:0 0 12px rgba(255,220,80,.5)}.ff-shade{background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.52))!important}.ff-modal{text-shadow:0 2px 10px rgba(0,0,0,.7);animation:ffIn .35s ease}.ff-display{letter-spacing:.18em;filter:drop-shadow(0 0 16px var(--ember))}.ff-lede,.ff-stat-line,.ff-fine{text-shadow:0 1px 6px rgba(0,0,0,.7)}.ff-btns{background:rgba(0,0,0,.42);border:1px solid var(--glow-line);border-radius:16px;padding:14px 16px 16px;box-shadow:0 14px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);backdrop-filter:blur(7px)}.ff-btn{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 18px var(--glow-fill);letter-spacing:.06em}.ff-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.35)}.ff-hud{box-shadow:0 10px 24px rgba(0,0,0,.28)}.ff-toast{backdrop-filter:blur(6px)}@keyframes ffIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}`);
+  })(`:root{--bg:#2a8ae0;--sky1:#8ae8ff;--sky2:#5ad05a;--water:#1a6ac8;--amber:#ffffff;--amber-hi:#ffe84a;--amber-soft:#ffffff;--amber-line:#ff4a4a;--ember:#a81c1c;--btn:#1a6ab8;--lamp:#fff6d8;--pop1:#ff5a5a;--pop2:#ffe84a;--pop3:#7ae85a;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
   var clamp = FF.clamp, TS = PF.TS;
   var ui = FF.create({
+    deco: ["leaf", "flower", "circle"], 
     id: "nettle-run", title: "Nettle Run", course: "The hills", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "score", label: "Score" }, { id: "lives", label: "Lives", value: "3" }],
     pads: {
@@ -71,11 +72,11 @@
     { name: "Moon Common", th: "night", segs: ["start", "flint", "bats", "gauntlet", "fruitrow", "check", "high", "water2", "mixed", "cart", "bats", "plats", "gauntlet", "hill", "goal"] }
   ];
   var THEMES = {
-    meadow: { sky: ["#4aa4f0", "#c8f0ff"], sun: "#ffe66a", far: "#8ad0a0", near: "#4aba50", trees: "#2a9a38", dirt: "#d2a060", dirtD: "#b88848", top: "#3ad048", topD: "#28a838", deco: ["#e83838", "#ffe66a", "#fff"], plank: "#e0a848", water: "#2a8ad0", waterHi: "#8ae0ff", spike: "#2e9a2e", rock: "#7a7268" },
-    woods: { sky: ["#3a90d0", "#b8e8c8"], sun: "#fff4a0", far: "#2a8a48", near: "#1e7a38", trees: "#147a28", dirt: "#c49858", dirtD: "#a87c40", top: "#2aba3a", topD: "#1e8a2a", deco: ["#e83838", "#ffe66a"], plank: "#d49840", water: "#1a6a90", waterHi: "#6ad0e0", spike: "#2a8a2a", rock: "#5a5a50" },
-    marsh: { sky: ["#6ab4e8", "#e8fff0"], sun: "#fff8a8", far: "#7aba80", near: "#5aaa50", dirt: "#c8b068", dirtD: "#a89450", top: "#8ad040", topD: "#68b028", deco: ["#e83838", "#ffe66a"], plank: "#e0b050", water: "#2a8a9a", waterHi: "#a8f0e0", spike: "#4aaa3a", rock: "#6a6a5a" },
-    hills: { sky: ["#5aa8f0", "#ffe08a"], sun: "#ffe66a", far: "#6aba70", near: "#4aa848", trees: "#2a8a38", dirt: "#d2a060", dirtD: "#b88848", top: "#3ad048", topD: "#28a838", deco: ["#e83838", "#ffe66a", "#fff"], plank: "#e0a848", water: "#3a7ad0", waterHi: "#a8d0ff", spike: "#4aaa3a", rock: "#7a6a68" },
-    night: { sky: ["#081830", "#1a3a68"], stars: 1, far: "#143050", near: "#102848", trees: "#0a2030", dirt: "#4a3a28", dirtD: "#3a2c1e", top: "#2a8a40", topD: "#1a6a2e", deco: ["#ffe66a", "#e83838"], plank: "#c49038", water: "#1a3a70", waterHi: "#5a90d0", spike: "#2a7a32", rock: "#4a4a50" }
+    meadow: { sky: ["#4aa4f0", "#c8f0ff"], sun: "#ffe66a", far: "#8ad0a0", near: "#4aba50", trees: "#2a9a38", dirt: "#d2a060", dirtD: "#b88848", top: "#3ad048", topD: "#28a838", plank: "#e0a848", water: "#2a8ad0", waterHi: "#8ae0ff", spike: "#2e9a2e", rock: "#7a7268" },
+    woods: { sky: ["#3a90d0", "#b8e8c8"], sun: "#fff4a0", far: "#2a8a48", near: "#1e7a38", trees: "#147a28", dirt: "#c49858", dirtD: "#a87c40", top: "#2aba3a", topD: "#1e8a2a", plank: "#d49840", water: "#1a6a90", waterHi: "#6ad0e0", spike: "#2a8a2a", rock: "#5a5a50" },
+    marsh: { sky: ["#6ab4e8", "#e8fff0"], sun: "#fff8a8", far: "#7aba80", near: "#5aaa50", dirt: "#c8b068", dirtD: "#a89450", top: "#8ad040", topD: "#68b028", plank: "#e0b050", water: "#2a8a9a", waterHi: "#a8f0e0", spike: "#4aaa3a", rock: "#6a6a5a" },
+    hills: { sky: ["#5aa8f0", "#ffe08a"], sun: "#ffe66a", far: "#6aba70", near: "#4aa848", trees: "#2a8a38", dirt: "#d2a060", dirtD: "#b88848", top: "#3ad048", topD: "#28a838", plank: "#e0a848", water: "#3a7ad0", waterHi: "#a8d0ff", spike: "#4aaa3a", rock: "#7a6a68" },
+    night: { sky: ["#081830", "#1a3a68"], stars: 1, far: "#143050", near: "#102848", trees: "#0a2030", dirt: "#4a3a28", dirtD: "#3a2c1e", top: "#2a8a40", topD: "#1a6a2e", plank: "#c49038", water: "#1a3a70", waterHi: "#5a90d0", spike: "#2a7a32", rock: "#4a4a50" }
   };
   function buildStage(si) {
     var st = STAGES[si], rows = []; for (var r = 0; r < 12; r++) rows.push("");
