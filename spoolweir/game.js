@@ -8,11 +8,12 @@
     document.head.appendChild(s);
     var m = document.querySelector('meta[name="theme-color"]');
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
-  })(`:root{--bg:#1a4a3a;--water:#143c30;--amber:#e8f0d8;--amber-hi:#d8e878;--amber-soft:#eef4d8;--amber-line:#6aaa70;--ember:#e09040;--btn:#1a3a2c;--lamp:#f8ffe0;--glow-line:rgba(120,200,130,.4);--glow-fill:rgba(120,200,130,.1)}.ff-host{background:radial-gradient(ellipse at 50% 20%, #2a6a50 0%, transparent 55%), var(--bg)}.ff-hud{background:linear-gradient(#1a4a3a,#0e2a22);border-bottom-color:rgba(106,170,112,.4)}` + (window.FFX ? FFX.menuChrome() : ""));
+  })(`:root{--bg:#10a8a0;--sky1:#7af0ff;--sky2:#b0e83a;--water:#0a8888;--amber:#ffffff;--amber-hi:#fff27a;--amber-soft:#ffffff;--amber-line:#e83a8a;--ember:#066a68;--btn:#0a9890;--lamp:#fff6d8;--pop1:#e84a9a;--pop2:#c8ff4a;--pop3:#ffffff;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
   var COLS = ["#c43a28", "#e0a020", "#2a8a7a", "#f0e0c0", "#7a3a88"];
   var COLS_DK = ["#8a2010", "#a87810", "#1a5a4e", "#c0b090", "#4a2060"];
   var ui = FF.create({
+    deco: ["circle", "drop", "leaf"], 
     id: "spoolweir", title: "Spoolweir", course: "The leat", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "left", label: "Spools", value: "-" }, { id: "score", label: "Score", value: "0" }],
     pads: {
