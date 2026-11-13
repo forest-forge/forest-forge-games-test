@@ -3,8 +3,15 @@
  * core.js (seeded designer + route solver). All art drawn in code, all sound generated. */
 (function () {
   "use strict";
+  (function applyChrome(css) {
+    var s = document.createElement("style"); s.id = "ff-palette"; s.textContent = css;
+    document.head.appendChild(s);
+    var m = document.querySelector('meta[name="theme-color"]');
+    var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
+  })(`:root{--bg:#141a5a;--sky1:#2a3ab8;--sky2:#6a1a9a;--water:#0c1040;--amber:#ffffff;--amber-hi:#fff23a;--amber-soft:#ffffff;--amber-line:#ff3ac8;--ember:#0a88b8;--btn:#1a2280;--lamp:#fff6d8;--pop1:#3af0ff;--pop2:#fff23a;--pop3:#ff4ad8;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
   var P = window.PLC, T = P.T, COLS = P.COLS, ROWS = P.ROWS;
   var ui = FF.create({
+    deco: ["square", "spark", "diamond"], 
     id: "pitlamp", title: "Pitlamp", course: "Room 1", wide: true, view: { w: 640, h: 360, flex: true },
     stats: [{ id: "score", label: "Score", value: "0" }, { id: "room", label: "Room", value: "1/20" }],
     pads: { left: [{ id: "L", icon: "left", aria: "Left", keys: ["ArrowLeft", "KeyA", "KeyO"] }, { id: "R", icon: "right", aria: "Right", keys: ["ArrowRight", "KeyD", "KeyP"] }],
