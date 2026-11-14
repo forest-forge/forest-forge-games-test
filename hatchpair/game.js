@@ -386,8 +386,8 @@
   }
   function drawHatch(c, h, iron, L) {
     if (!h) return;
-    var s = L.s, x = L.ox + h.tx * s, y = L.oy + h.ty * s, col = iron ? "#6a6e70" : "#b87333", hi = iron ? "#d0d4d8" : "#e0a060";
-    var glow = iron ? "rgba(200,210,220,.55)" : "rgba(200,140,60,.55)";
+    var s = L.s, x = L.ox + h.tx * s, y = L.oy + h.ty * s, col = iron ? "#7a8ab8" : "#ff8a3a", hi = iron ? "#dce6ff" : "#ffc890";
+    var glow = iron ? "rgba(200,220,255,.6)" : "rgba(255,160,80,.6)";
     c.save(); c.shadowColor = glow; c.shadowBlur = 10;
     c.fillStyle = col;
     if (h.side === "N") c.fillRect(x + 2, y, s - 4, 6);
@@ -409,7 +409,7 @@
     if (window.FFX) FFX.sky(c, Wv, Hv, "#c8fff0", "#a8c8ff", "#6a5ad8");
     else {
       var g = c.createLinearGradient(0, 0, 0, Hv);
-      g.addColorStop(0, "#7aa0a8"); g.addColorStop(1, "#3a4a48");
+      g.addColorStop(0, "#c8fff0"); g.addColorStop(1, "#6a5ad8");
       c.fillStyle = g; c.fillRect(0, 0, Wv, Hv);
     }
     // attic window
@@ -418,8 +418,8 @@
       for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
         var ch = grid[y][x], px = L.ox + x * s, py = L.oy + y * s;
         if (ch === "#" || ch === "=") {
-          if (window.FFX) FFX.bevelRoundRect(c, px, py, s, s, 2, (x + y) % 2 ? "#d0c09a" : "#b8a878", "#7a6840");
-          else { c.fillStyle = (x + y) % 2 ? "#c8b890" : "#b8a878"; c.fillRect(px, py, s, s); c.strokeStyle = "#8a7850"; c.strokeRect(px, py, s, s); }
+          if (window.FFX) FFX.bevelRoundRect(c, px, py, s, s, 2, (x + y) % 2 ? "#8a7af0" : "#7464e0", "#3a2a98");
+          else { c.fillStyle = (x + y) % 2 ? "#8a7af0" : "#7464e0"; c.fillRect(px, py, s, s); c.strokeStyle = "#3a2a98"; c.strokeRect(px, py, s, s); }
         } else if (ch === "^") {
           c.fillStyle = "#a03020";
           c.beginPath(); c.moveTo(px, py + s); c.lineTo(px + s / 2, py + 3); c.lineTo(px + s, py + s); c.fill();
@@ -431,13 +431,13 @@
           c.fillStyle = on ? "#80d070" : "#d0a040"; c.fillRect(px + 4, py, s - 8, 6);
         } else if (ch === "g") {
           if (!gatesOpen()) {
-            if (window.FFX) FFX.bevelRoundRect(c, px + 4, py, s - 8, s, 2, "#5a3040", "#2a1018");
-            else { c.fillStyle = "#5a3040"; c.fillRect(px + 4, py, s - 8, s); }
+            if (window.FFX) FFX.bevelRoundRect(c, px + 4, py, s - 8, s, 2, "#ff5a9a", "#c02a6a");
+            else { c.fillStyle = "#ff5a9a"; c.fillRect(px + 4, py, s - 8, s); }
           }
         } else if (ch === "x") {
           c.save(); c.shadowColor = "rgba(255,200,80,.6)"; c.shadowBlur = 12;
-          if (window.FFX) FFX.bevelRoundRect(c, px + 3, py + 3, s - 6, s - 6, 3, "#e8c060", "#6a4a10");
-          else { c.fillStyle = "#e8c060"; c.fillRect(px + 3, py + 3, s - 6, s - 6); }
+          if (window.FFX) FFX.bevelRoundRect(c, px + 3, py + 3, s - 6, s - 6, 3, "#ffe14a", "#e0900a");
+          else { c.fillStyle = "#ffe14a"; c.fillRect(px + 3, py + 3, s - 6, s - 6); }
           c.restore();
         } else {
           // plaster
@@ -447,14 +447,14 @@
       }
       drawHatch(c, hatches[0], true, L); drawHatch(c, hatches[1], false, L);
       crates.forEach(function (cr) {
-        if (window.FFX) FFX.bevelRoundRect(c, L.ox + cr.x * s, L.oy + cr.y * s, cr.w * s, cr.h * s, 3, "#8a5a28", "#3a2410");
-        else { c.fillStyle = "#8a5a28"; c.fillRect(L.ox + cr.x * s, L.oy + cr.y * s, cr.w * s, cr.h * s); c.strokeStyle = "#3a2410"; c.strokeRect(L.ox + cr.x * s, L.oy + cr.y * s, cr.w * s, cr.h * s); }
+        if (window.FFX) FFX.bevelRoundRect(c, L.ox + cr.x * s, L.oy + cr.y * s, cr.w * s, cr.h * s, 4, "#ffb03a", "#d0700a");
+        else { c.fillStyle = "#ffb03a"; c.fillRect(L.ox + cr.x * s, L.oy + cr.y * s, cr.w * s, cr.h * s); c.strokeStyle = "#d0700a"; c.strokeRect(L.ox + cr.x * s, L.oy + cr.y * s, cr.w * s, cr.h * s); }
       });
       var px = L.ox + p.x * s, py = L.oy + p.y * s, pw = p.w * s, ph = p.h * s;
       // Rowan: coat, apron, hair — original joiner's apprentice
       c.fillStyle = "rgba(0,0,0,.2)"; c.beginPath(); c.ellipse(px + pw / 2, py + ph, pw * 0.4, 3, 0, 0, Math.PI * 2); c.fill();
-      c.fillStyle = "#4a2c18"; c.fillRect(px + 2, py + 8, pw - 4, ph - 10);
-      c.fillStyle = "#d8c8a0"; c.fillRect(px + 4, py + 14, pw - 8, ph * 0.42);
+      c.fillStyle = "#13a890"; c.fillRect(px + 2, py + 8, pw - 4, ph - 10);
+      c.fillStyle = "#fff27a"; c.fillRect(px + 4, py + 14, pw - 8, ph * 0.42);
       c.fillStyle = "#e0c8a0"; c.beginPath(); c.arc(px + pw / 2, py + 7, 5, 0, Math.PI * 2); c.fill();
       c.fillStyle = "#3a2410"; c.beginPath(); c.arc(px + pw / 2, py + 5, 5, Math.PI, 0); c.fill();
       c.fillStyle = "#2a1a10"; c.fillRect(px + pw / 2 + p.face * 2, py + 6, 2, 2);
