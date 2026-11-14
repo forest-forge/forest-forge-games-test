@@ -12,8 +12,8 @@
   })(`:root{--bg:#3aa83a;--sky1:#c8f05a;--sky2:#3ac8a0;--water:#2a8a2a;--amber:#ffffff;--amber-hi:#ffe84a;--amber-soft:#ffffff;--amber-line:#ff5a3a;--ember:#1a6a1a;--btn:#2a982a;--lamp:#fff6d8;--pop1:#ffe14a;--pop2:#ff6a4a;--pop3:#ffffff;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
   var COLS = 8, ROWS = 12;
-  var SEED = ["#d45a2a", "#e0b02a", "#3a8a48", "#7a4a28"];
-  var SEED_DK = ["#9a3010", "#a88010", "#246030", "#4a2c14"];
+  var SEED = ["#ff5a4a", "#ffd23a", "#2ac8a0", "#8a6aff"];
+  var SEED_DK = ["#c83028", "#d8a010", "#109a78", "#5a3ad0"];
   var ui = FF.create({
     deco: ["leaf", "flower", "drop"], 
     id: "sowbench", title: "Sowbench", course: "The tray", view: { w: 390, h: 720, flex: true },
@@ -150,7 +150,7 @@
       if (n) {
         Object.keys(clear).forEach(function (k) {
           var p = k.split(","), Lx = layout(), val = grid[+p[1]][+p[0]];
-          if (window.FFX) FFX.burst(Lx.ox + (+p[0] + 0.5) * Lx.s, Lx.oy + (+p[1] + 0.5) * Lx.s, val < 0 ? "#8a6a40" : SEED[(Math.abs(val) - 1) % SEED.length], 8, { spd: 90, r: 2.4, kind: "fluff", g: 120 });
+          if (window.FFX) FFX.burst(Lx.ox + (+p[0] + 0.5) * Lx.s, Lx.oy + (+p[1] + 0.5) * Lx.s, val < 0 ? "#b8b0d0" : SEED[(Math.abs(val) - 1) % SEED.length], 8, { spd: 90, r: 2.4, kind: "fluff", g: 120 });
           grid[+p[1]][+p[0]] = 0;
         });
         chain++; score += n * 70 * chain; S.clear(); moved = true;
@@ -254,21 +254,21 @@
     var husk = val < 0, col = colorOf(val), k = (col - 1) % SEED.length;
     var pad = 2;
     if (window.FFX) {
-      FFX.bevelRoundRect(c, x + pad, y + pad, s - pad * 2, s - pad * 2, 5, husk ? "#8a6a40" : SEED[k], husk ? "#5a4020" : SEED_DK[k]);
+      FFX.bevelRoundRect(c, x + pad, y + pad, s - pad * 2, s - pad * 2, 5, husk ? "#b8b0d0" : SEED[k], husk ? "#7a7098" : SEED_DK[k]);
     } else {
-      c.fillStyle = husk ? "#8a6a40" : SEED[k];
+      c.fillStyle = husk ? "#b8b0d0" : SEED[k];
       c.fillRect(x + pad, y + pad, s - pad * 2, s - pad * 2);
-      c.strokeStyle = husk ? "#5a4020" : SEED_DK[k]; c.lineWidth = 2;
+      c.strokeStyle = husk ? "#7a7098" : SEED_DK[k]; c.lineWidth = 2;
       c.strokeRect(x + pad, y + pad, s - pad * 2, s - pad * 2);
     }
     var cx = x + s / 2, cy = y + s / 2;
-    c.fillStyle = husk ? "#3a2a14" : "rgba(40,20,10,.45)";
+    c.fillStyle = husk ? "#4a4068" : "rgba(255,255,255,.7)";
     if (k === 0) { c.beginPath(); c.arc(cx, cy, s * 0.12, 0, Math.PI * 2); c.fill(); }
     else if (k === 1) { c.fillRect(cx - s * 0.18, cy - 2, s * 0.36, 4); }
     else if (k === 2) { c.beginPath(); c.moveTo(cx, cy + s * 0.16); c.quadraticCurveTo(cx - s * 0.2, cy, cx, cy - s * 0.18); c.quadraticCurveTo(cx + s * 0.2, cy, cx, cy + s * 0.16); c.fill(); }
     else { c.fillRect(cx - 2, cy - s * 0.16, 4, s * 0.32); }
     if (husk) {
-      c.strokeStyle = "#3a2a14"; c.lineWidth = 2; c.beginPath();
+      c.strokeStyle = "#4a4068"; c.lineWidth = 2; c.beginPath();
       c.moveTo(x + 6, y + 6); c.lineTo(x + s - 6, y + s - 6); c.stroke();
     }
   }
@@ -286,16 +286,16 @@
     c.fillStyle = "rgba(40,70,20,.18)";
     for (var i = 0; i < 8; i++) { c.beginPath(); c.ellipse((i * 97 + 20) % W, (i * 53 + 40) % H, 18, 8, i, 0, Math.PI * 2); c.fill(); }
     if (window.FFX) {
-      FFX.bevelRoundRect(c, L.ox - 14, L.oy - 10, L.s * COLS + 28, L.s * ROWS + 20, 8, "#8a5a28", "#4a3010");
-      FFX.bevelRoundRect(c, L.ox - 4, L.oy, L.s * COLS + 8, L.s * ROWS, 3, "#5a3a14", "#2a1808");
+      FFX.bevelRoundRect(c, L.ox - 14, L.oy - 10, L.s * COLS + 28, L.s * ROWS + 20, 10, "#ff6a4a", "#c83a2a");
+      FFX.bevelRoundRect(c, L.ox - 4, L.oy, L.s * COLS + 8, L.s * ROWS, 4, "#ffffff", "#9ad8b0");
     } else {
-      c.fillStyle = "#8a5a28"; c.fillRect(L.ox - 12, L.oy - 8, L.s * COLS + 24, L.s * ROWS + 16);
-      c.fillStyle = "#5a3a14"; c.fillRect(L.ox - 4, L.oy, L.s * COLS + 8, L.s * ROWS);
+      c.fillStyle = "#ff6a4a"; c.fillRect(L.ox - 12, L.oy - 8, L.s * COLS + 24, L.s * ROWS + 16);
+      c.fillStyle = "#ffffff"; c.fillRect(L.ox - 4, L.oy, L.s * COLS + 8, L.s * ROWS);
     }
     if (grid) {
       for (var r = 0; r < ROWS; r++) for (var col = 0; col < COLS; col++) {
         var x = L.ox + col * L.s, y = L.oy + r * L.s;
-        c.fillStyle = (r + col) % 2 ? "#c4a06a" : "#b89058";
+        c.fillStyle = (r + col) % 2 ? "#eafff0" : "#d2f6de";
         c.fillRect(x, y, L.s, L.s);
         if (grid[r][col]) drawCake(c, x, y, L.s, grid[r][col]);
       }
@@ -305,8 +305,8 @@
     });
     if (nxt) {
       var nx = L.ox, ny = L.oy + L.s * ROWS + 20;
-      if (window.FFX) FFX.bevelRoundRect(c, nx - 6, ny - 14, 130, 44, 6, "#6a4a20", "#3a2810");
-      ui.text("NEXT", nx, ny, 11, "#f0e8c8", "left");
+      if (window.FFX) FFX.bevelRoundRect(c, nx - 6, ny - 14, 130, 44, 8, "#2a982a", "#1a6a1a");
+      ui.text("NEXT", nx, ny, 11, "#ffffff", "left");
       nxt.shape.forEach(function (p, i) {
         drawCake(c, nx + 50 + p[0] * 20, ny - 8 + p[1] * 20, 20, nxt.cols[i]);
       });
