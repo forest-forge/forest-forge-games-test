@@ -36,9 +36,9 @@
     { id: "odd", name: "Odd tool" }
   ];
   var TINS = [
-    { name: "RED", col: "#c43a2a" }, { name: "GOLD", col: "#e0a020" },
-    { name: "TEAL", col: "#2a8a7a" }, { name: "BLUE", col: "#2a4a9a" },
-    { name: "CREAM", col: "#f0e0c0" }, { name: "MOSS", col: "#3a8a40" }
+    { name: "RED", col: "#ff4a4a" }, { name: "GOLD", col: "#ffc81a" },
+    { name: "TEAL", col: "#1ac8b8" }, { name: "BLUE", col: "#3a6aff" },
+    { name: "CREAM", col: "#fff0c8" }, { name: "MOSS", col: "#4ab84a" }
   ];
 
   var mode = "title", set, si, rounds, score, keen, cur, phase, timer, picked, flash;
@@ -244,22 +244,22 @@
     var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
     c.save(); c.translate(sh.x, sh.y);
     if (window.FFX) FFX.sky(c, W, H, "#9af5e6", "#3ac8c0", "#0a7a78");
-    else { c.fillStyle = "#3a3a34"; c.fillRect(0, 0, W, H); }
+    else { c.fillStyle = "#3ac8c0"; c.fillRect(0, 0, W, H); }
     // lamp glow
     var lg = c.createRadialGradient(W * 0.5, 20, 10, W * 0.5, 20, W * 0.7);
-    lg.addColorStop(0, "rgba(255,220,140,.18)"); lg.addColorStop(1, "rgba(255,200,80,0)");
+    lg.addColorStop(0, "rgba(255,255,220,.25)"); lg.addColorStop(1, "rgba(255,200,80,0)");
     c.fillStyle = lg; c.fillRect(0, 0, W, H);
-    if (window.FFX) FFX.bevelRoundRect(c, 0, H * 0.72, W, H * 0.28, 0, "#6a5a38", "#3a2c14");
-    else { c.fillStyle = "#6a5a38"; c.fillRect(0, H * 0.72, W, H * 0.28); }
-    c.fillStyle = "#c8b080"; c.fillRect(0, H * 0.72, W, 8);
+    if (window.FFX) FFX.bevelRoundRect(c, 0, H * 0.72, W, H * 0.28, 0, "#ff9a3a", "#e06a10");
+    else { c.fillStyle = "#ff9a3a"; c.fillRect(0, H * 0.72, W, H * 0.28); }
+    c.fillStyle = "#ffe14a"; c.fillRect(0, H * 0.72, W, 8);
     // vise and lamp silhouettes
-    c.fillStyle = "rgba(30,30,24,.4)";
+    c.fillStyle = "rgba(6,90,90,.35)";
     c.fillRect(18, H * 0.64, 36, H * 0.1);
-    c.fillStyle = "#d8c070"; c.beginPath(); c.arc(W - 36, 28, 10, 0, Math.PI * 2); c.fill();
+    c.fillStyle = "#ffe14a"; c.beginPath(); c.arc(W - 36, 28, 10, 0, Math.PI * 2); c.fill();
     hitBoxes = [];
     if (mode === "play" && cur) {
       var ex = EX.filter(function (e) { return e.id === cur.id; })[0];
-      ui.text(ex.name, W / 2, 36, 22, "#f0d070", "center");
+      ui.text(ex.name, W / 2, 36, 22, "#ffffff", "center");
       if (phase === "intro") { ui.text("Ready", W / 2, 200, 28, "#f0ead8", "center"); }
       else {
         if (cur.id === "bolts") drawBolts(c);
@@ -304,7 +304,7 @@
     ui.text(phase === "show" ? "Watch the path" : "Trace it back", ui.VW / 2, 140, 16, "#f0ead8", "center");
     for (var r = 0; r < 5; r++) for (var col = 0; col < 5; col++) {
       var x = L.ox + col * L.s, y = L.oy + r * L.s;
-      if (window.FFX) FFX.bevelRoundRect(c, x + 3, y + 3, L.s - 6, L.s - 6, 4, "#2a2a28", "#111"); else { c.fillStyle = "#2a2a28"; c.fillRect(x + 3, y + 3, L.s - 6, L.s - 6); }
+      if (window.FFX) FFX.bevelRoundRect(c, x + 3, y + 3, L.s - 6, L.s - 6, 4, "#087a7a", "#065a5a"); else { c.fillStyle = "#087a7a"; c.fillRect(x + 3, y + 3, L.s - 6, L.s - 6); }
       var step = -1;
       if (phase === "show") {
         var shown = Math.min(cur.path.length, Math.floor(timer / 0.28) + 1);
@@ -312,22 +312,22 @@
       } else {
         for (var i = 0; i < cur.input.length; i++) if (cur.input[i][0] === col && cur.input[i][1] === r) step = i;
       }
-      if (step >= 0) { c.fillStyle = "#e0a040"; c.fillRect(x + 6, y + 6, L.s - 12, L.s - 12); ui.text(String(step + 1), x + L.s / 2, y + L.s / 2, 14, "#1a1a14", "center"); }
+      if (step >= 0) { c.fillStyle = "#ffd23a"; c.fillRect(x + 6, y + 6, L.s - 12, L.s - 12); ui.text(String(step + 1), x + L.s / 2, y + L.s / 2, 14, "#065a5a", "center"); }
     }
   }
   function drawTin(c) {
     ui.text("Tap the colour of the tin, not the word on the label.", ui.VW / 2, 110, 14, "#f0ead8", "center");
     var cx = ui.VW / 2, cy = 230;
-    if (window.FFX) FFX.bevelRoundRect(c, cx - 40, cy - 50, 80, 90, 8, cur.body.col, "#1a1a14");
+    if (window.FFX) FFX.bevelRoundRect(c, cx - 40, cy - 50, 80, 90, 10, cur.body.col, "#065a5a");
     else { c.fillStyle = cur.body.col; c.fillRect(cx - 40, cy - 50, 80, 90); }
-    c.fillStyle = "#3a3a34"; c.fillRect(cx - 30, cy - 18, 60, 32);
-    c.fillStyle = "#f0ead8"; c.font = "14px Georgia"; c.textAlign = "center"; c.textBaseline = "middle";
+    c.fillStyle = "#ffffff"; c.fillRect(cx - 30, cy - 18, 60, 32);
+    c.fillStyle = "#065a5a"; c.font = "600 14px Fredoka, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
     c.fillText(cur.label.name, cx, cy);
     if (phase === "ask" || phase === "result") {
       (cur.choices || []).forEach(function (t, i) {
         var x = 30 + (i % 2) * 170, y = 360 + Math.floor(i / 2) * 70;
         c.fillStyle = t.col; c.fillRect(x, y, 150, 58);
-        c.strokeStyle = "#1a1a14"; c.strokeRect(x, y, 150, 58);
+        c.strokeStyle = "#ffffff"; c.lineWidth = 3; c.strokeRect(x, y, 150, 58);
         hitBoxes.push({ x: x, y: y, w: 150, h: 58, v: t.name });
       });
     }
@@ -336,13 +336,13 @@
     ui.text("Which tool does not belong?", ui.VW / 2, 120, 16, "#f0ead8", "center");
     (cur.items || []).forEach(function (it, i) {
       var x = 30 + (i % 2) * 170, y = 170 + Math.floor(i / 2) * 160;
-      c.fillStyle = "#4a4a44"; c.fillRect(x, y, 150, 140);
+      if (window.FFX) FFX.bevelRoundRect(c, x, y, 150, 140, 12, "#087a7a", "#065a5a"); else { c.fillStyle = "#087a7a"; c.fillRect(x, y, 150, 140); }
       drawTool(c, x + 75, y + 70, it.k);
       hitBoxes.push({ x: x, y: y, w: 150, h: 140, v: it.i });
     });
   }
   function drawTool(c, x, y, k) {
-    c.save(); c.translate(x, y); c.strokeStyle = "#d0d0d0"; c.fillStyle = "#d0d0d0"; c.lineWidth = 4; c.lineCap = "round";
+    c.save(); c.translate(x, y); c.strokeStyle = "#ffffff"; c.fillStyle = "#ffffff"; c.lineWidth = 4; c.lineCap = "round";
     if (k === "spanner") { c.beginPath(); c.arc(-20, 0, 12, 0.4, Math.PI * 2 - 0.4); c.moveTo(-10, 0); c.lineTo(28, 0); c.stroke(); }
     else if (k === "hammer") { c.fillRect(-8, -28, 16, 18); c.fillRect(-3, -12, 6, 36); }
     else if (k === "file") { c.fillRect(-4, -30, 8, 50); c.fillRect(-10, 20, 20, 8); }
@@ -353,16 +353,15 @@
     values = values || labels;
     labels.forEach(function (lab, i) {
       var x = 30 + (i % 2) * 170, y = 340 + Math.floor(i / 2) * 70;
-      if (window.FFX) FFX.bevelRoundRect(c, x, y, 150, 58, 8, "#3a3a34", "#1a1a14");
-      else { c.fillStyle = "#3a3a34"; c.strokeStyle = "#c8a050"; c.lineWidth = 2; c.fillRect(x, y, 150, 58); c.strokeRect(x, y, 150, 58); }
-      c.strokeStyle = "#c8a050"; c.lineWidth = 1.5; c.strokeRect(x, y, 150, 58);
-      ui.text(String(lab), x + 75, y + 29, 18, "#f0ead8", "center");
+      if (window.FFX) FFX.bevelRoundRect(c, x, y, 150, 58, 12, "#ff7a1a", "#c8500a");
+      else { c.fillStyle = "#ff7a1a"; c.strokeStyle = "#ffffff"; c.lineWidth = 2; c.fillRect(x, y, 150, 58); c.strokeRect(x, y, 150, 58); }
+            ui.text(String(lab), x + 75, y + 29, 18, "#f0ead8", "center");
       hitBoxes.push({ x: x, y: y, w: 150, h: 58, v: values[i] });
     });
   }
   function wrapText(c, text, x, y, max, size, col) {
     var words = text.split(" "), line = "", ly = y;
-    c.font = size + "px Georgia"; c.fillStyle = col; c.textAlign = "center"; c.textBaseline = "top";
+    c.font = "500 " + size + "px Fredoka, sans-serif"; c.fillStyle = col; c.textAlign = "center"; c.textBaseline = "top";
     words.forEach(function (w) {
       var t = line ? line + " " + w : w;
       if (c.measureText(t).width > max) { c.fillText(line, x, ly); ly += size + 6; line = w; }
