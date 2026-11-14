@@ -363,7 +363,7 @@
     c.beginPath(); c.moveTo(0, -sc * 0.22); c.quadraticCurveTo(sc * 0.12, -sc * 0.5, sc * 0.22, -sc * 0.62); c.stroke();
     if (sp) {
       c.shadowColor = "rgba(255,240,160,.8)"; c.shadowBlur = 10;
-      c.fillStyle = "#fff6c8"; c.font = "bold " + Math.floor(s * 0.28) + "px Georgia"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(sp === 2 ? "L" : "B", 0, 0);
+      c.fillStyle = "#fff6c8"; c.font = "bold " + Math.floor(s * 0.28) + "px Fredoka, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(sp === 2 ? "L" : "B", 0, 0);
       c.shadowBlur = 0;
     }
     c.restore();
