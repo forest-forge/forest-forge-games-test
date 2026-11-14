@@ -12,8 +12,8 @@
   })(`:root{--bg:#0a98b8;--sky1:#6af0e0;--sky2:#ff8a6a;--water:#0a7898;--amber:#ffffff;--amber-hi:#ffe14a;--amber-soft:#ffffff;--amber-line:#ff5a4a;--ember:#085a7a;--btn:#0a88a8;--lamp:#fff6d8;--pop1:#ffd23a;--pop2:#ff7a6a;--pop3:#ffffff;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
   var R = 4, N6 = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
-  var STONE = ["#e8c878", "#d45a32", "#2a9a88", "#c87a2a", "#6a8aac", "#f0e0c0"];
-  var STONE_DK = ["#c8a058", "#a83a1a", "#187060", "#9a5a14", "#4a6a88", "#d0c09a"];
+  var STONE = ["#ffd23a", "#ff5a4a", "#2ad0b0", "#ff9a2a", "#a86aff", "#ff8ad8"];
+  var STONE_DK = ["#d8a010", "#c83028", "#109a80", "#d0700a", "#7a3ad8", "#d058a8"];
   var ui = FF.create({
     deco: ["hex", "diamond", "spark"], 
     
@@ -466,7 +466,7 @@
       // mason tool-mark
       c.save();
       FFX.hexPath(c, x, y, s * 0.92); c.clip();
-      c.strokeStyle = "rgba(60,30,10,.12)"; c.lineWidth = 1;
+      c.strokeStyle = "rgba(10,40,80,.12)"; c.lineWidth = 1;
       for (var i = -2; i < 3; i++) { c.beginPath(); c.moveTo(x - s, y + i * s * 0.28); c.lineTo(x + s, y + i * s * 0.28 + s * 0.08); c.stroke(); }
       c.restore();
     } else {
@@ -481,27 +481,27 @@
       FFX.clouds(c, W, H * 0.45, idleT, "rgba(255,255,255,.22)");
     } else {
       var g = c.createLinearGradient(0, 0, 0, H);
-      g.addColorStop(0, "#7ec8e8"); g.addColorStop(0.45, "#f0d8a0"); g.addColorStop(1, "#c4783a");
+      g.addColorStop(0, "#7ec8e8"); g.addColorStop(0.45, "#bff0e0"); g.addColorStop(1, "#3ab8a8");
       c.fillStyle = g; c.fillRect(0, 0, W, H);
     }
-    // distant quarry terraces
-    c.fillStyle = "#b07a3c";
+    // distant hills, sea-glass greens
+    c.fillStyle = "#4ad0a8";
     c.beginPath(); c.moveTo(0, H * 0.62); c.quadraticCurveTo(W * 0.25, H * 0.5, W * 0.5, H * 0.58); c.quadraticCurveTo(W * 0.75, H * 0.66, W, H * 0.52); c.lineTo(W, H); c.lineTo(0, H); c.fill();
-    c.fillStyle = "#8a5a28";
+    c.fillStyle = "#2aa8b0";
     c.beginPath(); c.moveTo(0, H * 0.78); c.quadraticCurveTo(W * 0.4, H * 0.68, W, H * 0.74); c.lineTo(W, H); c.lineTo(0, H); c.fill();
     // silo bowl with rim highlight
     var rad = L.s * (R + 1.7) * 1.55;
     var bg = c.createRadialGradient(L.cx - rad * 0.15, L.cy - rad * 0.2, rad * 0.2, L.cx, L.cy, rad);
-    bg.addColorStop(0, "#9a6a38"); bg.addColorStop(0.7, "#6a4420"); bg.addColorStop(1, "#3a2410");
+    bg.addColorStop(0, "#2ac8d8"); bg.addColorStop(0.7, "#0a88b8"); bg.addColorStop(1, "#085a8a");
     c.beginPath(); c.arc(L.cx, L.cy, rad, 0, Math.PI * 2); c.fillStyle = bg; c.fill();
     c.beginPath(); c.arc(L.cx, L.cy, rad, 0, Math.PI * 2);
-    c.strokeStyle = "#e8c878"; c.lineWidth = 6; c.stroke();
+    c.strokeStyle = "#ffd23a"; c.lineWidth = 7; c.stroke();
     c.beginPath(); c.arc(L.cx, L.cy, rad - 5, 0, Math.PI * 2);
-    c.strokeStyle = "rgba(80,40,10,.5)"; c.lineWidth = 3; c.stroke();
+    c.strokeStyle = "#ff7a6a"; c.lineWidth = 3; c.stroke();
     // inner well
     var ir = L.s * (R + 1.15) * 1.5;
     var ig = c.createRadialGradient(L.cx, L.cy, ir * 0.2, L.cx, L.cy, ir);
-    ig.addColorStop(0, "#7a542c"); ig.addColorStop(1, "#4a3018");
+    ig.addColorStop(0, "#1a6aa8"); ig.addColorStop(1, "#0a3a78");
     c.beginPath(); c.arc(L.cx, L.cy, ir, 0, Math.PI * 2); c.fillStyle = ig; c.fill();
   }
   function render(c) {
@@ -517,20 +517,20 @@
     // empty sockets with mortar depth
     for (var q = -R; q <= R; q++) for (var r = -R; r <= R; r++) if (inBoard(q, r)) {
       var p = pix(q, r, L);
-      if (window.FFX) FFX.bevelHex(c, p[0], p[1], L.s * 0.92, "#4a3018", "#2a1808", "rgba(80,50,20,.25)");
-      else drawHex(c, p[0], p[1], L.s * 0.92, "#5a3c20", "#3a2814", 0);
+      if (window.FFX) FFX.bevelHex(c, p[0], p[1], L.s * 0.92, "#2a7ac8", "#0a4a90", "rgba(160,230,255,.35)");
+      else drawHex(c, p[0], p[1], L.s * 0.92, "#2a7ac8", "#0a4a90", 0);
     }
     // keystone — polished brass with glow
     var k = pix(0, 0, L);
     if (window.FFX) {
       c.save();
       c.shadowColor = "rgba(255,210,80,.55)"; c.shadowBlur = 18;
-      FFX.bevelHex(c, k[0], k[1], L.s * 0.98, "#d4b05a", "#7a5018", "rgba(255,245,200,.55)");
+      FFX.bevelHex(c, k[0], k[1], L.s * 0.98, "#ffe14a", "#e08a10", "rgba(255,255,220,.65)");
       c.restore();
-      FFX.bevelHex(c, k[0], k[1], L.s * 0.48, "#efe0a8", "#a07828", "rgba(255,255,230,.6)");
+      FFX.bevelHex(c, k[0], k[1], L.s * 0.48, "#fff6c0", "#ffb020", "rgba(255,255,255,.7)");
     } else {
-      drawHex(c, k[0], k[1], L.s * 0.95, "#c8a04a", "#7a5018", 0);
-      drawHex(c, k[0], k[1], L.s * 0.5, "#efe0a8", "#a07828", 0);
+      drawHex(c, k[0], k[1], L.s * 0.95, "#ffe14a", "#e08a10", 0);
+      drawHex(c, k[0], k[1], L.s * 0.5, "#fff6c0", "#ffb020", 0);
     }
     // locked stones
     Object.keys(board || {}).forEach(function (key) {
@@ -569,9 +569,9 @@
     // next
     if (nxt && mode === "play") {
       var ns = L.s * 0.48, nx = W - 72, ny = 78;
-      if (window.FFX) FFX.bevelRoundRect(c, nx - 36, 14, 72, 86, 10, "#6a4a24", "#3a2810");
-      else { c.fillStyle = "#6a4a24"; c.fillRect(nx - 36, 14, 72, 86); }
-      ui.text("NEXT", nx, 28, 11, "#ffe9c4", "center");
+      if (window.FFX) FFX.bevelRoundRect(c, nx - 36, 14, 72, 86, 10, "#0a88a8", "#085a7a");
+      else { c.fillStyle = "#0a88a8"; c.fillRect(nx - 36, 14, 72, 86); }
+      ui.text("NEXT", nx, 28, 11, "#ffffff", "center");
       nxt.cells.forEach(function (p) {
         var x = nx + ns * (3 / 2 * (p[0] - nxt.cells[0][0]));
         var y = ny + ns * (Math.sqrt(3) / 2 * (p[0] - nxt.cells[0][0]) + Math.sqrt(3) * (p[1] - nxt.cells[0][1]));
