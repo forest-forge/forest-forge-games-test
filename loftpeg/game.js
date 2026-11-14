@@ -12,8 +12,8 @@
   })(`:root{--bg:#2a7ae8;--sky1:#8ad8ff;--sky2:#ff8ac8;--water:#1a60c8;--amber:#ffffff;--amber-hi:#fff27a;--amber-soft:#ffffff;--amber-line:#ff4a8a;--ember:#1a3aa0;--btn:#2a68d0;--lamp:#fff6d8;--pop1:#ffe14a;--pop2:#ff6aa8;--pop3:#5af0b0;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
   var COLS = 8, ROWS = 12, COLORS = 5;
-  var PEG = ["#2a9aaa", "#e0a020", "#c43a28", "#4a7ad0", "#8a3a88"];
-  var PEG_DK = ["#1a6a78", "#a87810", "#8a2010", "#2a4a98", "#5a2060"];
+  var PEG = ["#2ad0c0", "#ffd23a", "#ff4a5a", "#3a7aff", "#c060ff"];
+  var PEG_DK = ["#109a90", "#d8a010", "#c82838", "#1a4ad0", "#8a30d0"];
   var ui = FF.create({
     deco: ["circle", "star", "spark"], 
     id: "loftpeg", title: "Loftpeg", course: "The loft", view: { w: 390, h: 720, flex: true },
@@ -307,14 +307,14 @@
     c.fillStyle = "rgba(0,0,0,.2)";
     c.beginPath(); c.ellipse(x, y + s * 0.38, s * 0.32, s * 0.1, 0, 0, Math.PI * 2); c.fill();
     if (window.FFX) {
-      FFX.bevelCircle(c, x, y, s * 0.42, "#6a4a28", "#3a2810", "#c8a060");
+      FFX.bevelCircle(c, x, y, s * 0.42, "#ffffff", "#c8d8ff", "#ffffff");
       FFX.bevelCircle(c, x, y, s * 0.32, PEG[k], PEG_DK[k], FFX.lighten(PEG[k], 0.35));
       c.save(); c.beginPath(); c.arc(x, y, s * 0.3, 0, Math.PI * 2); c.clip();
-      c.strokeStyle = "rgba(40,20,8,.15)"; c.lineWidth = 1;
+      c.strokeStyle = "rgba(255,255,255,.18)"; c.lineWidth = 1;
       for (var i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(x - s, y + i * s * 0.1); c.lineTo(x + s, y + i * s * 0.1 + 2); c.stroke(); }
       c.restore();
     } else {
-      c.beginPath(); c.arc(x, y, s * 0.4, 0, Math.PI * 2); c.fillStyle = "#6a4a28"; c.fill();
+      c.beginPath(); c.arc(x, y, s * 0.4, 0, Math.PI * 2); c.fillStyle = "#ffffff"; c.fill();
       c.beginPath(); c.arc(x, y, s * 0.32, 0, Math.PI * 2); c.fillStyle = PEG[k]; c.fill();
       c.strokeStyle = PEG_DK[k]; c.lineWidth = 2; c.stroke();
       c.beginPath(); c.arc(x - s * 0.1, y - s * 0.1, s * 0.1, 0, Math.PI * 2); c.fillStyle = "rgba(255,255,240,.35)"; c.fill();
@@ -327,24 +327,24 @@
     if (window.FFX) FFX.sky(c, W, H, "#bfe8ff", "#8ac8ff", "#ff9ad0");
     else {
       var g = c.createLinearGradient(0, 0, 0, H);
-      g.addColorStop(0, "#c8a060"); g.addColorStop(0.3, "#8a5a30"); g.addColorStop(1, "#3a2210");
+      g.addColorStop(0, "#bfe8ff"); g.addColorStop(0.5, "#8ac8ff"); g.addColorStop(1, "#ff9ad0");
       c.fillStyle = g; c.fillRect(0, 0, W, H);
     }
     for (var i = 0; i < 9; i++) {
       var gy = c.createLinearGradient(0, 16 + i * 30, 0, 28 + i * 30);
-      gy.addColorStop(0, "rgba(255,220,140,.16)"); gy.addColorStop(1, "rgba(80,50,20,.28)");
+      gy.addColorStop(0, "rgba(255,255,255,.14)"); gy.addColorStop(1, "rgba(255,255,255,0)");
       c.fillStyle = gy; c.fillRect(0, 16 + i * 30, W, 12);
     }
     if (window.FFX) {
-      FFX.bevelRoundRect(c, 0, 0, 14, H, 0, "#5a3a18", "#2a1808");
-      FFX.bevelRoundRect(c, W - 14, 0, 14, H, 0, "#5a3a18", "#2a1808");
-      FFX.bevelRoundRect(c, 8, L.oy - 20, W - 16, 18, 3, "#6a4a20", "#3a2410");
+      FFX.bevelRoundRect(c, 0, 0, 14, H, 0, "#ff4a8a", "#c82a68");
+      FFX.bevelRoundRect(c, W - 14, 0, 14, H, 0, "#ff4a8a", "#c82a68");
+      FFX.bevelRoundRect(c, 8, L.oy - 20, W - 16, 18, 9, "#ffe14a", "#e0a010");
     } else {
-      c.fillStyle = "#5a3a18"; c.fillRect(8, L.oy - 18, W - 16, 16);
-      c.fillStyle = "#c8a060"; c.fillRect(8, L.oy - 18, W - 16, 4);
+      c.fillStyle = "#ffe14a"; c.fillRect(8, L.oy - 18, W - 16, 16);
+      c.fillStyle = "#fff6b0"; c.fillRect(8, L.oy - 18, W - 16, 4);
     }
     if (grid) {
-      c.strokeStyle = "rgba(80,50,20,.45)"; c.lineWidth = 1.5;
+      c.strokeStyle = "rgba(255,255,255,.75)"; c.lineWidth = 1.5;
       for (var col = 0; col < colsIn(0); col++) {
         var p0 = cellPos(col, 0, L);
         c.beginPath(); c.moveTo(p0.x, L.oy - 4); c.lineTo(p0.x, p0.y - L.s * 0.32); c.stroke();
@@ -358,7 +358,7 @@
     var dy = L.oy + (ROWS - 2) * L.s * 0.86;
     c.beginPath(); c.moveTo(L.pad, dy); c.lineTo(W - L.pad, dy); c.stroke(); c.setLineDash([]);
     var sx = W / 2, sy = H - 100;
-    if (window.FFX) FFX.bevelRoundRect(c, sx - 28, sy - 10, 56, 22, 8, "#6a4a24", "#3a2410");
+    if (window.FFX) FFX.bevelRoundRect(c, sx - 28, sy - 10, 56, 22, 11, "#1a3aa0", "#0a2470");
     c.strokeStyle = "rgba(255,240,200,.7)"; c.lineWidth = 2;
     c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx + Math.sin(angle) * 80, sy - Math.cos(angle) * 80); c.stroke();
     c.fillStyle = "rgba(255,240,200,.4)";
@@ -367,8 +367,8 @@
     }
     if (curCol) drawPeg(c, sx, sy, L.s, curCol);
     if (nextCol) {
-      if (window.FFX) FFX.bevelRoundRect(c, W - 78, H - 168, 64, 70, 8, "#5a3a18", "#2a1808");
-      ui.text("NEXT", W - 46, H - 150, 11, "#f0e0c0", "center"); drawPeg(c, W - 46, H - 118, L.s * 0.8, nextCol);
+      if (window.FFX) FFX.bevelRoundRect(c, W - 78, H - 168, 64, 70, 10, "#2a68d0", "#1a3aa0");
+      ui.text("NEXT", W - 46, H - 150, 11, "#ffffff", "center"); drawPeg(c, W - 46, H - 118, L.s * 0.8, nextCol);
     }
     if (shot) drawPeg(c, shot.x, shot.y, L.s, shot.col);
     if (window.FFX) { FFX.vignette(c, W, H, 0.3); FFX.draw(c); }
