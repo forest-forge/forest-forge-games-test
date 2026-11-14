@@ -376,45 +376,45 @@
     // clock-tower window
     c.fillStyle = "rgba(80,140,180,.12)";
     c.beginPath(); c.arc(Wv * 0.8, 36, 40, 0, Math.PI * 2); c.fill();
-    c.strokeStyle = "rgba(200,160,80,.25)"; c.lineWidth = 3; c.stroke();
+    c.strokeStyle = "rgba(255,255,255,.35)"; c.lineWidth = 3; c.stroke();
     if (!grid) { if (window.FFX) { FFX.vignette(c, Wv, Hv, 0.35); FFX.draw(c); } c.restore(); return; }
     var L = layout(), s = L.s;
     for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
       var ch = grid[y][x], px = L.ox + x * s, py = L.oy + y * s;
       if (ch === "#") {
-        if (window.FFX) FFX.bevelRoundRect(c, px, py, s, s, 2, (x + y) % 2 ? "#6e4a28" : "#5a3c20", "#2a1808");
-        else { c.fillStyle = (x + y) % 2 ? "#6a4a28" : "#5a3c20"; c.fillRect(px, py, s, s); }
-        c.fillStyle = "#c8a060"; c.fillRect(px, py, s, 2);
+        if (window.FFX) FFX.bevelRoundRect(c, px, py, s, s, 2, (x + y) % 2 ? "#1aa8a8" : "#148e9a", "#0a5a5a");
+        else { c.fillStyle = (x + y) % 2 ? "#1aa8a8" : "#148e9a"; c.fillRect(px, py, s, s); }
+        c.fillStyle = "#6af0e0"; c.fillRect(px, py, s, 2);
       } else if (ch === "b") {
-        if (window.FFX) FFX.bevelRoundRect(c, px + 2, py + 2, s - 4, s - 4, 3, "#d08030", "#7a4010");
-        else { c.fillStyle = "#c87020"; c.fillRect(px + 2, py + 2, s - 4, s - 4); }
+        if (window.FFX) FFX.bevelRoundRect(c, px + 2, py + 2, s - 4, s - 4, 3, "#ff7a2a", "#c84a10");
+        else { c.fillStyle = "#ff7a2a"; c.fillRect(px + 2, py + 2, s - 4, s - 4); }
       } else if (ch === "e") {
         c.save(); c.shadowColor = "rgba(255,200,60,.7)"; c.shadowBlur = 12;
-        if (window.FFX) FFX.bevelRoundRect(c, px + 2, py + 2, s - 4, s - 4, 3, "#e8c050", "#6a4a10");
-        else { c.fillStyle = "#e8c050"; c.fillRect(px + 2, py + 2, s - 4, s - 4); }
+        if (window.FFX) FFX.bevelRoundRect(c, px + 2, py + 2, s - 4, s - 4, 3, "#ffe14a", "#e0900a");
+        else { c.fillStyle = "#ffe14a"; c.fillRect(px + 2, py + 2, s - 4, s - 4); }
         c.restore();
-        c.fillStyle = "#6a4a10"; c.fillRect(px + s * 0.35, py + s * 0.2, s * 0.3, s * 0.6);
+        c.fillStyle = "#c060ff"; c.fillRect(px + s * 0.35, py + s * 0.2, s * 0.3, s * 0.6);
       } else {
-        c.fillStyle = "rgba(40,24,10,.28)"; c.fillRect(px, py, s, s);
+        c.fillStyle = "rgba(255,255,255,.16)"; c.fillRect(px, py, s, s);
       }
     }
     mites.forEach(function (m, i) {
       if (m.st === "lost") return;
       var px = L.ox + m.x * s + s / 2, py = L.oy + m.y * s + s / 2;
       if (m.st === "home") c.globalAlpha = 0.4;
-      if (window.FFX) FFX.bevelCircle(c, px, py, s * 0.38, "#d4b05a", "#6a4a18", "#fff0c0");
-      else { c.beginPath(); c.arc(px, py, s * 0.38, 0, Math.PI * 2); c.fillStyle = "#c8a050"; c.fill(); c.strokeStyle = "#6a4a18"; c.lineWidth = 1.2; c.stroke(); }
+      if (window.FFX) FFX.bevelCircle(c, px, py, s * 0.38, "#ffd23a", "#e0800a", "#fff6c0");
+      else { c.beginPath(); c.arc(px, py, s * 0.38, 0, Math.PI * 2); c.fillStyle = "#ffd23a"; c.fill(); c.strokeStyle = "#e0800a"; c.lineWidth = 1.2; c.stroke(); }
       var rot = (m.x + idleT * (m.st === "walk" ? 8 : 2));
       for (var tt = 0; tt < 8; tt++) {
         var a = tt * Math.PI / 4 + rot;
-        c.fillStyle = "#e8c878";
+        c.fillStyle = "#ffb03a";
         c.fillRect(px + Math.cos(a) * s * 0.34 - 1.6, py + Math.sin(a) * s * 0.34 - 1.6, 3.2, 3.2);
       }
       c.fillStyle = "#2a1a08"; c.fillRect(px - 2 + m.dir * 3, py - 3, 2, 2); c.fillRect(px - 2 + m.dir * 6, py - 3, 2, 2);
       if (i === sel) { c.strokeStyle = "#fff0a0"; c.lineWidth = 2; c.shadowColor = "#fff0a0"; c.shadowBlur = 8; c.beginPath(); c.arc(px, py, s * 0.52, 0, Math.PI * 2); c.stroke(); c.shadowBlur = 0; }
       c.globalAlpha = 1;
     });
-    c.fillStyle = "rgba(60,36,16,.55)";
+    c.fillStyle = "rgba(150,100,255,.22)";
     c.fillRect(0, 0, Wv, L.oy);
     c.fillRect(0, L.oy + H * s, Wv, Hv - (L.oy + H * s));
     if (window.FFX) { FFX.vignette(c, Wv, Hv, 0.32); FFX.draw(c); }
