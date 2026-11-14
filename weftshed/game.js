@@ -11,9 +11,9 @@
   })(`:root{--bg:#e04a7a;--sky1:#ffd84a;--sky2:#3ac8d8;--water:#c03a68;--amber:#ffffff;--amber-hi:#fff6a0;--amber-soft:#ffffff;--amber-line:#1a98c8;--ember:#8a1a48;--btn:#c83a6a;--lamp:#fff6d8;--pop1:#3ad8e8;--pop2:#ffe14a;--pop3:#8aff6a;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
   var COLS = 8, ROWS = 8;
-  var YARN = ["#c43a2a", "#e0a01a", "#2a4a9a", "#3a8a48", "#f0e0c0", "#c45a28"];
-  var YARN_DK = ["#8a2010", "#a87810", "#1a2c6a", "#246030", "#c8b898", "#8a3a14"];
-  var YARN_NAME = ["madder", "weld", "woad", "moss", "flax", "rust"];
+  var YARN = ["#ff4a6a", "#ffd23a", "#3a7aff", "#3ad070", "#a860ff", "#ff8a1a"];
+  var YARN_DK = ["#c82a48", "#d8a010", "#1a4ad0", "#18a050", "#7a3ad8", "#d0600a"];
+  var YARN_NAME = ["madder", "weld", "woad", "moss", "heather", "rust"];
   var ui = FF.create({
     deco: ["circle", "flower", "spark"], 
     id: "weftshed", title: "Weftshed", course: "The loom", view: { w: 390, h: 720, flex: true },
@@ -45,7 +45,7 @@
     { name: "Weld gold", colors: 5, moves: 20, collect: { 1: 16 }, tangles: 0, boats: 0 },
     { name: "Two colours", colors: 5, moves: 22, collect: { 0: 12, 2: 12 }, tangles: 0, boats: 0 },
     { name: "A few knots", colors: 5, moves: 22, collect: {}, tangles: 8, boats: 0 },
-    { name: "Moss and flax", colors: 6, moves: 22, collect: { 3: 14, 4: 10 }, tangles: 4, boats: 0 },
+    { name: "Moss and heather", colors: 6, moves: 22, collect: { 3: 14, 4: 10 }, tangles: 4, boats: 0 },
     { name: "Shuttle down", colors: 5, moves: 24, collect: {}, tangles: 0, boats: 2 },
     { name: "Rust knots", colors: 6, moves: 24, collect: { 5: 12 }, tangles: 8, boats: 0 },
     { name: "Tight shed", colors: 6, moves: 20, collect: { 1: 16, 2: 12 }, tangles: 6, boats: 0 },
@@ -61,7 +61,7 @@
     { name: "Boat run", colors: 6, moves: 26, collect: {}, tangles: 6, boats: 4 },
     { name: "Knot lattice", colors: 6, moves: 22, collect: {}, tangles: 18, boats: 0 },
     { name: "Woad deep", colors: 6, moves: 24, collect: { 2: 20 }, tangles: 8, boats: 1 },
-    { name: "Flax field", colors: 6, moves: 24, collect: { 4: 18 }, tangles: 10, boats: 0 },
+    { name: "Heather field", colors: 6, moves: 24, collect: { 4: 18 }, tangles: 10, boats: 0 },
     { name: "Cross dyes", colors: 6, moves: 26, collect: { 0: 12, 1: 12, 3: 10 }, tangles: 8, boats: 0 },
     { name: "Packed shed", colors: 6, moves: 22, collect: { 3: 16 }, tangles: 12, boats: 2 },
     { name: "Four boats", colors: 6, moves: 28, collect: {}, tangles: 8, boats: 4 },
@@ -474,19 +474,19 @@
       c.strokeStyle = "rgba(255,255,240,.35)"; c.lineWidth = 2; c.stroke();
     }
     if (knot) {
-      c.strokeStyle = "#3a2410"; c.lineWidth = 3.2; c.lineCap = "round";
+      c.strokeStyle = "#3a1a4a"; c.lineWidth = 3.2; c.lineCap = "round";
       c.beginPath(); c.moveTo(cx - 7, cy - 7); c.lineTo(cx + 7, cy + 7); c.moveTo(cx + 7, cy - 7); c.lineTo(cx - 7, cy + 7); c.stroke();
       if (knot > 1) { c.beginPath(); c.arc(cx, cy, 9, 0, Math.PI * 2); c.stroke(); }
     }
     if (boat) {
-      if (window.FFX) FFX.bevelRoundRect(c, cx - 10, cy - 5, 20, 10, 3, "#7a4a18", "#3a2410");
-      else { c.fillStyle = "#6a3a14"; c.fillRect(cx - 8, cy - 4, 16, 7); }
-      c.fillStyle = "#f0d878";
+      if (window.FFX) FFX.bevelRoundRect(c, cx - 10, cy - 5, 20, 10, 3, "#1a98c8", "#0a6a98");
+      else { c.fillStyle = "#1a98c8"; c.fillRect(cx - 8, cy - 4, 16, 7); }
+      c.fillStyle = "#ffffff";
       c.beginPath(); c.moveTo(cx, cy - 13); c.lineTo(cx + 7, cy - 3); c.lineTo(cx - 1, cy - 3); c.closePath(); c.fill();
-      c.strokeStyle = "#6a4a14"; c.lineWidth = 1; c.stroke();
+      c.strokeStyle = "#0a6a98"; c.lineWidth = 1; c.stroke();
     }
     if (special) {
-      c.fillStyle = "#fff6d0"; c.font = "bold " + Math.floor(s * 0.32) + "px Georgia"; c.textAlign = "center"; c.textBaseline = "middle";
+      c.fillStyle = "#fff6d0"; c.font = "bold " + Math.floor(s * 0.32) + "px Fredoka, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
       c.shadowColor = "rgba(0,0,0,.35)"; c.shadowBlur = 4;
       c.fillText(special === 3 ? "B" : special === 4 ? "H" : "S", cx, cy + 1);
       c.shadowBlur = 0;
@@ -499,45 +499,45 @@
     if (window.FFX) FFX.sky(c, W, H, "#ffe27a", "#ff9ab0", "#3ab8c8");
     else {
       var bg = c.createLinearGradient(0, 0, 0, H);
-      bg.addColorStop(0, "#8a5a30"); bg.addColorStop(1, "#3a2210");
+      bg.addColorStop(0, "#ffe27a"); bg.addColorStop(1, "#3ab8c8");
       c.fillStyle = bg; c.fillRect(0, 0, W, H);
     }
     // workshop window light
     var lg = c.createRadialGradient(W * 0.2, 40, 10, W * 0.2, 40, W * 0.8);
     lg.addColorStop(0, "rgba(255,230,160,.22)"); lg.addColorStop(1, "rgba(255,200,80,0)");
     c.fillStyle = lg; c.fillRect(0, 0, W, H);
-    // wall planks
-    c.strokeStyle = "rgba(40,20,8,.18)"; c.lineWidth = 2;
+    // soft wall stripes
+    c.strokeStyle = "rgba(255,255,255,.14)"; c.lineWidth = 2;
     for (var i = 0; i < 10; i++) { c.beginPath(); c.moveTo(0, 40 + i * 70); c.lineTo(W, 50 + i * 70); c.stroke(); }
     var L = layout();
     // loom posts
     var fw = L.s * COLS + 28, fh = L.s * ROWS + 28, fx = L.ox - 14, fy = L.oy - 14;
     if (window.FFX) {
-      FFX.bevelRoundRect(c, fx - 10, fy - 16, fw + 20, fh + 36, 8, "#6a3e1c", "#3a2010");
-      FFX.bevelRoundRect(c, fx, fy, fw, fh, 4, "#8a5a2c", "#4a3014");
+      FFX.bevelRoundRect(c, fx - 10, fy - 16, fw + 20, fh + 36, 12, "#c83a6a", "#8a1a48");
+      FFX.bevelRoundRect(c, fx, fy, fw, fh, 6, "#ff7aa8", "#c83a6a");
     } else {
-      c.fillStyle = "#6a3e1c";
+      c.fillStyle = "#c83a6a";
       c.fillRect(L.ox - 10, L.oy - 10, L.s * COLS + 20, L.s * ROWS + 20);
     }
     // heddle beam
     if (window.FFX) {
-      FFX.bevelRoundRect(c, fx - 10, fy - 18, fw + 20, 14, 4, "#d0a060", "#7a5020");
-      FFX.bevelRoundRect(c, fx - 10, fy + fh + 4, fw + 20, 14, 4, "#d0a060", "#7a5020");
+      FFX.bevelRoundRect(c, fx - 10, fy - 18, fw + 20, 14, 7, "#3ad8e8", "#1a98c8");
+      FFX.bevelRoundRect(c, fx - 10, fy + fh + 4, fw + 20, 14, 7, "#3ad8e8", "#1a98c8");
     } else {
-      c.fillStyle = "#c8a060";
+      c.fillStyle = "#3ad8e8";
       c.fillRect(L.ox - 10, L.oy - 14, L.s * COLS + 20, 8);
       c.fillRect(L.ox - 10, L.oy + L.s * ROWS + 6, L.s * COLS + 20, 8);
     }
     // warp threads behind the cloth
-    c.strokeStyle = "rgba(240,220,180,.18)"; c.lineWidth = 1;
+    c.strokeStyle = "rgba(255,255,255,.3)"; c.lineWidth = 1;
     for (var col = 0; col < COLS; col++) {
       c.beginPath(); c.moveTo(L.ox + col * L.s + L.s / 2, L.oy - 8); c.lineTo(L.ox + col * L.s + L.s / 2, L.oy + L.s * ROWS + 8); c.stroke();
     }
     if (!grid) { if (window.FFX) { FFX.vignette(c, W, H, 0.32); FFX.draw(c); } c.restore(); return; }
     for (var r = 0; r < ROWS; r++) for (var col = 0; col < COLS; col++) {
       var x = L.ox + col * L.s, y = L.oy + r * L.s, cell = grid[r][col];
-      if (window.FFX) FFX.bevelRoundRect(c, x + 1, y + 1, L.s - 2, L.s - 2, 4, (r + col) % 2 ? "#e0cc9a" : "#c8b078", "#6a4a24");
-      else { c.fillStyle = (r + col) % 2 ? "#d8c49a" : "#c8b078"; c.fillRect(x + 1, y + 1, L.s - 2, L.s - 2); }
+      if (window.FFX) FFX.bevelRoundRect(c, x + 1, y + 1, L.s - 2, L.s - 2, 4, (r + col) % 2 ? "#fff6fb" : "#ffe2ef", "#f0a0c4");
+      else { c.fillStyle = (r + col) % 2 ? "#fff6fb" : "#ffe2ef"; c.fillRect(x + 1, y + 1, L.s - 2, L.s - 2); }
       if (cell.col) {
         var fy2 = (cell.fall || 0) * L.s * -0.6;
         drawYarn(c, x, y + fy2, L.s, cell.col, cell.knot, cell.boat, cell.special, cell.pop, cell.born);
