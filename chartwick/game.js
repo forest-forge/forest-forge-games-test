@@ -297,17 +297,17 @@
     var W = ui.VW, H = ui.VH;
     var sh = window.FFX ? FFX.offset() : { x: 0, y: 0 };
     c.save(); c.translate(sh.x, sh.y);
-    if (window.FFX) FFX.sky(c, W, H, "#8ec4e0", "#f0c070", "#1a4a6a");
+    if (window.FFX) FFX.sky(c, W, H, "#5ac8f0", "#1a98d0", "#0a5a8a");
     else {
       var g = c.createLinearGradient(0, 0, 0, H);
-      g.addColorStop(0, "#7eb0d0"); g.addColorStop(0.45, "#f0c070"); g.addColorStop(1, "#1a4a6a");
+      g.addColorStop(0, "#5ac8f0"); g.addColorStop(0.45, "#1a98d0"); g.addColorStop(1, "#0a5a8a");
       c.fillStyle = g; c.fillRect(0, 0, W, H);
     }
     // sun
     c.fillStyle = "#f8e0a0"; c.beginPath(); c.arc(W * 0.82, H * 0.18, 22, 0, Math.PI * 2); c.fill();
-    c.fillStyle = "#6a5a40"; c.fillRect(0, H * 0.78, W, H * 0.22);
+    c.fillStyle = "#ff8a6a"; c.fillRect(0, H * 0.78, W, H * 0.22);
     // plank lines
-    c.strokeStyle = "rgba(30,20,10,.25)"; c.lineWidth = 1;
+    c.strokeStyle = "rgba(255,255,255,.4)"; c.lineWidth = 1;
     for (var i = 0; i < 6; i++) { c.beginPath(); c.moveTo(0, H * 0.8 + i * 12); c.lineTo(W, H * 0.8 + i * 12); c.stroke(); }
     var wg = c.createLinearGradient(0, H * 0.7, 0, H * 0.78);
     wg.addColorStop(0, "#5aa0c8"); wg.addColorStop(1, "#2a6a88");
@@ -315,27 +315,27 @@
     hits = [];
     if (mode !== "play") { if (window.FFX) { FFX.vignette(c, W, H, 0.28); FFX.draw(c); } c.restore(); return; }
     if (phase === "story") {
-      ui.text(CH[ci].title, W / 2, 80, 26, "#f0d080", "center");
+      ui.text(CH[ci].title, W / 2, 80, 26, "#ffe14a", "center");
       wrap(c, CH[ci].story, W / 2, 130, W - 48, 18, "#e8f0f8");
-      ui.text("Tap to go on", W / 2, H * 0.64, 16, "#f0d080", "center");
+      ui.text("Tap to go on", W / 2, H * 0.64, 16, "#ffe14a", "center");
       // Nedda: chart-cape, pencil in hair — not a top-hatted gentleman
       drawNedda(c, W / 2, H * 0.52);
       return;
     }
     if (phase === "done") {
-      ui.text("That's the piece.", W / 2, 120, 26, "#f0d080", "center");
+      ui.text("That's the piece.", W / 2, 120, 26, "#ffe14a", "center");
       wrap(c, ci === CH.length - 1 ? "The gong hangs on its hook again." : "Nedda pencils a note on the chart and goes on.", W / 2, 170, W - 48, 18, "#e8f0f8");
-      ui.text("Tap to go on", W / 2, H * 0.62, 16, "#f0d080", "center");
+      ui.text("Tap to go on", W / 2, H * 0.62, 16, "#ffe14a", "center");
       return;
     }
-    ui.text(CH[ci].title, W / 2, 36, 20, "#f0d080", "center");
+    ui.text(CH[ci].title, W / 2, 36, 20, "#ffe14a", "center");
     if (msg) ui.text(msg, W / 2, 64, 14, "#e07060", "center");
     if (st && st.kind === "lanterns") {
       wrap(c, "Which lantern on the hook-row was left unlit last night? (Its wick is dark.)", W / 2, 80, W - 40, 16, "#e8f0f8");
       for (var i = 0; i < 3; i++) {
         var x = 70 + i * 90, y = 220;
-        c.fillStyle = "#5a3a18"; c.fillRect(x + 20, y - 40, 6, 50);
-        c.fillStyle = i === st.dark ? "#4a4030" : "#f0d060";
+        c.fillStyle = "#ff6a5a"; c.fillRect(x + 20, y - 40, 6, 50);
+        c.fillStyle = i === st.dark ? "#2a4a6a" : "#ffe14a";
         c.beginPath(); c.ellipse(x + 23, y + 20, 18, 24, 0, 0, Math.PI * 2); c.fill();
         if (i !== st.dark) { c.fillStyle = "rgba(255,220,80,.35)"; c.beginPath(); c.arc(x + 23, y + 20, 30, 0, Math.PI * 2); c.fill(); }
         hits.push({ x: x, y: y - 40, w: 60, h: 120, v: i });
@@ -345,12 +345,12 @@
       wrap(c, "Tap Weigh to compare the left box with the middle box, then tap the light one.", W / 2, 80, W - 40, 16, "#e8f0f8");
       ["Left", "Middle", "Right"].forEach(function (lab, i) {
         var x = 40 + i * 110, y = 180;
-        c.fillStyle = "#8a6a30"; c.fillRect(x, y, 90, 70);
+        c.fillStyle = "#ff7a6a"; c.fillRect(x, y, 90, 70);
         ui.text(lab, x + 45, y + 35, 14, "#f0ead8", "center");
         hits.push({ x: x, y: y, w: 90, h: 70, act: "pick", v: i });
       });
       btn(c, 120, 300, 150, 48, "Weigh 1 against 2", "weigh");
-      if (st.last) ui.text(st.last === "level" ? "The beam is level." : "The " + st.last + " pan goes up.", W / 2, 380, 16, "#f0d080", "center");
+      if (st.last) ui.text(st.last === "level" ? "The beam is level." : "The " + st.last + " pan goes up.", W / 2, 380, 16, "#ffe14a", "center");
     }
     if (st && st.kind === "sticks") {
       wrap(c, "The three sides and one inner stick are down. Place the last two inner sticks so four small triangles appear.", W / 2, 70, W - 40, 15, "#e8f0f8");
@@ -360,7 +360,7 @@
       var M = [[(A[0] + B[0]) / 2, (A[1] + B[1]) / 2], [(B[0] + C[0]) / 2, (B[1] + C[1]) / 2], [(C[0] + A[0]) / 2, (C[1] + A[1]) / 2]];
       var segs = [[A, B], [B, C], [C, A], [M[0], M[1]], [M[1], M[2]], [M[2], M[0]]];
       segs.forEach(function (sg, i) {
-        c.strokeStyle = st.placed[i] ? "#c47a30" : "rgba(240,240,240,.25)";
+        c.strokeStyle = st.placed[i] ? "#ffe14a" : "rgba(255,255,255,.35)";
         c.lineWidth = 8; c.lineCap = "round";
         c.beginPath(); c.moveTo(sg[0][0], sg[0][1]); c.lineTo(sg[1][0], sg[1][1]); c.stroke();
         var mx = (sg[0][0] + sg[1][0]) / 2, my = (sg[0][1] + sg[1][1]) / 2;
@@ -371,7 +371,7 @@
     if (st && st.kind === "logic") {
       wrap(c, st.clues.join("  "), W / 2, 70, W - 36, 14, "#e8f0f8");
       ["Nia", "Owen", "Pat"].forEach(function (who, yi) {
-        ui.text(who, 40, 200 + yi * 120, 16, "#f0d080", "left");
+        ui.text(who, 40, 200 + yi * 120, 16, "#ffe14a", "left");
         st.boats.forEach(function (b, i) {
           var x = 100 + i * 80, y = 180 + yi * 120;
           chip(c, x, y, 70, 32, b, st.pick[who][0] === b, { who: who, slot: 0, v: b });
@@ -387,11 +387,11 @@
       var L = slideLayout();
       for (var r = 0; r < 4; r++) for (var col = 0; col < 4; col++) {
         var x = L.ox + col * L.s, y = L.oy + r * L.s, ch = st.g[r][col];
-        c.fillStyle = "#2a4a5a"; c.fillRect(x + 2, y + 2, L.s - 4, L.s - 4);
-        if (ch === "#") { c.fillStyle = "#6a5a40"; c.fillRect(x + 2, y + 2, L.s - 4, L.s - 4); }
-        if (ch === "b") { c.fillStyle = "#8a5a28"; c.fillRect(x + 6, y + 6, L.s - 12, L.s - 12); }
-        if (ch === "G") { c.fillStyle = "#e0b040"; c.fillRect(x + 6, y + 6, L.s - 12, L.s - 12); }
-        if (ch === "D") { c.fillStyle = "#4a2a10"; c.fillRect(x + 10, y + 4, L.s - 20, L.s - 8); c.fillStyle = "#e0c060"; c.fillRect(x + L.s - 16, y + L.s / 2 - 4, 6, 8); }
+        c.fillStyle = "#1a8ab8"; c.fillRect(x + 2, y + 2, L.s - 4, L.s - 4);
+        if (ch === "#") { c.fillStyle = "#ff8a6a"; c.fillRect(x + 2, y + 2, L.s - 4, L.s - 4); }
+        if (ch === "b") { c.fillStyle = "#a86aff"; c.fillRect(x + 6, y + 6, L.s - 12, L.s - 12); }
+        if (ch === "G") { c.fillStyle = "#ffd23a"; c.fillRect(x + 6, y + 6, L.s - 12, L.s - 12); }
+        if (ch === "D") { c.fillStyle = "#ff4a5a"; c.fillRect(x + 10, y + 4, L.s - 20, L.s - 8); c.fillStyle = "#ffe14a"; c.fillRect(x + L.s - 16, y + L.s / 2 - 4, 6, 8); }
       }
     }
     if (st && st.kind === "lamps") {
@@ -406,9 +406,9 @@
       });
       st.nodes.forEach(function (p, i) {
         var x = ox + p[0] * sx, y = oy + p[1] * sy, on = st.lit.indexOf(i) >= 0;
-        c.fillStyle = on ? "#f0d060" : "#3a4a50";
+        c.fillStyle = on ? "#ffe14a" : "#2a5a7a";
         c.beginPath(); c.arc(x, y, 18, 0, Math.PI * 2); c.fill();
-        if (on) ui.text(String(st.lit.indexOf(i) + 1), x, y, 14, "#2a1a08", "center");
+        if (on) ui.text(String(st.lit.indexOf(i) + 1), x, y, 14, "#08507a", "center");
         hits.push({ x: x - 22, y: y - 22, w: 44, h: 44, v: i });
       });
     }
@@ -418,15 +418,15 @@
       drawBank(c, 1, 220, 160, "Far slip");
       btn(c, 120, 430, 140, 44, "Cross", "cross");
       if (st.hold) btn(c, 120, 485, 140, 44, "Drop " + st.hold, "drop");
-      if (st.hold) ui.text("In the punt: " + st.hold, W / 2, 400, 14, "#f0d080", "center");
+      if (st.hold) ui.text("In the punt: " + st.hold, W / 2, 400, 14, "#ffe14a", "center");
     }
     if (st && st.kind === "cipher") {
       wrap(c, st.clue, W / 2, 90, W - 40, 16, "#e8f0f8");
       st.doors.forEach(function (n, i) {
         var x = 30 + i * 85, y = 280;
-        c.fillStyle = "#6a4a28"; c.fillRect(x, y, 70, 110);
-        c.fillStyle = "#1a2a30"; c.fillRect(x + 12, y + 20, 46, 70);
-        ui.text(String(n), x + 35, y + 55, 22, "#f0d080", "center");
+        c.fillStyle = "#ff7a6a"; c.fillRect(x, y, 70, 110);
+        c.fillStyle = "#08507a"; c.fillRect(x + 12, y + 20, 46, 70);
+        ui.text(String(n), x + 35, y + 55, 22, "#ffe14a", "center");
         hits.push({ x: x, y: y, w: 70, h: 110, v: n });
       });
     }
@@ -434,40 +434,40 @@
     c.restore();
   }
   function drawBank(c, side, x, y, title) {
-    c.fillStyle = "#5a4a30"; c.fillRect(x, y, 150, 200);
+    c.fillStyle = "#0a7aa0"; c.fillRect(x, y, 150, 200);
     ui.text(title, x + 75, y + 18, 14, "#f0ead8", "center");
     var items = ["loaf", "eels", "dog"], yy = y + 40;
     items.forEach(function (it) {
       if (st.bank[it] === side) {
-        c.fillStyle = "#d8c8a0"; c.fillRect(x + 20, yy, 110, 36);
-        ui.text(it, x + 75, yy + 18, 14, "#2a1a08", "center");
+        c.fillStyle = "#ffffff"; c.fillRect(x + 20, yy, 110, 36);
+        ui.text(it, x + 75, yy + 18, 14, "#08507a", "center");
         if (st.boat === side) hits.push({ x: x + 20, y: yy, w: 110, h: 36, act: "take", v: it });
         yy += 44;
       }
     });
-    if (st.boat === side) ui.text("punt is here", x + 75, y + 180, 12, "#f0d080", "center");
+    if (st.boat === side) ui.text("punt is here", x + 75, y + 180, 12, "#ffe14a", "center");
   }
   function btn(c, x, y, w, h, lab, act) {
-    c.fillStyle = "#1e3a54"; c.strokeStyle = "#6aa8c8"; c.lineWidth = 2;
+    c.fillStyle = "#ff6a5a"; c.strokeStyle = "#ffffff"; c.lineWidth = 2;
     c.fillRect(x, y, w, h); c.strokeRect(x, y, w, h);
     ui.text(lab, x + w / 2, y + h / 2, 14, "#e8f0f8", "center");
     hits.push({ x: x, y: y, w: w, h: h, act: act });
   }
   function chip(c, x, y, w, h, lab, on, meta) {
-    c.fillStyle = on ? "#c88840" : "#1e3a54"; c.strokeStyle = "#6aa8c8"; c.lineWidth = 1.5;
+    c.fillStyle = on ? "#ffb03a" : "#0a6a90"; c.strokeStyle = "#ffffff"; c.lineWidth = 1.5;
     c.fillRect(x, y, w, h); c.strokeRect(x, y, w, h);
     ui.text(lab, x + w / 2, y + h / 2, 12, "#e8f0f8", "center");
     hits.push(Object.assign({ x: x, y: y, w: w, h: h }, meta));
   }
   function drawNedda(c, x, y) {
-    c.fillStyle = "#3a5a48"; c.fillRect(x - 16, y, 32, 40); // cape
+    c.fillStyle = "#2ab8a0"; c.fillRect(x - 16, y, 32, 40); // cape
     c.fillStyle = "#e0c8a0"; c.beginPath(); c.arc(x, y - 8, 10, 0, Math.PI * 2); c.fill();
     c.fillStyle = "#2a1a10"; c.fillRect(x + 6, y - 18, 3, 14); // pencil in hair
-    c.fillStyle = "#c8a060"; c.fillRect(x - 12, y + 8, 24, 16); // chart under arm
+    c.fillStyle = "#ffffff"; c.fillRect(x - 12, y + 8, 24, 16); // chart under arm
   }
   function wrap(c, text, x, y, max, size, col) {
     var words = text.split(" "), line = "", ly = y;
-    c.font = size + "px Georgia"; c.fillStyle = col; c.textAlign = "center"; c.textBaseline = "top";
+    c.font = "500 " + size + "px Fredoka, sans-serif"; c.fillStyle = col; c.textAlign = "center"; c.textBaseline = "top";
     words.forEach(function (w) {
       var t = line ? line + " " + w : w;
       if (c.measureText(t).width > max) { c.fillText(line, x, ly); ly += size + 5; line = w; }
