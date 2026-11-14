@@ -10,8 +10,8 @@
     var bg = /--bg:([^;}]+)/.exec(css); if (m && bg) m.setAttribute("content", bg[1].trim());
   })(`:root{--bg:#10a8a0;--sky1:#7af0ff;--sky2:#b0e83a;--water:#0a8888;--amber:#ffffff;--amber-hi:#fff27a;--amber-soft:#ffffff;--amber-line:#e83a8a;--ember:#066a68;--btn:#0a9890;--lamp:#fff6d8;--pop1:#e84a9a;--pop2:#c8ff4a;--pop3:#ffffff;--glow-line:rgba(255,255,255,.55);--glow-fill:rgba(255,255,255,.14)}`);
 
-  var COLS = ["#c43a28", "#e0a020", "#2a8a7a", "#f0e0c0", "#7a3a88"];
-  var COLS_DK = ["#8a2010", "#a87810", "#1a5a4e", "#c0b090", "#4a2060"];
+  var COLS = ["#ff4a5a", "#ffd23a", "#2ad0c0", "#ff8ad8", "#a860ff"];
+  var COLS_DK = ["#c82838", "#d8a010", "#109a90", "#d058a8", "#7a30d0"];
   var ui = FF.create({
     deco: ["circle", "drop", "leaf"], 
     id: "spoolweir", title: "Spoolweir", course: "The leat", wide: true, view: { w: 640, h: 360, flex: true },
@@ -267,15 +267,15 @@
     sc = sc || 1; var k = (col - 1) % COLS.length, r = rad * sc;
     c.fillStyle = "rgba(0,0,0,.2)"; c.beginPath(); c.ellipse(x, y + r * 0.7, r * 0.7, r * 0.22, 0, 0, Math.PI * 2); c.fill();
     if (window.FFX) {
-      FFX.bevelCircle(c, x, y, r, "#6a4a28", "#3a2410", "#c8a060");
+      FFX.bevelCircle(c, x, y, r, "#ffffff", "#b8e8f0", "#ffffff");
       FFX.bevelCircle(c, x, y, r * 0.72, COLS[k], COLS_DK[k], FFX.lighten(COLS[k], 0.35));
-      c.beginPath(); c.arc(x, y, r * 0.16, 0, Math.PI * 2); c.fillStyle = "#3a2410"; c.fill();
+      c.beginPath(); c.arc(x, y, r * 0.16, 0, Math.PI * 2); c.fillStyle = "#0a6a78"; c.fill();
       c.beginPath(); c.arc(x - r * 0.06, y - r * 0.06, r * 0.07, 0, Math.PI * 2); c.fillStyle = "rgba(255,255,240,.3)"; c.fill();
     } else {
-      c.fillStyle = "#6a4a28"; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#ffffff"; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill();
       c.fillStyle = COLS[k]; c.beginPath(); c.arc(x, y, r * 0.72, 0, Math.PI * 2); c.fill();
       c.strokeStyle = COLS_DK[k]; c.lineWidth = 2; c.stroke();
-      c.fillStyle = "#3a2410"; c.beginPath(); c.arc(x, y, r * 0.16, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#0a6a78"; c.beginPath(); c.arc(x, y, r * 0.16, 0, Math.PI * 2); c.fill();
     }
   }
   function render(c) {
@@ -315,8 +315,8 @@
       else { c.fillStyle = "#c8d0d8"; c.fillRect(end[0] - 10, end[1] - 16, 20, 32); }
       chain.forEach(function (s) { var p = atT(path, acc, s.t), v = toView([p.x, p.y]); drawSpool(c, v[0], v[1], s.col, W / 640); });
       var h = hopV();
-      if (window.FFX) FFX.bevelRoundRect(c, h[0] - 18, h[1] - 12, 36, 26, 6, "#6a4a20", "#3a2410");
-      else { c.fillStyle = "#5a3a18"; c.fillRect(h[0] - 16, h[1] - 10, 32, 22); }
+      if (window.FFX) FFX.bevelRoundRect(c, h[0] - 18, h[1] - 12, 36, 26, 9, "#ff5a8a", "#c82a5a");
+      else { c.fillStyle = "#ff5a8a"; c.fillRect(h[0] - 16, h[1] - 10, 32, 22); }
       c.strokeStyle = "rgba(255,255,220,.7)"; c.lineWidth = 2;
       c.beginPath(); c.moveTo(h[0], h[1]); c.lineTo(h[0] + Math.cos(angle) * 50, h[1] + Math.sin(angle) * 50); c.stroke();
       c.fillStyle = "rgba(255,255,220,.4)";
